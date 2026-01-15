@@ -1,68 +1,68 @@
 import { useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { ArrowLeft, CalendarDots, FlagBanner } 
-import { APIContract, LifecyclePhase } from '
 import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
 import { format, parseISO, min, max, differenceInDays, subMonths, addMonths } from 'date-fns'
 import { APIContract, LifecyclePhase } from '@/lib/types'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
-
+interface RoadmapProps {
   apis: APIContract[]
-  certifying: 'bg-[o
+  onBack: () => void
 }
 
+const PHASE_LABELS: Record<LifecyclePhase, string> = {
+  implementing: 'Implementing',
+  certifying: 'Certifying',
+  current: 'Current',
+  deprecated: 'Deprecated',
   retired: 'Retired',
+}
 
+const PHASE_COLORS: Record<LifecyclePhase, string> = {
+  implementing: 'bg-[oklch(0.75_0.15_70)] text-warning-foreground',
+  certifying: 'bg-[oklch(0.60_0.18_240)] text-info-foreground',
+  current: 'bg-[oklch(0.65_0.20_140)] text-success-foreground',
+  deprecated: 'bg-[oklch(0.75_0.15_70)] text-warning-foreground',
+  retired: 'bg-muted text-muted-foreground',
+}
+
+interface TimelineEvent {
   id: string
+  apiId: string
   apiName: string
+  type: 'phase' | 'milestone'
   date: Date
+  phase?: LifecyclePhase
+  title: string
   description?: string
 }
 
+export function Roadmap({ apis, onBack }: RoadmapProps) {
+  const [selectedApi, setSelectedApi] = useState<string | null>(null)
 
-    const events: TimelineEvent
+  const timelineData = useMemo(() => {
+    const events: TimelineEvent[] = []
+
     apis.forEach(api => {
-        if (phaseData
-            id: `${api.id}-
-            apiName: 
- 
-
-interface TimelineEvent {
-        if (
-  apiId: string
-            apiNa
-            date: parseISO(ph
-            
+      api.lifecyclePhases.forEach(phaseData => {
+        if (phaseData.startDate) {
+          events.push({
+            id: `${api.id}-${phaseData.phase}-start`,
+            apiId: api.id,
+            apiName: api.name,
+            type: 'phase',
+            date: parseISO(phaseData.startDate),
+            phase: phaseData.phase,
+            title: `${PHASE_LABELS[phaseData.phase]} Start`,
+          })
         }
 
-        events.push({
- 
-
-          title: milestone.title,
-        })
-
-    return events.sort((a, b) => a.dat
-
-
-  }, [apis, selectedApi])
-  const dateRange = useMemo(() => {
-      return { start: subMonths(ne
-
-    const minDate = min(dates)
-
-      start: subMonths(minDate
-    }
-
-
-    const daysSinceStart = differenceInDays(date, dateRange.
-          })
-  const a
-
-        .filter(p => p.startDate
-          phase: p.phas
-          end: p.endDate ? parseISO(p.endDate) : da
-        .sort((a, b) => a.
-      return {
+        if (phaseData.endDate) {
+          events.push({
+            id: `${api.id}-${phaseData.phase}-end`,
+            apiId: api.id,
+            apiName: api.name,
             type: 'phase',
             date: parseISO(phaseData.endDate),
             phase: phaseData.phase,
@@ -129,13 +129,13 @@ interface TimelineEvent {
       return {
         api,
         events: apiEvents,
-               
+        phases,
       }
-      
+    })
   }, [filteredApis, timelineData, dateRange.end])
 
   const monthMarkers = useMemo(() => {
-    const markers = []
+    const markers: Array<{ date: Date; position: number; label: string }> = []
     let currentDate = new Date(dateRange.start)
     currentDate.setDate(1)
 
@@ -143,24 +143,24 @@ interface TimelineEvent {
       markers.push({
         date: new Date(currentDate),
         position: getPositionPercent(currentDate),
-        <h3 className="text-lg font-display fon
-        
+        label: format(currentDate, 'MMM yyyy'),
+      })
       currentDate = addMonths(currentDate, 1)
-     
+    }
 
-          ))}
-  }, [dateRange])
+    return markers
+  }, [dateRange, getPositionPercent])
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" onClick={onBack}>
           <ArrowLeft size={20} />
-
+        </Button>
         <div className="flex-1">
           <h2 className="text-2xl font-display font-bold">Roadmap</h2>
           <p className="text-sm text-muted-foreground">API lifecycle timeline and milestones</p>
-
+        </div>
       </div>
 
       <Card className="p-6">
@@ -170,35 +170,35 @@ interface TimelineEvent {
             <h3 className="text-lg font-display font-semibold">Filter by API</h3>
             <p className="text-sm text-muted-foreground">Select an API to focus on its timeline</p>
           </div>
-
+        </div>
         <div className="flex flex-wrap gap-2">
           <Button
             variant={selectedApi === null ? 'default' : 'outline'}
             size="sm"
             onClick={() => setSelectedApi(null)}
-
+          >
             All APIs
-
+          </Button>
           {apis.map(api => (
-
+            <Button
               key={api.id}
               variant={selectedApi === api.id ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSelectedApi(api.id)}
             >
-
+              {api.name}
             </Button>
-
+          ))}
         </div>
-
+      </Card>
 
       {apiRows.length === 0 ? (
         <Card className="p-12 text-center">
           <CalendarDots size={48} weight="duotone" className="text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">No timeline data available</p>
-
+        </Card>
       ) : (
-
+        <Card className="p-6">
           <div className="space-y-8">
             <div className="relative">
               <div className="flex border-b border-border pb-2 mb-4">
@@ -208,19 +208,19 @@ interface TimelineEvent {
                     className="absolute text-xs text-muted-foreground font-medium"
                     style={{ left: `${marker.position}%`, transform: 'translateX(-50%)' }}
                   >
-
+                    {marker.label}
                   </div>
                 ))}
               </div>
-
+            </div>
 
             <div className="space-y-6 mt-8">
               {apiRows.map(({ api, events, phases }) => (
-
+                <div key={api.id} className="space-y-3">
                   <div className="flex items-center gap-3">
                     <h4 className="font-display font-semibold text-base">{api.name}</h4>
                     <span className="text-xs text-muted-foreground font-mono">{api.version}</span>
-
+                  </div>
 
                   <div className="relative h-16 bg-muted/30 rounded-lg border border-border">
                     {phases.map((phaseBlock, idx) => {
@@ -232,26 +232,26 @@ interface TimelineEvent {
                         <div
                           key={idx}
                           className={`absolute top-2 bottom-2 rounded ${PHASE_COLORS[phaseBlock.phase]} flex items-center justify-center text-xs font-medium`}
-
+                          style={{
                             left: `${startPos}%`,
-
+                            width: `${width}%`,
                           }}
-
+                        >
                           {width > 8 && PHASE_LABELS[phaseBlock.phase]}
-
+                        </div>
                       )
                     })}
 
                     {events.map(event => {
                       const position = getPositionPercent(event.date)
 
-
+                      return (
                         <div
-
+                          key={event.id}
                           className="absolute top-0 bottom-0 flex flex-col items-center justify-center group"
                           style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
                         >
-
+                          {event.type === 'milestone' ? (
                             <>
                               <FlagBanner size={20} weight="fill" className="text-accent drop-shadow-sm" />
                               <div className="absolute top-full mt-2 hidden group-hover:block z-10 bg-popover text-popover-foreground border border-border rounded-md shadow-lg p-3 min-w-[200px]">
@@ -267,7 +267,7 @@ interface TimelineEvent {
                           ) : (
                             <div className="w-2 h-full bg-border" />
                           )}
-
+                        </div>
                       )
                     })}
                   </div>
@@ -281,23 +281,23 @@ interface TimelineEvent {
                     ))}
                   </div>
                 </div>
-
+              ))}
             </div>
-
+          </div>
         </Card>
+      )}
 
-
-
+      <Card className="p-6">
         <h3 className="text-lg font-display font-semibold mb-4 flex items-center gap-2">
           <FlagBanner size={24} weight="duotone" className="text-primary" />
           Legend
-
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {Object.entries(PHASE_LABELS).map(([phase, label]) => (
             <div key={phase} className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded ${PHASE_COLORS[phase as LifecyclePhase]}`} />
               <span className="text-sm">{label}</span>
-
+            </div>
           ))}
           <div className="flex items-center gap-2">
             <FlagBanner size={24} weight="fill" className="text-accent" />
@@ -305,6 +305,6 @@ interface TimelineEvent {
           </div>
         </div>
       </Card>
-
+    </div>
   )
-
+}
