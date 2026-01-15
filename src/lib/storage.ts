@@ -1,12 +1,13 @@
 export const STORAGE_KEYS = {
   THEME: 'app-theme',
-  API_CONFIG_PREFIX: 
-
+  LANGUAGE: 'app-language',
+  API_CONFIG_PREFIX: 'api-config-',
+  APIS: 'apis',
 } as const
 
 export const storage = {
   get<T>(key: string): T | null {
-      con
+    try {
       const item = localStorage.getItem(key)
       return item ? JSON.parse(item) : null
     } catch (error) {
@@ -33,13 +34,13 @@ export const storage = {
 
   clear(): void {
     try {
-
-    const key = `${ST
+      localStorage.clear()
+    } catch (error) {
+      console.error('Error clearing localStorage:', error)
+    }
   },
-  set
-    
 
-    const key = `${STORAGE_KEYS.API_CONFIG_P
+  getAPIConfig<T>(apiId: string): T | null {
     const key = `${STORAGE_KEYS.API_CONFIG_PREFIX}${apiId}`
     return storage.get<T>(key)
   },
