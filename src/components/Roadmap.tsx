@@ -1,100 +1,62 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
-import { APIContract, LifecyclePhase } from '@/lib/types'
-import { parseISO, format, differenceInDays, subMonths, addMonths, min, max } from 'date-fns'
-import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
+import { Card } from '@/components/ui/card'
+interface RoadmapProps {
+  onBack: () => void
+
 
 interface RoadmapProps {
   apis: APIContract[]
   onBack: () => void
 }
 
-interface TimelineEvent {
-  id: string
-  apiId: string
-  apiName: string
-  type: 'phase' | 'milestone'
-  date: Date
-  phase?: LifecyclePhase
-  title: string
-  description?: string
+  certifying: 'Certifying
+  deprecated
 }
-
-const PHASE_LABELS: Record<LifecyclePhase, string> = {
-  implementing: 'Implementing',
-  certifying: 'Certifying',
-  current: 'Current',
-  deprecated: 'Deprecated',
-  retired: 'Retired',
+const PHASE_COLOR
+  certifying: 'bg-[oklch(0.65
+  deprecated
 }
+export function
 
-const PHASE_COLORS: Record<LifecyclePhase, string> = {
-  implementing: 'bg-[oklch(0.60_0.18_240)]',
-  certifying: 'bg-[oklch(0.65_0.16_260)]',
-  current: 'bg-[oklch(0.65_0.20_140)]',
-  deprecated: 'bg-[oklch(0.75_0.15_70)]',
-  retired: 'bg-[oklch(0.60_0.22_25)]',
-}
+ 
 
-export function Roadmap({ apis, onBack }: RoadmapProps) {
-  const [selectedApi, setSelectedApi] = useState<string | null>(null)
-
-  const timelineData = useMemo(() => {
-    const events: TimelineEvent[] = []
-
-    apis.forEach(api => {
-      api.lifecyclePhases.forEach(phaseData => {
         if (phaseData.startDate) {
-          events.push({
-            id: `${api.id}-${phaseData.phase}-start`,
-            apiId: api.id,
-            apiName: api.name,
-            type: 'phase',
-            date: parseISO(phaseData.startDate),
-            phase: phaseData.phase,
-            title: `${PHASE_LABELS[phaseData.phase]} Started`,
-          })
+            id: `${api.id}-${ph
+            apiName: api.na
+            date: par
+            title: `${PHASE
         }
-        if (phaseData.endDate) {
-          events.push({
-            id: `${api.id}-${phaseData.phase}-end`,
-            apiId: api.id,
-            apiName: api.name,
-            type: 'phase',
-            date: parseISO(phaseData.endDate),
-            phase: phaseData.phase,
-            title: `${PHASE_LABELS[phaseData.phase]} Ended`,
-          })
-        }
-      })
+ 
 
-      api.milestones.forEach(milestone => {
-        events.push({
+            type: 'phase',
+            phase: phaseData.phase,
+          })
+      })
+      api.milestones.forEach(milestone =>
           id: milestone.id,
-          apiId: api.id,
-          apiName: api.name,
-          type: 'milestone',
+}         apiId: api.id,
+     apiName: api.name,
           date: parseISO(milestone.date),
           title: milestone.title,
           description: milestone.description,
         })
       })
-    })
+
 
     return events.sort((a, b) => a.date.getTime() - b.date.getTime())
   }, [apis])
 
-  const filteredApis = useMemo(() => {
+            id: `${api.id}-${phaseData.phase}-start`,
     if (!selectedApi) return apis
     return apis.filter(api => api.id === selectedApi)
   }, [apis, selectedApi])
 
-  const dateRange = useMemo(() => {
+            phase: phaseData.phase,
     if (timelineData.length === 0) {
       const now = new Date()
-      return {
+        }
         start: subMonths(now, 3),
         end: addMonths(now, 3),
       }
@@ -138,6 +100,44 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
   }, [filteredApis, timelineData, dateRange])
 
   const monthMarkers = useMemo(() => {
+    let currentDate = new Date(dateRange.start)
+    const markers: { position: number; label: string }[] = []
+
+    while (currentDate <= dateRange.end) {
+      markers.push({
+        position: getPositionPercent(currentDate),
+        label: format(currentDate, 'MMM yyyy'),
+      })
+
+      currentDate = addMonths(currentDate, 1)
+    }
+
+    return markers
+  }, [dateRange, totalDays])
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" onClick={onBack}>
+          <ArrowLeft size={20} className="mr-2" />
+          Back
+        </Button>
+        <h2 className="text-2xl font-display font-bold">API Roadmap</h2>
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        <Button
+          variant={selectedApi === null ? 'default' : 'outline'}
+          onClick={() => setSelectedApi(null)}
+        >
+          All APIs
+        </Button>
+        {apis.map(api => (
+          <Button
+            key={api.id}
+            variant={selectedApi === api.id ? 'default' : 'outline'}
+            onClick={() => setSelectedApi(api.id)}
+          >
     let currentDate = new Date(dateRange.start)
     const markers: { position: number; label: string }[] = []
 
@@ -231,7 +231,7 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
                         >
                           <div className="px-2 py-1 text-xs text-white font-medium truncate">
                             {PHASE_LABELS[phaseData.phase]}
-                          </div>
+        </Card>
                         </div>
                       )
                     })}
@@ -251,26 +251,3 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
                               <FlagBanner size={20} weight="fill" className="text-accent" />
                             </div>
                           </div>
-                        )
-                      })}
-                  </div>
-
-                  <div className="mt-2 flex gap-2 flex-wrap">
-                    {events
-                      .filter(e => e.type === 'milestone')
-                      .map(event => (
-                        <Badge key={event.id} variant="outline" className="text-xs">
-                          <FlagBanner size={12} className="mr-1" />
-                          {event.title} - {format(event.date, 'MMM d, yyyy')}
-                        </Badge>
-                      ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-      )}
-    </div>
-  )
-}
