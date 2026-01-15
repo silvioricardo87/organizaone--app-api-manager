@@ -1,30 +1,22 @@
 import { useMemo, useState } from 'react'
-import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { parseISO, format, differenceInDays
 import { Badge } from '@/components/ui/badge'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { parseISO, format, differenceInDays, subMonths, addMonths, min, max } from 'date-fns'
 
-interface RoadmapProps {
+
   apis: APIContract[]
-  onBack: () => void
+  apiId: string
 }
 
 interface TimelineEvent {
-  id: string
+  id: stringfecyclePhase
   apiId: string
   apiName: string
   type: 'phase' | 'milestone'
   date: Date
-  phase?: LifecyclePhase
-  title: string
-  description?: string
-}
-
-const PHASE_LABELS: Record<LifecyclePhase, string> = {
-  implementing: 'Implementing',
-  certifying: 'Certifying',
   current: 'Current',
   deprecated: 'Deprecated',
   retired: 'Retired',
