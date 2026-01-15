@@ -1,14 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
 import { APIContract, LifecyclePhase } from '@/lib/types'
-import { format, parseISO, addMonths, differenceInDays, min, max } from 'date-fns'
+import { format, parseISO, addMonths, subMonths, differenceInDays, min, max } from 'date-fns'
 
 interface RoadmapProps {
-  apis: APIContract[]
+const PHASE_LABELS: R
   onBack: () => void
-}
+ 
 
 const PHASE_LABELS: Record<LifecyclePhase, string> = {
   implementing: 'Implementing',
@@ -16,22 +15,22 @@ const PHASE_LABELS: Record<LifecyclePhase, string> = {
   current: 'Current',
   deprecated: 'Deprecated',
   retired: 'Retired',
-}
+
 
 const PHASE_COLORS: Record<LifecyclePhase, string> = {
   implementing: 'bg-[oklch(0.60_0.18_240)]',
   certifying: 'bg-[oklch(0.65_0.16_260)]',
   current: 'bg-[oklch(0.65_0.20_140)]',
-  deprecated: 'bg-[oklch(0.75_0.15_70)]',
-  retired: 'bg-[oklch(0.60_0.22_25)]',
-}
-
-interface TimelineEvent {
-  id: string
-  apiName: string
-  date: Date
-  type: 'milestone' | 'phase'
   phase?: LifecyclePhase
+  retired: 'bg-[oklch(0.60_0.22_25)]',
+e
+
+  const timelineData = us
+  id: string
+    apis.forEac
+  apiName: string
+          ap
+          title
   title?: string
 }
 
