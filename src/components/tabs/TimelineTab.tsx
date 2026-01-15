@@ -124,8 +124,8 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
       <Card className="p-6">
         <h2 className="text-xl font-display font-semibold mb-6">Visual Timeline</h2>
         
-        <div className="relative">
-          <div className="h-2 bg-muted rounded-full mb-12"></div>
+        <div className="relative pt-16 pb-8">
+          <div className="absolute top-16 left-0 right-0 h-2 bg-muted rounded-full"></div>
           
           {api.lifecyclePhases.map((phase, index) => {
             if (!phase.startDate) return null
@@ -138,7 +138,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
             return (
               <div
                 key={phase.phase}
-                className="absolute top-0 h-2 rounded-full transition-all"
+                className="absolute top-16 h-2 rounded-full transition-all"
                 style={{
                   left: `${startPos}%`,
                   width: `${width}%`,
@@ -148,28 +148,55 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
             )
           })}
 
-          {api.milestones.map(milestone => {
+          {api.milestones.map((milestone, idx) => {
             const milestoneDate = parseISO(milestone.date)
             const position = getPositionPercentage(milestoneDate)
+            const isEven = idx % 2 === 0
 
             return (
               <div
                 key={milestone.id}
-                className="absolute -top-8 transform -translate-x-1/2"
-                style={{ left: `${position}%` }}
+                className="absolute transform -translate-x-1/2"
+                style={{ 
+                  left: `${position}%`,
+                  top: isEven ? '0px' : 'auto',
+                  bottom: isEven ? 'auto' : '0px'
+                }}
               >
-                <div className="flex flex-col items-center">
-                  <Flag size={24} weight="fill" className="text-accent" />
-                  <div className="mt-10 text-center">
-                    <p className="text-xs font-medium">{milestone.title}</p>
-                    <p className="text-xs text-muted-foreground">{format(milestoneDate, 'MMM d, yyyy')}</p>
-                  </div>
+                <div className="flex flex-col items-center w-32">
+                  {isEven ? (
+                    <>
+                      <div className="text-center mb-2 px-1">
+                        <p className="text-xs font-medium truncate w-full" title={milestone.title}>
+                          {milestone.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground whitespace-nowrap">
+                          {format(milestoneDate, 'MMM d, yyyy')}
+                        </p>
+                      </div>
+                      <div className="h-6 w-0.5 bg-accent"></div>
+                      <Flag size={20} weight="fill" className="text-accent" />
+                    </>
+                  ) : (
+                    <>
+                      <Flag size={20} weight="fill" className="text-accent" />
+                      <div className="h-6 w-0.5 bg-accent"></div>
+                      <div className="text-center mt-2 px-1">
+                        <p className="text-xs font-medium truncate w-full" title={milestone.title}>
+                          {milestone.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground whitespace-nowrap">
+                          {format(milestoneDate, 'MMM d, yyyy')}
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )
           })}
 
-          <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+          <div className="absolute top-[4.5rem] left-0 right-0 flex justify-between text-xs text-muted-foreground">
             <span>{format(minDate, 'MMM yyyy')}</span>
             <span>{format(maxDate, 'MMM yyyy')}</span>
           </div>

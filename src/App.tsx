@@ -30,6 +30,12 @@ function App() {
     setSelectedAPI(updatedAPI)
   }
 
+  const handleDeleteAPI = (apiId: string) => {
+    setApis((currentApis) => (currentApis || []).filter(api => api.id !== apiId))
+    setSelectedAPI(null)
+    setCurrentView('list')
+  }
+
   const handleSelectAPI = (api: APIContract) => {
     const latestAPI = currentApis.find(a => a.id === api.id) || api
     setSelectedAPI(latestAPI)
@@ -77,6 +83,7 @@ function App() {
             api={selectedAPI}
             onBack={handleBack}
             onUpdate={handleUpdateAPI}
+            onDelete={handleDeleteAPI}
           />
         ) : (
           <APIList
