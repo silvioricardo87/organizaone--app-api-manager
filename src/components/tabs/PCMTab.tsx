@@ -11,6 +11,7 @@ import { Plus, Trash, Pencil } from '@phosphor-icons/react'
 import { APIContract, PCMField, PCMMandatoryType } from '@/lib/types'
 import { generateId, extractEndpoints, getEndpointFields } from '@/lib/api-utils'
 import { toast } from 'sonner'
+import { useSettings } from '@/hooks/use-settings'
 
 interface PCMTabProps {
   api: APIContract
@@ -18,6 +19,7 @@ interface PCMTabProps {
 }
 
 export function PCMTab({ api, onUpdate }: PCMTabProps) {
+  const { t } = useSettings()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingField, setEditingField] = useState<PCMField | null>(null)
   const [endpoint, setEndpoint] = useState('')
@@ -191,7 +193,9 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
                     )}
                     <div>
                       <span className="font-medium text-muted-foreground">Mandatory:</span>
-                      <Badge variant="outline" className="ml-2">{pcmField.mandatory}</Badge>
+                      <Badge variant="outline" className="ml-2">
+                        {pcmField.mandatory === 'none' ? '-' : t.badges[pcmField.mandatory]}
+                      </Badge>
                     </div>
                     {pcmField.maxSize && (
                       <div>
