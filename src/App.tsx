@@ -5,12 +5,17 @@ import { APIContract } from '@/lib/types'
 import { APIList } from '@/components/APIList'
 import { APIDetailView } from '@/components/APIDetailView'
 import { NewAPIDialog } from '@/components/NewAPIDialog'
-import { FileText } from '@phosphor-icons/react'
+import { Dashboard } from '@/components/Dashboard'
+import { FileText, ChartBar } from '@phosphor-icons/react'
+import { Button } from '@/components/ui/button'
+
+type View = 'list' | 'dashboard' | 'detail'
 
 function App() {
   const [apis, setApis] = useKV<APIContract[]>('openfinance-apis', [])
   const [selectedAPI, setSelectedAPI] = useState<APIContract | null>(null)
   const [newAPIDialogOpen, setNewAPIDialogOpen] = useState(false)
+  const [currentView, setCurrentView] = useState<View>('list')
 
   const currentApis = apis || []
 
@@ -28,30 +33,46 @@ function App() {
   const handleSelectAPI = (api: APIContract) => {
     const latestAPI = currentApis.find(a => a.id === api.id) || api
     setSelectedAPI(latestAPI)
+    setCurrentView('detail')
   }
 
   const handleBack = () => {
     setSelectedAPI(null)
+    setCurrentView('list')
+  }
+
+  const handleBackFromDashboard = () => {
+    setCurrentView('list')
   }
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <FileText size={28} weight="duotone" className="text-primary" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <FileText size={28} weight="duotone" className="text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-display font-bold">OpenFinance API Manager</h1>
+                <p className="text-sm text-muted-foreground">Manage API contracts, lifecycle, and metrics</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-display font-bold">OpenFinance API Manager</h1>
-              <p className="text-sm text-muted-foreground">Manage API contracts, lifecycle, and metrics</p>
-            </div>
+            {currentView === 'list' && currentApis.length > 0 && (
+              <Button variant="outline" onClick={() => setCurrentView('dashboard')}>
+                <ChartBar size={20} weight="duotone" className="mr-2" />
+                Dashboard
+              </Button>
+            )}
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {selectedAPI ? (
+        {currentView === 'dashboard' ? (
+          <Dashboard apis={currentApis} onBack={handleBackFromDashboard} />
+        ) : currentView === 'detail' && selectedAPI ? (
           <APIDetailView
             api={selectedAPI}
             onBack={handleBack}

@@ -69,6 +69,13 @@ This application manages sophisticated data structures including OpenAPI 3.0 spe
 - **Progression**: Load application → View API list → Search by name/version → Filter by lifecycle phase → Sort by date → Click API to view details
 - **Success criteria**: Fast search response, accurate filtering, clear list presentation
 
+### Dashboard & Analytics View
+- **Functionality**: Visual dashboard displaying API lifecycle distribution, issue status breakdown, backlog status, and issues by API with interactive charts
+- **Purpose**: Provide executive overview and at-a-glance health metrics for the entire API portfolio
+- **Trigger**: User clicks "Dashboard" button in header when on API list view
+- **Progression**: Click Dashboard button → View statistics cards → Explore pie charts for lifecycle/issue/backlog distribution → Review bar chart showing top APIs by issue count → Click back to return to list
+- **Success criteria**: Charts render correctly with current data, distribution percentages accurate, responsive layout on all screen sizes, empty states handled gracefully
+
 ## Edge Case Handling
 
 - **Invalid YAML Import** - Display clear error messages highlighting the specific parsing issue and line number if possible
