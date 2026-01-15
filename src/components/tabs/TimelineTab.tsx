@@ -13,6 +13,7 @@ import { PhaseIndicator } from '../PhaseIndicator'
 import { generateId } from '@/lib/api-utils'
 import { format, parseISO, differenceInDays } from 'date-fns'
 import { toast } from 'sonner'
+import { useSettings } from '@/hooks/use-settings'
 
 interface TimelineTabProps {
   api: APIContract
@@ -22,6 +23,7 @@ interface TimelineTabProps {
 const phaseOrder: LifecyclePhase[] = ['implementing', 'certifying', 'current', 'deprecated', 'retired']
 
 export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
+  const { t } = useSettings()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null)
   const [title, setTitle] = useState('')
@@ -60,7 +62,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
 
   const handleSave = () => {
     if (!title.trim() || !date) {
-      toast.error('Title and date are required')
+      toast.error(t.toasts.fieldRequired)
       return
     }
 
@@ -72,7 +74,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
           ? { ...m, title, description, date: date.toISOString() }
           : m
       )
-      toast.success('Milestone updated')
+      toast.success(t.toasts.milestoneUpdated)
     } else {
       const newMilestone: Milestone = {
         id: generateId(),
@@ -83,7 +85,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
       updatedMilestones = [...api.milestones, newMilestone].sort((a, b) => 
         new Date(a.date).getTime() - new Date(b.date).getTime()
       )
-      toast.success('Milestone created')
+      toast.success(t.toasts.milestoneCreated)
     }
 
     onUpdate({
@@ -96,7 +98,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
   }
 
   const handleDelete = (milestoneId: string) => {
-    if (!confirm('Are you sure you want to delete this milestone?')) return
+    if (!confirm(t.apiDetail.confirmDeleteMessage)) return
 
     const updatedMilestones = api.milestones.filter(m => m.id !== milestoneId)
     onUpdate({
@@ -104,7 +106,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
       milestones: updatedMilestones,
       updatedAt: new Date().toISOString()
     })
-    toast.success('Milestone deleted')
+    toast.success(t.toasts.milestoneDeleted)
   }
 
   const getPositionPercentage = (date: Date): number => {

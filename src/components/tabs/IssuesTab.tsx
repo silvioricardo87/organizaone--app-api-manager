@@ -51,7 +51,7 @@ export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
 
   const handleSave = () => {
     if (!title.trim()) {
-      toast.error('Title is required')
+      toast.error(t.toasts.titleRequired)
       return
     }
 
@@ -64,7 +64,7 @@ export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
           ? { ...issue, title, description, status, updatedAt: now }
           : issue
       )
-      toast.success('Issue updated')
+      toast.success(t.toasts.issueUpdated)
     } else {
       const newIssue: KnownIssue = {
         id: generateId(),
@@ -75,7 +75,7 @@ export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
         updatedAt: now
       }
       updatedIssues = [...api.knownIssues, newIssue]
-      toast.success('Issue created')
+      toast.success(t.toasts.issueCreated)
     }
 
     onUpdate({
@@ -88,7 +88,7 @@ export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
   }
 
   const handleDelete = (issueId: string) => {
-    if (!confirm('Are you sure you want to delete this issue?')) return
+    if (!confirm(t.apiDetail.confirmDeleteMessage)) return
 
     const updatedIssues = api.knownIssues.filter(issue => issue.id !== issueId)
     onUpdate({
@@ -96,7 +96,7 @@ export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
       knownIssues: updatedIssues,
       updatedAt: new Date().toISOString()
     })
-    toast.success('Issue deleted')
+    toast.success(t.toasts.issueDeleted)
   }
 
   return (

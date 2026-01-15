@@ -9,6 +9,7 @@ import { APIContract, LifecyclePhase } from '@/lib/types'
 import { PhaseIndicator } from '../PhaseIndicator'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
+import { useSettings } from '@/hooks/use-settings'
 
 interface LifecycleTabProps {
   api: APIContract
@@ -18,6 +19,7 @@ interface LifecycleTabProps {
 const phaseOrder: LifecyclePhase[] = ['implementing', 'certifying', 'current', 'deprecated', 'retired']
 
 export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
+  const { t } = useSettings()
   const [editingPhase, setEditingPhase] = useState<LifecyclePhase | null>(null)
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({})
 
@@ -39,7 +41,7 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
     })
     
     setOpenPopovers(prev => ({ ...prev, [`${phase}-${type}`]: false }))
-    toast.success('Lifecycle phase updated')
+    toast.success(t.toasts.apiUpdated)
   }
 
   return (
