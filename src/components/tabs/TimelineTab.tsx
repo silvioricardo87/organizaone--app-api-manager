@@ -120,12 +120,12 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
       <div className="flex justify-end">
         <Button onClick={() => openDialog()}>
           <Plus size={20} weight="bold" className="mr-2" />
-          Add Milestone
+          {t.timeline.addMilestone}
         </Button>
       </div>
 
       <Card className="p-6">
-        <h2 className="text-xl font-display font-semibold mb-6">Visual Timeline</h2>
+        <h2 className="text-xl font-display font-semibold mb-6">{t.timeline.visualTimeline}</h2>
         
         <div className="relative pt-16 pb-8">
           <div className="absolute top-16 left-0 right-0 h-2 bg-muted rounded-full"></div>
@@ -208,7 +208,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">Lifecycle Phases</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t.timeline.lifecyclePhases}</h3>
           <div className="space-y-3">
             {phaseOrder.map(phase => {
               const phaseData = api.lifecyclePhases.find(p => p.phase === phase)
@@ -234,9 +234,9 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">Milestones</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t.timeline.milestones}</h3>
           {api.milestones.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No milestones added yet.</p>
+            <p className="text-sm text-muted-foreground">{t.timeline.noMilestones}</p>
           ) : (
             <div className="space-y-3">
               {api.milestones.map(milestone => (
@@ -271,36 +271,36 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingMilestone ? 'Edit Milestone' : 'New Milestone'}</DialogTitle>
+            <DialogTitle>{editingMilestone ? t.timeline.editMilestone : t.timeline.newMilestone}</DialogTitle>
             <DialogDescription>
-              {editingMilestone ? 'Update milestone details' : 'Add a new milestone to the timeline'}
+              {editingMilestone ? t.timeline.updateMilestoneDetails : t.timeline.addNewMilestone}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="milestone-title">Title *</Label>
+              <Label htmlFor="milestone-title">{t.timeline.title} *</Label>
               <Input
                 id="milestone-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Milestone name"
+                placeholder={t.timeline.titlePlaceholder}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="milestone-description">Description</Label>
+              <Label htmlFor="milestone-description">{t.timeline.description}</Label>
               <Textarea
                 id="milestone-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional description"
+                placeholder={t.timeline.descriptionPlaceholder}
                 rows={2}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>{t.lifecycle.date} *</Label>
+              <Label>{t.timeline.date} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
@@ -322,10 +322,10 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              {t.timeline.cancel}
             </Button>
             <Button onClick={handleSave} disabled={!title.trim() || !date}>
-              {editingMilestone ? 'Update' : 'Create'}
+              {editingMilestone ? t.timeline.update : t.timeline.create}
             </Button>
           </div>
         </DialogContent>
