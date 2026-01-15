@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge'
 import { APIContract } from '@/lib/types'
 import { Copy, CaretRight } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import { marked } from 'marked'
 
 interface SpecificationTabProps {
   api: APIContract
@@ -403,51 +402,15 @@ function ResponseViewer({ responses }: { responses: any }) {
 
 export function SpecificationTab({ api }: SpecificationTabProps) {
   const spec = api.parsedSpec
+  const [showFullDescription, setShowFullDescription] = useState(false)
 
-  const apiInfoMarkdown = useMemo(() => {
-    if (!spec) return ''
-    
-    const lines: string[] = []
-    
-    lines.push(`## ${spec.info?.title || 'API Information'}`)
-    lines.push('')
-    lines.push(`**Version:** \`${spec.info?.version}\``)
-    lines.push('')
-    
-    if (spec.info?.description) {
-      lines.push(`### Description`)
-      lines.push('')
-      lines.push(spec.info.description)
-      lines.push('')
-    }
-    
-    if (spec.info?.contact) {
-      lines.push(`### Contact Information`)
-      lines.push('')
-      if (spec.info.contact.name) {
-        lines.push(`- **Name:** ${spec.info.contact.name}`)
-      }
-      if (spec.info.contact.email) {
-        lines.push(`- **Email:** ${spec.info.contact.email}`)
-      }
-      if (spec.info.contact.url) {
-        lines.push(`- **URL:** [${spec.info.contact.url}](${spec.info.contact.url})`)
-      }
-      lines.push('')
-    }
-    
-    if (spec.info?.license) {
-      lines.push(`### License`)
-      lines.push('')
-      lines.push(`- **Name:** ${spec.info.license.name}`)
-      if (spec.info.license.url) {
-        lines.push(`- **URL:** [${spec.info.license.url}](${spec.info.license.url})`)
-      }
-      lines.push('')
-    }
-    
-    return marked(lines.join('\n'))
-  }, [spec])
+  const description = spec?.info?.description || ''
+  const descriptionLines = description.split('\n')
+  const MAX_LINES = 5
+  const shouldTruncate = descriptionLines.length > MAX_LINES
+  const displayedDescription = shouldTruncate && !showFullDescription
+    ? descriptionLines.slice(0, MAX_LINES).join('\n')
+    : description
 
   if (!api.parsedSpec) {
     return (
@@ -459,12 +422,101 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="p-6">
-        <div 
-          className="prose prose-sm max-w-none prose-headings:font-display prose-h2:text-xl prose-h2:font-semibold prose-h2:mb-4 prose-h3:text-lg prose-h3:font-semibold prose-h3:mb-2 prose-h3:mt-4 prose-p:text-sm prose-ul:text-sm prose-strong:font-semibold prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-          dangerouslySetInnerHTML={{ __html: apiInfoMarkdown }}
-        />
-      </Card>
+      {description && (
+        <Card className="p-6">
+          <h2 className="text-xl font-display font-semibold mb-4">Description</h2>
+          <div className="space-y-3">
+            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+              {displayedDescription}
+              {shouldTruncate && !showFullDescription && '...'}
+            </p>
+            {shouldTruncate && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFullDescription(!showFullDescription)}
+                className="text-primary"
+              >
+                {showFullDescription ? 'Show less' : 'Show more'}
+              </Button>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {spec.info?.version && (
+        <Card className="p-6">
+          <h2 className="text-xl font-display font-semibold mb-4">Version</h2>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-base px-3 py-1 font-mono">
+              {spec.info.version}
+            </Badge>
+          </div>
+        </Card>
+      )}
+
+      {spec.info?.license && (
+        <Card className="p-6">
+          <h2 className="text-xl font-display font-semibold mb-4">License</h2>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">Name:</span>
+              <span className="text-sm">{spec.info.license.name}</span>
+            </div>
+            {spec.info.license.url && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold">URL:</span>
+                <a 
+                  href={spec.info.license.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  {spec.info.license.url}
+                </a>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {spec.info?.contact && (
+        <Card className="p-6">
+          <h2 className="text-xl font-display font-semibold mb-4">Contact</h2>
+          <div className="space-y-2">
+            {spec.info.contact.name && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold">Name:</span>
+                <span className="text-sm">{spec.info.contact.name}</span>
+              </div>
+            )}
+            {spec.info.contact.email && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold">Email:</span>
+                <a 
+                  href={`mailto:${spec.info.contact.email}`}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {spec.info.contact.email}
+                </a>
+              </div>
+            )}
+            {spec.info.contact.url && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold">URL:</span>
+                <a 
+                  href={spec.info.contact.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  {spec.info.contact.url}
+                </a>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
 
       {spec.servers && spec.servers.length > 0 && (
         <Card className="p-6">
