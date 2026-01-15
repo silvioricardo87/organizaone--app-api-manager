@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { APIContract, LifecyclePhase } from
-
-  apis: APIContract[]
-}
+import { Card } from '@/components/ui/card'
+import { APIContract, LifecyclePhase } from '@/lib/types'
+import { parseISO, format, differenceInDays, addMonths, min, max } from 'date-fns'
+import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
 
 interface RoadmapProps {
   apis: APIContract[]
@@ -37,10 +37,11 @@ const PHASE_COLORS: Record<LifecyclePhase, string> = {
 
 export function Roadmap({ apis, onBack }: RoadmapProps) {
   const [selectedApi, setSelectedApi] = useState<string | null>(null)
-artDate) {
+
   const timelineData = useMemo(() => {
-    const events: TimelineEvent[] = [].phase}-start`,
-    apis.forEach(api => {ame,
+    const events: TimelineEvent[] = []
+    
+    apis.forEach(api => {
       api.lifecyclePhases.forEach(phaseData => {
         if (phaseData.startDate) {
           events.push({
@@ -50,36 +51,51 @@ artDate) {
             type: 'phase',
             phase: phaseData.phase,
             title: `${PHASE_LABELS[phaseData.phase]} Start`,
-          })apiName: api.name,
-        }SO(phaseData.endDate),
+          })
+        }
         if (phaseData.endDate) {
           events.push({
-            id: `${api.id}-${phaseData.phase}-end`,} End`,
+            id: `${api.id}-${phaseData.phase}-end`,
             apiName: api.name,
             date: parseISO(phaseData.endDate),
             type: 'phase',
             phase: phaseData.phase,
             title: `${PHASE_LABELS[phaseData.phase]} End`,
           })
-          id: milestone.id,
+        }
       })
 
       api.milestones.forEach(milestone => {
-        events.push({tone.title,
+        events.push({
           id: milestone.id,
           apiName: api.name,
           date: parseISO(milestone.date),
           type: 'milestone',
           title: milestone.title,
         })
+      })
+    })
+
+    return events.sort((a, b) => a.date.getTime() - b.date.getTime())
+  }, [apis])
 
   const filteredApis = useMemo(() => {
     if (!selectedApi) return apis
     return apis.filter(api => api.id === selectedApi)
   }, [apis, selectedApi])
 
+  const filteredTimelineData = useMemo(() => {
+    if (!selectedApi) return timelineData
+    return timelineData.filter(event => {
+      const api = apis.find(a => a.name === event.apiName)
+      return api?.id === selectedApi
+    })
+  }, [timelineData, selectedApi, apis])
+
   const dateRange = useMemo(() => {
-    if (timelineData.length === 0) {
+    const dataToUse = selectedApi ? filteredTimelineData : timelineData
+    
+    if (dataToUse.length === 0) {
       const now = new Date()
       return {
         start: now,
@@ -87,7 +103,7 @@ artDate) {
       }
     }
 
-    const dates = timelineData.map(e => e.date)
+    const dates = dataToUse.map(e => e.date)
     const minDate = min(dates)
     const maxDate = max(dates)
 
@@ -95,7 +111,7 @@ artDate) {
       start: minDate,
       end: addMonths(maxDate, 1),
     }
-  }, [timelineData])
+  }, [timelineData, filteredTimelineData, selectedApi])
 
   const totalDays = differenceInDays(dateRange.end, dateRange.start)
 
@@ -114,7 +130,7 @@ artDate) {
           end: parseISO(p.endDate!),
         }))
 
-      const events = timelineData.filter(e => e.apiName === api.name)
+      const events = (selectedApi ? filteredTimelineData : timelineData).filter(e => e.apiName === api.name)
 
       return {
         api,
@@ -122,7 +138,7 @@ artDate) {
         phases,
       }
     })
-  }, [filteredApis, timelineData])
+  }, [filteredApis, timelineData, filteredTimelineData, selectedApi])
 
   const monthMarkers = useMemo(() => {
     let currentDate = new Date(dateRange.start)
