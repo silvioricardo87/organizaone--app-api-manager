@@ -56,7 +56,7 @@ export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
 
   const handleSave = () => {
     if (!title.trim()) {
-      toast.error('Title is required')
+      toast.error(t.toasts.titleRequired)
       return
     }
 
@@ -69,7 +69,7 @@ export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
           ? { ...item, title, description, proposal, origin, status, updatedAt: now }
           : item
       )
-      toast.success('Backlog item updated')
+      toast.success(t.toasts.improvementUpdated)
     } else {
       const newItem: BacklogItem = {
         id: generateId(),
@@ -82,7 +82,7 @@ export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
         updatedAt: now
       }
       updatedItems = [...api.backlogItems, newItem]
-      toast.success('Backlog item created')
+      toast.success(t.toasts.improvementCreated)
     }
 
     onUpdate({
@@ -95,7 +95,7 @@ export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
   }
 
   const handleDelete = (itemId: string) => {
-    if (!confirm('Are you sure you want to delete this backlog item?')) return
+    if (!confirm(t.apiDetail.confirmDeleteMessage)) return
 
     const updatedItems = api.backlogItems.filter(item => item.id !== itemId)
     onUpdate({
@@ -103,7 +103,7 @@ export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
       backlogItems: updatedItems,
       updatedAt: new Date().toISOString()
     })
-    toast.success('Backlog item deleted')
+    toast.success(t.toasts.improvementDeleted)
   }
 
   return (

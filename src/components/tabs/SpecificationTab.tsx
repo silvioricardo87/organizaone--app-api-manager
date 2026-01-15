@@ -9,6 +9,7 @@ import { APIContract } from '@/lib/types'
 import { Copy, CaretRight, MagnifyingGlass, X } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { resolveParameter, resolveRef, resolveSchema } from '@/lib/api-utils'
+import { useSettings } from '@/hooks/use-settings'
 
 interface SpecificationTabProps {
   api: APIContract
@@ -74,6 +75,7 @@ function schemaMatchesFilter(schemaName: string, schema: any, filter: string, sp
 }
 
 function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: string; level?: number; spec?: any }) {
+  const { t } = useSettings()
   const [expanded, setExpanded] = useState(level < 2)
 
   if (!schema) return null
@@ -92,7 +94,7 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    toast.success('Copied to clipboard')
+    toast.success(t.toasts.copiedToClipboard)
   }
 
   return (

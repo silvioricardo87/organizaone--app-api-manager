@@ -83,7 +83,7 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
 
   const handleSave = () => {
     if (!endpoint || !method || !field) {
-      toast.error('Endpoint, method, and field are required')
+      toast.error(t.toasts.fieldRequired)
       return
     }
 
@@ -108,10 +108,10 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
 
     if (editingField) {
       updatedFields = api.pcmFields.map(f => f.id === editingField.id ? newField : f)
-      toast.success('PCM field updated')
+      toast.success(t.toasts.metricUpdated)
     } else {
       updatedFields = [...api.pcmFields, newField]
-      toast.success('PCM field created')
+      toast.success(t.toasts.metricCreated)
     }
 
     onUpdate({
@@ -124,7 +124,7 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
   }
 
   const handleDelete = (fieldId: string) => {
-    if (!confirm('Are you sure you want to delete this PCM field?')) return
+    if (!confirm(t.apiDetail.confirmDeleteMessage)) return
 
     const updatedFields = api.pcmFields.filter(f => f.id !== fieldId)
     onUpdate({
@@ -132,7 +132,7 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
       pcmFields: updatedFields,
       updatedAt: new Date().toISOString()
     })
-    toast.success('PCM field deleted')
+    toast.success(t.toasts.metricDeleted)
   }
 
   if (!api.parsedSpec) {
