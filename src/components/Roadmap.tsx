@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
 import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { format, parseISO, differenceInDays, addMonths, subMonths, min, max } from 'date-fns'
 
@@ -158,112 +160,7 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
           <ArrowLeft size={20} className="mr-2" />
           Back
         </Button>
-        <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-display font-bold">API Roadmap</h2>
-        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          >
-
-          </Button>
-
-
-
-      <Card className="p-6">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        </div>
-
-
-
-
-
-
-
-          </div>
-
-      )}
-    </div>
-
-}
-        </div>
+        <h2 className="text-2xl font-display font-bold">API Roadmap</h2>
       </div>
 
       <div className="flex gap-2 flex-wrap">
