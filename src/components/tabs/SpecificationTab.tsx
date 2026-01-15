@@ -35,6 +35,7 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
   const hasAllOf = schema.allOf && schema.allOf.length > 0
   const hasOneOf = schema.oneOf && schema.oneOf.length > 0
   const hasAnyOf = schema.anyOf && schema.anyOf.length > 0
+  const hasItems = isArray && schema.items
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
@@ -44,7 +45,7 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
   return (
     <div className={`${level > 0 ? 'ml-4 border-l-2 border-muted pl-4' : ''} space-y-2`}>
       <div className="flex items-start gap-2">
-        {(hasProperties || isArray || hasAllOf || hasOneOf || hasAnyOf) && (
+        {(hasProperties || hasItems || hasAllOf || hasOneOf || hasAnyOf) && (
           <button
             onClick={() => setExpanded(!expanded)}
             className="mt-1 text-muted-foreground hover:text-foreground transition-colors"
@@ -61,7 +62,7 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
             <code className="font-mono text-sm font-semibold text-primary">{name}</code>
             {schema.type && (
               <Badge variant="outline" className="text-xs">
-                {isArray ? `array[${schema.items?.type || 'object'}]` : schema.type}
+                {isArray && schema.items?.type ? `array[${schema.items.type}]` : schema.type}
               </Badge>
             )}
             {schema.format && (
@@ -81,7 +82,14 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
             {schema.writeOnly && (
               <Badge variant="outline" className="text-xs">Write-only</Badge>
             )}
+            {schema.deprecated && (
+              <Badge variant="destructive" className="text-xs">Deprecated</Badge>
+            )}
           </div>
+
+          {schema.title && (
+            <p className="text-xs font-semibold text-foreground mt-1">{schema.title}</p>
+          )}
 
           {schema.description && (
             <p className="text-sm text-muted-foreground mt-1">{schema.description}</p>
@@ -89,7 +97,9 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
 
           {(schema.minimum !== undefined || schema.maximum !== undefined) && (
             <p className="text-xs text-muted-foreground mt-1">
-              Range: {schema.minimum ?? '∞'} to {schema.maximum ?? '∞'}
+              Range: {schema.minimum ?? '-∞'} to {schema.maximum ?? '+∞'}
+              {schema.exclusiveMinimum && ' (exclusive min)'}
+              {schema.exclusiveMaximum && ' (exclusive max)'}
             </p>
           )}
 
@@ -99,10 +109,20 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
             </p>
           )}
 
+          {(schema.minItems !== undefined || schema.maxItems !== undefined) && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Array size: {schema.minItems ?? '0'} to {schema.maxItems ?? '∞'} items
+            </p>
+          )}
+
+          {schema.uniqueItems && (
+            <p className="text-xs text-muted-foreground mt-1">Items must be unique</p>
+          )}
+
           {schema.pattern && (
             <div className="mt-1 flex items-center gap-2">
               <p className="text-xs text-muted-foreground">Pattern:</p>
-              <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">{schema.pattern}</code>
+              <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono flex-1">{schema.pattern}</code>
               <Button
                 variant="ghost"
                 size="icon"
@@ -171,7 +191,7 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
             </div>
           )}
 
-          {expanded && isArray && schema.items && (
+          {expanded && hasItems && (
             <div className="mt-3">
               <SchemaViewer
                 name="items"
@@ -183,11 +203,11 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
 
           {expanded && hasAllOf && (
             <div className="mt-3 space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">All of:</p>
+              <p className="text-xs font-medium text-muted-foreground">All of (must match all):</p>
               {schema.allOf.map((subSchema: any, idx: number) => (
                 <SchemaViewer
                   key={idx}
-                  name={subSchema.$ref ? subSchema.$ref.split('/').pop() : `Option ${idx + 1}`}
+                  name={subSchema.$ref ? subSchema.$ref.split('/').pop() : `Schema ${idx + 1}`}
                   schema={subSchema}
                   level={level + 1}
                 />
@@ -197,7 +217,7 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
 
           {expanded && hasOneOf && (
             <div className="mt-3 space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">One of:</p>
+              <p className="text-xs font-medium text-muted-foreground">One of (must match exactly one):</p>
               {schema.oneOf.map((subSchema: any, idx: number) => (
                 <SchemaViewer
                   key={idx}
@@ -211,7 +231,7 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
 
           {expanded && hasAnyOf && (
             <div className="mt-3 space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">Any of:</p>
+              <p className="text-xs font-medium text-muted-foreground">Any of (must match at least one):</p>
               {schema.anyOf.map((subSchema: any, idx: number) => (
                 <SchemaViewer
                   key={idx}
@@ -226,8 +246,25 @@ function SchemaViewer({ schema, name, level = 0 }: { schema: any; name: string; 
           {schema.$ref && (
             <div className="mt-1">
               <Badge variant="outline" className="text-xs">
-                → {schema.$ref.split('/').pop()}
+                → Reference: {schema.$ref.split('/').pop()}
               </Badge>
+            </div>
+          )}
+
+          {schema.additionalProperties === false && (
+            <p className="text-xs text-muted-foreground mt-1 italic">No additional properties allowed</p>
+          )}
+
+          {schema.additionalProperties && typeof schema.additionalProperties === 'object' && (
+            <div className="mt-2">
+              <p className="text-xs font-medium mb-1">Additional Properties:</p>
+              <div className="ml-2">
+                <SchemaViewer
+                  name="additionalProperties"
+                  schema={schema.additionalProperties}
+                  level={level + 1}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -262,38 +299,60 @@ function RequestBodyViewer({ requestBody }: { requestBody: any }) {
           {Object.entries(requestBody.content).map(([contentType, content]: [string, any]) => (
             <TabsContent key={contentType} value={contentType} className="mt-3">
               {content.schema && (
-                <div className="border rounded-lg p-4 bg-card">
-                  <SchemaViewer name="body" schema={content.schema} />
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs font-medium mb-2">Schema:</p>
+                    <div className="border rounded-lg p-4 bg-card">
+                      <SchemaViewer name="body" schema={content.schema} />
+                    </div>
+                  </div>
+                  
+                  {content.schema.example && (
+                    <div>
+                      <p className="text-xs font-medium mb-2">Example Request:</p>
+                      <div className="bg-muted rounded p-3 relative group">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => navigator.clipboard.writeText(JSON.stringify(content.schema.example, null, 2))}
+                        >
+                          <Copy size={12} />
+                        </Button>
+                        <pre className="text-xs font-mono overflow-x-auto max-h-96">
+                          {JSON.stringify(content.schema.example, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               {content.examples && Object.keys(content.examples).length > 0 && (
                 <div className="mt-3">
                   <p className="text-xs font-medium mb-2">Examples:</p>
-                  <Accordion type="single" collapsible>
+                  <div className="space-y-3">
                     {Object.entries(content.examples).map(([exampleName, example]: [string, any]) => (
-                      <AccordionItem key={exampleName} value={exampleName}>
-                        <AccordionTrigger className="text-xs">{exampleName}</AccordionTrigger>
-                        <AccordionContent>
-                          {example.description && (
-                            <p className="text-xs text-muted-foreground mb-2">{example.description}</p>
-                          )}
-                          <div className="bg-muted rounded p-2 relative group">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={() => navigator.clipboard.writeText(JSON.stringify(example.value, null, 2))}
-                            >
-                              <Copy size={12} />
-                            </Button>
-                            <pre className="text-xs font-mono overflow-x-auto">
-                              {JSON.stringify(example.value, null, 2)}
-                            </pre>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
+                      <div key={exampleName} className="space-y-1">
+                        <p className="text-xs font-semibold">{exampleName}</p>
+                        {example.description && (
+                          <p className="text-xs text-muted-foreground">{example.description}</p>
+                        )}
+                        <div className="bg-muted rounded p-3 relative group">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => navigator.clipboard.writeText(JSON.stringify(example.value, null, 2))}
+                          >
+                            <Copy size={12} />
+                          </Button>
+                          <pre className="text-xs font-mono overflow-x-auto max-h-96">
+                            {JSON.stringify(example.value, null, 2)}
+                          </pre>
+                        </div>
+                      </div>
                     ))}
-                  </Accordion>
+                  </div>
                 </div>
               )}
             </TabsContent>
@@ -341,30 +400,54 @@ function ResponseViewer({ responses }: { responses: any }) {
                   {Object.entries(response.content).map(([contentType, content]: [string, any]) => (
                     <TabsContent key={contentType} value={contentType} className="mt-3">
                       {content.schema && (
-                        <div className="border rounded-lg p-4 bg-card">
-                          <SchemaViewer name="response" schema={content.schema} />
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-xs font-medium mb-2">Schema:</p>
+                            <div className="border rounded-lg p-4 bg-card">
+                              <SchemaViewer name="response" schema={content.schema} />
+                            </div>
+                          </div>
+                          
+                          {content.schema.example && (
+                            <div>
+                              <p className="text-xs font-medium mb-2">Example Response:</p>
+                              <div className="bg-muted rounded p-3 relative group">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => navigator.clipboard.writeText(JSON.stringify(content.schema.example, null, 2))}
+                                >
+                                  <Copy size={12} />
+                                </Button>
+                                <pre className="text-xs font-mono overflow-x-auto max-h-96">
+                                  {JSON.stringify(content.schema.example, null, 2)}
+                                </pre>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                       {content.examples && Object.keys(content.examples).length > 0 && (
                         <div className="mt-3">
                           <p className="text-xs font-medium mb-2">Examples:</p>
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             {Object.entries(content.examples).map(([exampleName, example]: [string, any]) => (
                               <div key={exampleName} className="space-y-1">
-                                <p className="text-xs font-medium">{exampleName}</p>
+                                <p className="text-xs font-semibold">{exampleName}</p>
                                 {example.description && (
                                   <p className="text-xs text-muted-foreground">{example.description}</p>
                                 )}
-                                <div className="bg-muted rounded p-2 relative group">
+                                <div className="bg-muted rounded p-3 relative group">
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="h-6 w-6 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                     onClick={() => navigator.clipboard.writeText(JSON.stringify(example.value, null, 2))}
                                   >
                                     <Copy size={12} />
                                   </Button>
-                                  <pre className="text-xs font-mono overflow-x-auto">
+                                  <pre className="text-xs font-mono overflow-x-auto max-h-96">
                                     {JSON.stringify(example.value, null, 2)}
                                   </pre>
                                 </div>
@@ -378,14 +461,29 @@ function ResponseViewer({ responses }: { responses: any }) {
                 </Tabs>
               )}
               {response.headers && Object.keys(response.headers).length > 0 && (
-                <div>
-                  <p className="text-xs font-medium mb-2">Headers:</p>
-                  <div className="space-y-1">
+                <div className="mt-3">
+                  <p className="text-xs font-medium mb-2">Response Headers:</p>
+                  <div className="space-y-2">
                     {Object.entries(response.headers).map(([headerName, header]: [string, any]) => (
-                      <div key={headerName} className="text-xs bg-muted p-2 rounded">
-                        <code className="font-semibold">{headerName}</code>
+                      <div key={headerName} className="border rounded-lg p-3 bg-card">
+                        <div className="flex items-center gap-2 mb-1">
+                          <code className="font-mono text-sm font-semibold text-primary">{headerName}</code>
+                          {header.schema?.type && (
+                            <Badge variant="outline" className="text-xs">
+                              {header.schema.type}
+                            </Badge>
+                          )}
+                          {header.required && (
+                            <Badge variant="destructive" className="text-xs">Required</Badge>
+                          )}
+                        </div>
                         {header.description && (
-                          <p className="text-muted-foreground mt-1">{header.description}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{header.description}</p>
+                        )}
+                        {header.schema && (
+                          <div className="mt-2 ml-2">
+                            <SchemaViewer name={headerName} schema={header.schema} level={1} />
+                          </div>
                         )}
                       </div>
                     ))}
@@ -598,10 +696,10 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                             <h4 className="text-sm font-semibold mb-3">Parameters</h4>
                             <div className="space-y-3">
                               {operation.parameters.map((param: any, idx: number) => (
-                                <div key={idx} className="border rounded-lg p-3 bg-card">
-                                  <div className="flex items-start gap-2 mb-2">
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                                <div key={idx} className="border rounded-lg p-4 bg-card space-y-2">
+                                  <div className="flex items-start gap-2">
+                                    <div className="flex-1 space-y-2">
+                                      <div className="flex items-center gap-2 flex-wrap">
                                         <code className="font-mono text-sm font-semibold text-primary">{param.name}</code>
                                         {param.schema?.type && (
                                           <Badge variant="outline" className="text-xs">
@@ -613,7 +711,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                                             {param.schema.format}
                                           </Badge>
                                         )}
-                                        <Badge variant="outline" className="text-xs">
+                                        <Badge variant="outline" className="text-xs capitalize">
                                           in: {param.in}
                                         </Badge>
                                         {param.required && (
@@ -622,12 +720,64 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                                         {param.deprecated && (
                                           <Badge variant="destructive" className="text-xs">Deprecated</Badge>
                                         )}
+                                        {param.allowEmptyValue && (
+                                          <Badge variant="outline" className="text-xs">Allow Empty</Badge>
+                                        )}
                                       </div>
+                                      
                                       {param.description && (
                                         <p className="text-sm text-muted-foreground">{param.description}</p>
                                       )}
+
+                                      {(param.schema?.minimum !== undefined || param.schema?.maximum !== undefined) && (
+                                        <div className="flex items-center gap-2">
+                                          <p className="text-xs text-muted-foreground">Range:</p>
+                                          <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
+                                            {param.schema.minimum ?? '-∞'} to {param.schema.maximum ?? '+∞'}
+                                          </code>
+                                        </div>
+                                      )}
+
+                                      {(param.schema?.minLength !== undefined || param.schema?.maxLength !== undefined) && (
+                                        <div className="flex items-center gap-2">
+                                          <p className="text-xs text-muted-foreground">Length:</p>
+                                          <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
+                                            {param.schema.minLength ?? '0'} to {param.schema.maxLength ?? '∞'}
+                                          </code>
+                                        </div>
+                                      )}
+
+                                      {(param.schema?.minItems !== undefined || param.schema?.maxItems !== undefined) && (
+                                        <div className="flex items-center gap-2">
+                                          <p className="text-xs text-muted-foreground">Array items:</p>
+                                          <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
+                                            {param.schema.minItems ?? '0'} to {param.schema.maxItems ?? '∞'}
+                                          </code>
+                                        </div>
+                                      )}
+
+                                      {param.schema?.pattern && (
+                                        <div className="flex items-center gap-2">
+                                          <p className="text-xs text-muted-foreground">Pattern:</p>
+                                          <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono flex-1">
+                                            {param.schema.pattern}
+                                          </code>
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-6 w-6"
+                                            onClick={() => {
+                                              navigator.clipboard.writeText(param.schema.pattern)
+                                              toast.success('Pattern copied to clipboard')
+                                            }}
+                                          >
+                                            <Copy size={12} />
+                                          </Button>
+                                        </div>
+                                      )}
+                                      
                                       {param.schema?.enum && param.schema.enum.length > 0 && (
-                                        <div className="mt-2">
+                                        <div>
                                           <p className="text-xs font-medium mb-1">Possible values:</p>
                                           <div className="flex flex-wrap gap-1">
                                             {param.schema.enum.map((value: any, enumIdx: number) => (
@@ -638,20 +788,41 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                                           </div>
                                         </div>
                                       )}
+                                      
                                       {param.schema?.default !== undefined && (
-                                        <div className="mt-2 flex items-center gap-2">
+                                        <div className="flex items-center gap-2">
                                           <p className="text-xs text-muted-foreground">Default:</p>
                                           <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
                                             {JSON.stringify(param.schema.default)}
                                           </code>
                                         </div>
                                       )}
+                                      
                                       {param.example !== undefined && (
-                                        <div className="mt-2">
+                                        <div>
                                           <p className="text-xs font-medium mb-1">Example:</p>
-                                          <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
+                                          <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono block">
                                             {JSON.stringify(param.example)}
                                           </code>
+                                        </div>
+                                      )}
+
+                                      {param.examples && Object.keys(param.examples).length > 0 && (
+                                        <div>
+                                          <p className="text-xs font-medium mb-1">Examples:</p>
+                                          <div className="space-y-1">
+                                            {Object.entries(param.examples).map(([exName, ex]: [string, any]) => (
+                                              <div key={exName} className="bg-muted rounded p-2">
+                                                <p className="text-xs font-semibold mb-1">{exName}</p>
+                                                {ex.description && (
+                                                  <p className="text-xs text-muted-foreground mb-1">{ex.description}</p>
+                                                )}
+                                                <code className="text-xs font-mono">
+                                                  {JSON.stringify(ex.value)}
+                                                </code>
+                                              </div>
+                                            ))}
+                                          </div>
                                         </div>
                                       )}
                                     </div>
