@@ -426,7 +426,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
         <Card className="p-6">
           <h2 className="text-xl font-display font-semibold mb-4">Description</h2>
           <div className="space-y-3">
-            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed font-mono">
               {displayedDescription}
               {shouldTruncate && !showFullDescription && '...'}
             </p>
