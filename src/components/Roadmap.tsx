@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { useSettings } from '@/hooks/use-settings'
-import { parseISO, format, differenceInDays, addMonths, min, max } from 'date-fns'
+import { parseISO, differenceInDays, addMonths, min, max } from 'date-fns'
+import { formatDate, monthNames } from '@/lib/i18n'
 import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
 
 interface RoadmapProps {
@@ -29,7 +30,7 @@ const PHASE_COLORS: Record<LifecyclePhase, string> = {
 }
 
 export function Roadmap({ apis, onBack }: RoadmapProps) {
-  const { t } = useSettings()
+  const { t, language } = useSettings()
   const [selectedApi, setSelectedApi] = useState<string | null>(null)
 
   const timelineData = useMemo(() => {
@@ -129,18 +130,21 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
   const monthMarkers = useMemo(() => {
     let currentDate = new Date(dateRange.start)
     const markers: { position: number; label: string }[] = []
+    const months = monthNames[language]
 
     while (currentDate <= dateRange.end) {
+      const monthIndex = currentDate.getMonth()
+      const year = currentDate.getFullYear()
       markers.push({
         position: getPositionPercent(currentDate),
-        label: format(currentDate, 'MMM yyyy'),
+        label: `${months.short[monthIndex]} ${year}`,
       })
 
       currentDate = addMonths(currentDate, 1)
     }
 
     return markers
-  }, [dateRange, totalDays])
+  }, [dateRange, totalDays, language])
 
   return (
     <div className="space-y-6">

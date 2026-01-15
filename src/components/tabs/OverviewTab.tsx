@@ -1,7 +1,8 @@
 import { Card } from '@/components/ui/card'
 import { APIContract } from '@/lib/types'
 import { PhaseIndicator } from '../PhaseIndicator'
-import { format } from 'date-fns'
+import { formatDate } from '@/lib/i18n'
+import { useSettings } from '@/hooks/use-settings'
 
 interface OverviewTabProps {
   api: APIContract
@@ -9,6 +10,7 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ api }: OverviewTabProps) {
+  const { t, language } = useSettings()
   const currentPhase = api.lifecyclePhases.find(p => {
     if (!p.startDate) return false
     const now = new Date()
@@ -22,26 +24,26 @@ export function OverviewTab({ api }: OverviewTabProps) {
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-xl font-display font-semibold mb-4">API Information</h2>
+        <h2 className="text-xl font-display font-semibold mb-4">{t.apiDetail.apiInformation}</h2>
         <dl className="space-y-4">
           <div>
-            <dt className="text-sm font-medium text-muted-foreground mb-1">Name</dt>
+            <dt className="text-sm font-medium text-muted-foreground mb-1">{t.apiDetail.name}</dt>
             <dd className="text-base">{api.name}</dd>
           </div>
           
           <div>
-            <dt className="text-sm font-medium text-muted-foreground mb-1">Version</dt>
+            <dt className="text-sm font-medium text-muted-foreground mb-1">{t.apiDetail.version}</dt>
             <dd className="text-base font-mono">{api.version}</dd>
           </div>
           
           <div>
-            <dt className="text-sm font-medium text-muted-foreground mb-1">Summary</dt>
+            <dt className="text-sm font-medium text-muted-foreground mb-1">{t.apiDetail.description}</dt>
             <dd className="text-base">{api.summary}</dd>
           </div>
           
           {currentPhase && (
             <div>
-              <dt className="text-sm font-medium text-muted-foreground mb-1">Current Phase</dt>
+              <dt className="text-sm font-medium text-muted-foreground mb-1">{t.apiDetail.currentPhase}</dt>
               <dd className="text-base">
                 <PhaseIndicator phase={currentPhase.phase} />
               </dd>
@@ -49,13 +51,13 @@ export function OverviewTab({ api }: OverviewTabProps) {
           )}
           
           <div>
-            <dt className="text-sm font-medium text-muted-foreground mb-1">Created</dt>
-            <dd className="text-base">{format(new Date(api.createdAt), 'PPP')}</dd>
+            <dt className="text-sm font-medium text-muted-foreground mb-1">{t.dates.created}</dt>
+            <dd className="text-base">{formatDate(new Date(api.createdAt), 'long', language)}</dd>
           </div>
           
           <div>
-            <dt className="text-sm font-medium text-muted-foreground mb-1">Last Updated</dt>
-            <dd className="text-base">{format(new Date(api.updatedAt), 'PPP')}</dd>
+            <dt className="text-sm font-medium text-muted-foreground mb-1">{t.dates.lastUpdated}</dt>
+            <dd className="text-base">{formatDate(new Date(api.updatedAt), 'long', language)}</dd>
           </div>
           
           {endpointCount > 0 && (

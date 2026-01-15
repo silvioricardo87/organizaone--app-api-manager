@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarIcon } from '@phosphor-icons/react'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { PhaseIndicator } from '../PhaseIndicator'
-import { format } from 'date-fns'
+import { formatDate } from '@/lib/i18n'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 
@@ -19,7 +19,7 @@ interface LifecycleTabProps {
 const phaseOrder: LifecyclePhase[] = ['implementing', 'certifying', 'current', 'deprecated', 'retired']
 
 export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
-  const { t } = useSettings()
+  const { t, language } = useSettings()
   const [editingPhase, setEditingPhase] = useState<LifecyclePhase | null>(null)
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({})
 
@@ -60,14 +60,14 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Start Date</Label>
+                <Label>{t.apiDetail.startDate}</Label>
                 <Popover open={openPopovers[`${phase}-start`]} onOpenChange={(open) => setOpenPopovers(prev => ({ ...prev, [`${phase}-start`]: open }))}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon size={16} className="mr-2" />
                       {phaseData.startDate
-                        ? format(new Date(phaseData.startDate), 'PPP')
-                        : 'Select date'}
+                        ? formatDate(new Date(phaseData.startDate), 'long', language)
+                        : t.dates.selectDate}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -82,14 +82,14 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>End Date</Label>
+                <Label>{t.apiDetail.endDate}</Label>
                 <Popover open={openPopovers[`${phase}-end`]} onOpenChange={(open) => setOpenPopovers(prev => ({ ...prev, [`${phase}-end`]: open }))}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon size={16} className="mr-2" />
                       {phaseData.endDate
-                        ? format(new Date(phaseData.endDate), 'PPP')
-                        : 'Select date'}
+                        ? formatDate(new Date(phaseData.endDate), 'long', language)
+                        : t.dates.selectDate}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">

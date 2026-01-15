@@ -380,6 +380,42 @@ export const translations = {
       nameRequired: 'Name is required',
       fieldRequired: 'This field is required',
     },
+    dates: {
+      today: 'Today',
+      yesterday: 'Yesterday',
+      tomorrow: 'Tomorrow',
+      thisWeek: 'This week',
+      lastWeek: 'Last week',
+      nextWeek: 'Next week',
+      thisMonth: 'This month',
+      lastMonth: 'Last month',
+      nextMonth: 'Next month',
+      thisYear: 'This year',
+      lastYear: 'Last year',
+      nextYear: 'Next year',
+      from: 'From',
+      to: 'To',
+      until: 'Until',
+      since: 'Since',
+      ago: 'ago',
+      in: 'in',
+      at: 'at',
+      on: 'on',
+      daysAgo: '{count} days ago',
+      daysFromNow: 'in {count} days',
+      hoursAgo: '{count} hours ago',
+      hoursFromNow: 'in {count} hours',
+      minutesAgo: '{count} minutes ago',
+      minutesFromNow: 'in {count} minutes',
+      justNow: 'just now',
+      selectDate: 'Select date',
+      startDate: 'Start date',
+      endDate: 'End date',
+      noDate: 'No date',
+      invalidDate: 'Invalid date',
+      created: 'Created',
+      lastUpdated: 'Last Updated',
+    },
   },
   pt: {
     header: {
@@ -762,8 +798,235 @@ export const translations = {
       nameRequired: 'Nome é obrigatório',
       fieldRequired: 'Este campo é obrigatório',
     },
+    dates: {
+      today: 'Hoje',
+      yesterday: 'Ontem',
+      tomorrow: 'Amanhã',
+      thisWeek: 'Esta semana',
+      lastWeek: 'Semana passada',
+      nextWeek: 'Próxima semana',
+      thisMonth: 'Este mês',
+      lastMonth: 'Mês passado',
+      nextMonth: 'Próximo mês',
+      thisYear: 'Este ano',
+      lastYear: 'Ano passado',
+      nextYear: 'Próximo ano',
+      from: 'De',
+      to: 'Até',
+      until: 'Até',
+      since: 'Desde',
+      ago: 'atrás',
+      in: 'em',
+      at: 'às',
+      on: 'em',
+      daysAgo: 'há {count} dias',
+      daysFromNow: 'em {count} dias',
+      hoursAgo: 'há {count} horas',
+      hoursFromNow: 'em {count} horas',
+      minutesAgo: 'há {count} minutos',
+      minutesFromNow: 'em {count} minutos',
+      justNow: 'agora mesmo',
+      selectDate: 'Selecionar data',
+      startDate: 'Data de início',
+      endDate: 'Data de término',
+      noDate: 'Sem data',
+      invalidDate: 'Data inválida',
+      created: 'Criado',
+      lastUpdated: 'Última Atualização',
+    },
   },
 }
 
 export type Language = keyof typeof translations
 export type TranslationKey = keyof typeof translations.en
+
+export const dateFormats = {
+  en: {
+    short: 'MM/DD/YYYY',
+    medium: 'MMM DD, YYYY',
+    long: 'MMMM DD, YYYY',
+    full: 'dddd, MMMM DD, YYYY',
+    time: 'h:mm A',
+    dateTime: 'MM/DD/YYYY h:mm A',
+    monthYear: 'MMMM YYYY',
+    dayMonth: 'MMM DD',
+  },
+  pt: {
+    short: 'DD/MM/YYYY',
+    medium: 'DD [de] MMM [de] YYYY',
+    long: 'DD [de] MMMM [de] YYYY',
+    full: 'dddd, DD [de] MMMM [de] YYYY',
+    time: 'HH:mm',
+    dateTime: 'DD/MM/YYYY HH:mm',
+    monthYear: 'MMMM [de] YYYY',
+    dayMonth: 'DD [de] MMM',
+  },
+}
+
+export const monthNames = {
+  en: {
+    full: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  },
+  pt: {
+    full: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+    short: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+  },
+}
+
+export const dayNames = {
+  en: {
+    full: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    short: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+  },
+  pt: {
+    full: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'],
+    short: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+  },
+}
+
+export function formatDate(date: Date | string | undefined, format: 'short' | 'medium' | 'long' | 'full' | 'time' | 'dateTime' | 'monthYear' | 'dayMonth', language: Language): string {
+  if (!date) return ''
+  
+  const d = typeof date === 'string' ? new Date(date) : date
+  
+  if (isNaN(d.getTime())) return ''
+
+  const day = d.getDate()
+  const month = d.getMonth()
+  const year = d.getFullYear()
+  const dayOfWeek = d.getDay()
+  const hours = d.getHours()
+  const minutes = d.getMinutes()
+
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  
+  const months = monthNames[language]
+  const days = dayNames[language]
+
+  switch (format) {
+    case 'short':
+      return language === 'pt' 
+        ? `${pad(day)}/${pad(month + 1)}/${year}`
+        : `${pad(month + 1)}/${pad(day)}/${year}`
+    
+    case 'medium':
+      return language === 'pt'
+        ? `${pad(day)} de ${months.short[month]} de ${year}`
+        : `${months.short[month]} ${pad(day)}, ${year}`
+    
+    case 'long':
+      return language === 'pt'
+        ? `${pad(day)} de ${months.full[month]} de ${year}`
+        : `${months.full[month]} ${pad(day)}, ${year}`
+    
+    case 'full':
+      return language === 'pt'
+        ? `${days.full[dayOfWeek]}, ${pad(day)} de ${months.full[month]} de ${year}`
+        : `${days.full[dayOfWeek]}, ${months.full[month]} ${pad(day)}, ${year}`
+    
+    case 'time':
+      if (language === 'pt') {
+        return `${pad(hours)}:${pad(minutes)}`
+      } else {
+        const h = hours % 12 || 12
+        const ampm = hours >= 12 ? 'PM' : 'AM'
+        return `${h}:${pad(minutes)} ${ampm}`
+      }
+    
+    case 'dateTime':
+      const dateStr = language === 'pt' 
+        ? `${pad(day)}/${pad(month + 1)}/${year}`
+        : `${pad(month + 1)}/${pad(day)}/${year}`
+      const timeStr = language === 'pt'
+        ? `${pad(hours)}:${pad(minutes)}`
+        : (() => {
+            const h = hours % 12 || 12
+            const ampm = hours >= 12 ? 'PM' : 'AM'
+            return `${h}:${pad(minutes)} ${ampm}`
+          })()
+      return `${dateStr} ${timeStr}`
+    
+    case 'monthYear':
+      return language === 'pt'
+        ? `${months.full[month]} de ${year}`
+        : `${months.full[month]} ${year}`
+    
+    case 'dayMonth':
+      return language === 'pt'
+        ? `${pad(day)} de ${months.short[month]}`
+        : `${months.short[month]} ${pad(day)}`
+    
+    default:
+      return d.toLocaleDateString(language === 'pt' ? 'pt-BR' : 'en-US')
+  }
+}
+
+export function formatRelativeDate(date: Date | string | undefined, language: Language): string {
+  if (!date) return ''
+  
+  const d = typeof date === 'string' ? new Date(date) : date
+  
+  if (isNaN(d.getTime())) return ''
+
+  const now = new Date()
+  const diffMs = now.getTime() - d.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+  const diffMinutes = Math.floor(diffMs / (1000 * 60))
+
+  if (language === 'pt') {
+    if (diffMinutes < 1) return 'agora mesmo'
+    if (diffMinutes < 60) return `há ${diffMinutes} ${diffMinutes === 1 ? 'minuto' : 'minutos'}`
+    if (diffHours < 24) return `há ${diffHours} ${diffHours === 1 ? 'hora' : 'horas'}`
+    if (diffDays < 7) return `há ${diffDays} ${diffDays === 1 ? 'dia' : 'dias'}`
+    if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7)
+      return `há ${weeks} ${weeks === 1 ? 'semana' : 'semanas'}`
+    }
+    if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30)
+      return `há ${months} ${months === 1 ? 'mês' : 'meses'}`
+    }
+    const years = Math.floor(diffDays / 365)
+    return `há ${years} ${years === 1 ? 'ano' : 'anos'}`
+  } else {
+    if (diffMinutes < 1) return 'just now'
+    if (diffMinutes < 60) return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`
+    if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`
+    if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`
+    if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7)
+      return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`
+    }
+    if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30)
+      return `${months} ${months === 1 ? 'month' : 'months'} ago`
+    }
+    const years = Math.floor(diffDays / 365)
+    return `${years} ${years === 1 ? 'year' : 'years'} ago`
+  }
+}
+
+export function formatDateRange(startDate: Date | string | undefined, endDate: Date | string | undefined, language: Language): string {
+  if (!startDate && !endDate) return ''
+  
+  if (!startDate) {
+    return language === 'pt' 
+      ? `Até ${formatDate(endDate, 'medium', language)}`
+      : `Until ${formatDate(endDate, 'medium', language)}`
+  }
+  
+  if (!endDate) {
+    return language === 'pt'
+      ? `A partir de ${formatDate(startDate, 'medium', language)}`
+      : `From ${formatDate(startDate, 'medium', language)}`
+  }
+
+  const start = formatDate(startDate, 'medium', language)
+  const end = formatDate(endDate, 'medium', language)
+  
+  return language === 'pt'
+    ? `${start} até ${end}`
+    : `${start} to ${end}`
+}

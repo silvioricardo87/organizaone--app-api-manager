@@ -11,7 +11,8 @@ import { Plus, Trash, Calendar as CalendarIcon, Flag } from '@phosphor-icons/rea
 import { APIContract, Milestone, LifecyclePhase } from '@/lib/types'
 import { PhaseIndicator } from '../PhaseIndicator'
 import { generateId } from '@/lib/api-utils'
-import { format, parseISO, differenceInDays } from 'date-fns'
+import { parseISO, differenceInDays } from 'date-fns'
+import { formatDate, monthNames } from '@/lib/i18n'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 
@@ -23,7 +24,7 @@ interface TimelineTabProps {
 const phaseOrder: LifecyclePhase[] = ['implementing', 'certifying', 'current', 'deprecated', 'retired']
 
 export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
-  const { t } = useSettings()
+  const { t, language } = useSettings()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null)
   const [title, setTitle] = useState('')
@@ -173,7 +174,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
                           {milestone.title}
                         </p>
                         <p className="text-xs text-muted-foreground whitespace-nowrap">
-                          {format(milestoneDate, 'MMM d, yyyy')}
+                          {formatDate(milestoneDate, 'medium', language)}
                         </p>
                       </div>
                       <div className="h-6 w-0.5 bg-accent"></div>
@@ -188,7 +189,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
                           {milestone.title}
                         </p>
                         <p className="text-xs text-muted-foreground whitespace-nowrap">
-                          {format(milestoneDate, 'MMM d, yyyy')}
+                          {formatDate(milestoneDate, 'medium', language)}
                         </p>
                       </div>
                     </>
@@ -199,8 +200,8 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
           })}
 
           <div className="absolute top-[4.5rem] left-0 right-0 flex justify-between text-xs text-muted-foreground">
-            <span>{format(minDate, 'MMM yyyy')}</span>
-            <span>{format(maxDate, 'MMM yyyy')}</span>
+            <span>{formatDate(minDate, 'monthYear', language)}</span>
+            <span>{formatDate(maxDate, 'monthYear', language)}</span>
           </div>
         </div>
       </Card>
@@ -219,10 +220,10 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
                     <PhaseIndicator phase={phase} />
                   </div>
                   <div className="text-right text-xs">
-                    <p>{format(parseISO(phaseData.startDate), 'MMM d, yyyy')}</p>
+                    <p>{formatDate(parseISO(phaseData.startDate), 'medium', language)}</p>
                     {phaseData.endDate && (
                       <p className="text-muted-foreground">
-                        to {format(parseISO(phaseData.endDate), 'MMM d, yyyy')}
+                        {t.dates.to} {formatDate(parseISO(phaseData.endDate), 'medium', language)}
                       </p>
                     )}
                   </div>
@@ -249,7 +250,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
                       <p className="text-xs text-muted-foreground mb-1">{milestone.description}</p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      {format(parseISO(milestone.date), 'MMM d, yyyy')}
+                      {formatDate(parseISO(milestone.date), 'medium', language)}
                     </p>
                   </div>
                   <div className="flex gap-1">
@@ -299,12 +300,12 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>Date *</Label>
+              <Label>{t.lifecycle.date} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon size={16} className="mr-2" />
-                    {date ? format(date, 'PPP') : 'Select date'}
+                    {date ? formatDate(date, 'long', language) : t.dates.selectDate}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
