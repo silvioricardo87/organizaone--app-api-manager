@@ -1,9 +1,15 @@
 import { useMemo, useState } from 'react'
 import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
-import { Button } from '@/components/ui/but
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { APIContract, LifecyclePhase } from '@/lib/types'
+import { parseISO, format, differenceInDays, subMonths, addMonths, min, max } from 'date-fns'
+
 interface RoadmapProps {
+  apis: APIContract[]
   onBack: () => void
+}
 
 interface TimelineEvent {
   id: string
@@ -56,7 +62,7 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
             id: `${api.id}-${phaseData.phase}-end`,
             apiId: api.id,
             apiName: api.name,
-        }e',
+            type: 'phase',
             date: parseISO(phaseData.endDate),
             phase: phaseData.phase,
             title: `${PHASE_LABELS[phaseData.phase]} Ended`,
@@ -162,117 +168,6 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
           variant={selectedApi === null ? 'default' : 'outline'}
           onClick={() => setSelectedApi(null)}
         >
-        </div>
-
-        {apis.map(api => (
-
-
-'outline'}
-dApi(api.id)}
-
-            {api.name}
-          </Button>
-        ))}
-      </div>
-
-      {timelineData.length === 0 ? (
-        <Card className="p-12 text-center">
-          <CalendarDots size={48} className="mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground">
-            No timeline data available. Add lifecycle phases or milestones to APIs.
-          </p>
-        </Card>
-      ) : (
-        <Card className="p-6">
-          <div className="relative min-h-[400px]">
-            <div className="absolute top-0 left-0 right-0 h-12 flex items-center border-b border-border">
-              {monthMarkers.map((marker, idx) => (
-                <div
-                  key={idx}
-                  className="absolute top-0 h-full flex flex-col items-center"
-                  style={{ left: `${marker.position}%` }}
-                >
-                  <div className="w-px h-full bg-border" />
-                  <span className="absolute top-2 text-xs text-muted-foreground whitespace-nowrap">
-                    {marker.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-16 space-y-8">
-              {apiRows.map(({ api, events, phases }) => (
-                <div key={api.id} className="relative">
-                  <div className="mb-2">
-                    <h3 className="font-display font-semibold">{api.name}</h3>
-                    <p className="text-sm text-muted-foreground">{api.version}</p>
-                  </div>
-
-                  <div className="relative h-16 bg-muted/30 rounded-lg">
-                    {phases.map((phaseData, idx) => {
-                      const startPercent = getPositionPercent(phaseData.start)
-                      const endPercent = getPositionPercent(phaseData.end)
-                      const widthPercent = endPercent - startPercent
-
-                      return (
-                        <div
-                          key={idx}
-                          className={`absolute top-2 bottom-2 ${PHASE_COLORS[phaseData.phase]} rounded opacity-80`}
-                          style={{
-                            left: `${startPercent}%`,
-                            width: `${widthPercent}%`,
-                          }}
-                        >
-                          <div className="px-2 py-1 text-xs text-white font-medium truncate">
-                            {PHASE_LABELS[phaseData.phase]}
-                          </div>
-                        </div>
-                      )
-                    })}
-
-                    {events
-                      .filter(e => e.type === 'milestone')
-                      .map(event => {
-                        const position = getPositionPercent(event.date)
-                        return (
-                          <div
-                            key={event.id}
-                            className="absolute top-0 bottom-0 flex flex-col items-center"
-                            style={{ left: `${position}%` }}
-                          >
-                            <div className="w-0.5 h-full bg-accent" />
-                            <div className="absolute top-1/2 -translate-y-1/2">
-                              <FlagBanner size={20} weight="fill" className="text-accent" />
-                            </div>
-                          </div>
-                        )
-                      })}
-                  </div>
-
-                  <div className="mt-2 flex gap-2 flex-wrap">
-                    {events
-                      .filter(e => e.type === 'milestone')
-                      .map(event => (
-                        <Badge key={event.id} variant="outline" className="text-xs">
-                          <FlagBanner size={12} className="mr-1" />
-                          {event.title} - {format(event.date, 'MMM d, yyyy')}
-                        </Badge>
-                      ))}
-                  </div>
-          </div>
-
-      )}
-    </div>
-
-}
-        </div>
-      </div>
-
-      <div className="flex gap-2 flex-wrap">
-        <Button
-          variant={selectedApi === null ? 'default' : 'outline'}
-          onClick={() => setSelectedApi(null)}
-        >
           All APIs
         </Button>
         {apis.map(api => (
@@ -370,15 +265,6 @@ dApi(api.id)}
                         </Badge>
                       ))}
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-      )}
-    </div>
-  )
-}
                 </div>
               ))}
             </div>
