@@ -67,7 +67,7 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
     return Object.entries(phaseCounts)
       .filter(([_, count]) => count > 0)
       .map(([phase, count]) => ({
-        name: phase.charAt(0).toUpperCase() + phase.slice(1),
+        name: t.badges[phase as LifecyclePhase],
         value: count,
         color: LIFECYCLE_COLORS[phase as LifecyclePhase],
       }))
@@ -90,7 +90,7 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
     return Object.entries(statusCounts)
       .filter(([_, count]) => count > 0)
       .map(([status, count]) => ({
-        name: status.charAt(0).toUpperCase() + status.slice(1),
+        name: t.badges[status as IssueStatus],
         value: count,
         color: STATUS_COLORS[status as IssueStatus],
       }))

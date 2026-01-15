@@ -12,19 +12,21 @@ import { APIContract, BacklogItem, BacklogOrigin, BacklogStatus } from '@/lib/ty
 import { generateId } from '@/lib/api-utils'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
+import { useSettings } from '@/hooks/use-settings'
 
 interface BacklogTabProps {
   api: APIContract
   onUpdate: (api: APIContract) => void
 }
 
-const statusConfig: Record<BacklogStatus, { label: string; color: string }> = {
-  backlog: { label: 'Backlog', color: 'bg-secondary text-secondary-foreground' },
-  in_progress: { label: 'In Progress', color: 'bg-info text-info-foreground' },
-  completed: { label: 'Completed', color: 'bg-success text-success-foreground' }
+const statusColorConfig: Record<BacklogStatus, string> = {
+  backlog: 'bg-secondary text-secondary-foreground',
+  in_progress: 'bg-info text-info-foreground',
+  completed: 'bg-success text-success-foreground'
 }
 
 export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
+  const { t } = useSettings()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<BacklogItem | null>(null)
   const [title, setTitle] = useState('')
@@ -125,10 +127,12 @@ export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <h3 className="font-display font-semibold">{item.title}</h3>
-                    <Badge className={statusConfig[item.status].color}>
-                      {statusConfig[item.status].label}
+                    <Badge className={statusColorConfig[item.status]}>
+                      {t.badges[item.status === 'in_progress' ? 'inProgress' : item.status]}
                     </Badge>
-                    <Badge variant="outline">{item.origin}</Badge>
+                    <Badge variant="outline">
+                      {item.origin === 'GT' ? t.badges.workingGroup : item.origin === 'Banco Central' ? t.badges.centralBank : t.badges.ticket}
+                    </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
                   {item.proposal && (

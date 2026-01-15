@@ -12,20 +12,22 @@ import { APIContract, KnownIssue, IssueStatus } from '@/lib/types'
 import { generateId } from '@/lib/api-utils'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
+import { useSettings } from '@/hooks/use-settings'
 
 interface IssuesTabProps {
   api: APIContract
   onUpdate: (api: APIContract) => void
 }
 
-const statusConfig: Record<IssueStatus, { label: string; color: string }> = {
-  open: { label: 'Open', color: 'bg-destructive text-destructive-foreground' },
-  investigating: { label: 'Investigating', color: 'bg-warning text-warning-foreground' },
-  resolved: { label: 'Resolved', color: 'bg-success text-success-foreground' },
-  closed: { label: 'Closed', color: 'bg-muted text-muted-foreground' }
+const statusColorConfig: Record<IssueStatus, string> = {
+  open: 'bg-destructive text-destructive-foreground',
+  investigating: 'bg-warning text-warning-foreground',
+  resolved: 'bg-success text-success-foreground',
+  closed: 'bg-muted text-muted-foreground'
 }
 
 export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
+  const { t } = useSettings()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingIssue, setEditingIssue] = useState<KnownIssue | null>(null)
   const [title, setTitle] = useState('')
@@ -118,8 +120,8 @@ export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="font-display font-semibold">{issue.title}</h3>
-                    <Badge className={statusConfig[issue.status].color}>
-                      {statusConfig[issue.status].label}
+                    <Badge className={statusColorConfig[issue.status]}>
+                      {t.badges[issue.status]}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">{issue.description}</p>
