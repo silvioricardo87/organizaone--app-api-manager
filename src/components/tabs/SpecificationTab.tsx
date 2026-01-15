@@ -126,19 +126,19 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
               </Badge>
             )}
             {resolvedSchema.required && (
-              <Badge variant="destructive" className="text-xs">Required</Badge>
+              <Badge variant="destructive" className="text-xs">{t.specification.required}</Badge>
             )}
             {resolvedSchema.nullable && (
-              <Badge variant="outline" className="text-xs">Nullable</Badge>
+              <Badge variant="outline" className="text-xs">{t.common.nullable}</Badge>
             )}
             {resolvedSchema.readOnly && (
-              <Badge variant="outline" className="text-xs">Read-only</Badge>
+              <Badge variant="outline" className="text-xs">{t.common.readOnly}</Badge>
             )}
             {resolvedSchema.writeOnly && (
-              <Badge variant="outline" className="text-xs">Write-only</Badge>
+              <Badge variant="outline" className="text-xs">{t.common.writeOnly}</Badge>
             )}
             {resolvedSchema.deprecated && (
-              <Badge variant="destructive" className="text-xs">Deprecated</Badge>
+              <Badge variant="destructive" className="text-xs">{t.common.deprecated}</Badge>
             )}
           </div>
 
@@ -152,7 +152,7 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 
           {(resolvedSchema.minimum !== undefined || resolvedSchema.maximum !== undefined) && (
             <p className="text-xs text-muted-foreground mt-1">
-              Range: {resolvedSchema.minimum ?? '-∞'} to {resolvedSchema.maximum ?? '+∞'}
+              {t.specification.range}: {resolvedSchema.minimum ?? '-∞'} to {resolvedSchema.maximum ?? '+∞'}
               {resolvedSchema.exclusiveMinimum && ' (exclusive min)'}
               {resolvedSchema.exclusiveMaximum && ' (exclusive max)'}
             </p>
@@ -160,23 +160,23 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 
           {(resolvedSchema.minLength !== undefined || resolvedSchema.maxLength !== undefined) && (
             <p className="text-xs text-muted-foreground mt-1">
-              Length: {resolvedSchema.minLength ?? '0'} to {resolvedSchema.maxLength ?? '∞'}
+              {t.specification.length}: {resolvedSchema.minLength ?? '0'} to {resolvedSchema.maxLength ?? '∞'}
             </p>
           )}
 
           {(resolvedSchema.minItems !== undefined || resolvedSchema.maxItems !== undefined) && (
             <p className="text-xs text-muted-foreground mt-1">
-              Array size: {resolvedSchema.minItems ?? '0'} to {resolvedSchema.maxItems ?? '∞'} items
+              {t.specification.arraySize}: {resolvedSchema.minItems ?? '0'} to {resolvedSchema.maxItems ?? '∞'} {t.specification.items}
             </p>
           )}
 
           {resolvedSchema.uniqueItems && (
-            <p className="text-xs text-muted-foreground mt-1">Items must be unique</p>
+            <p className="text-xs text-muted-foreground mt-1">{t.specification.itemsMustBeUnique}</p>
           )}
 
           {resolvedSchema.pattern && (
             <div className="mt-1 flex items-center gap-2">
-              <p className="text-xs text-muted-foreground">Pattern:</p>
+              <p className="text-xs text-muted-foreground">{t.specification.pattern}:</p>
               <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono flex-1">{resolvedSchema.pattern}</code>
               <Button
                 variant="ghost"
@@ -191,7 +191,7 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 
           {resolvedSchema.default !== undefined && (
             <div className="mt-1 flex items-center gap-2">
-              <p className="text-xs text-muted-foreground">Default:</p>
+              <p className="text-xs text-muted-foreground">{t.specification.default}:</p>
               <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
                 {JSON.stringify(resolvedSchema.default)}
               </code>
@@ -200,7 +200,7 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 
           {hasEnum && (
             <div className="mt-2">
-              <p className="text-xs font-medium mb-1">Possible values:</p>
+              <p className="text-xs font-medium mb-1">{t.specification.possibleValues}:</p>
               <div className="flex flex-wrap gap-1">
                 {resolvedSchema.enum.map((value: any, idx: number) => (
                   <Badge key={idx} variant="secondary" className="text-xs font-mono">
@@ -213,7 +213,7 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 
           {hasExample && (
             <div className="mt-2">
-              <p className="text-xs font-medium mb-1">Example:</p>
+              <p className="text-xs font-medium mb-1">{t.specification.example}:</p>
               <div className="bg-muted rounded p-2 relative group">
                 <Button
                   variant="ghost"
@@ -260,7 +260,7 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 
           {expanded && hasAllOf && (
             <div className="mt-3 space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">All of (must match all):</p>
+              <p className="text-xs font-medium text-muted-foreground">{t.specification.allOf}:</p>
               {resolvedSchema.allOf.map((subSchema: any, idx: number) => (
                 <SchemaViewer
                   key={idx}
@@ -275,7 +275,7 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 
           {expanded && hasOneOf && (
             <div className="mt-3 space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">One of (must match exactly one):</p>
+              <p className="text-xs font-medium text-muted-foreground">{t.specification.oneOf}:</p>
               {resolvedSchema.oneOf.map((subSchema: any, idx: number) => (
                 <SchemaViewer
                   key={idx}
@@ -290,7 +290,7 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 
           {expanded && hasAnyOf && (
             <div className="mt-3 space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">Any of (must match at least one):</p>
+              <p className="text-xs font-medium text-muted-foreground">{t.specification.anyOf}:</p>
               {resolvedSchema.anyOf.map((subSchema: any, idx: number) => (
                 <SchemaViewer
                   key={idx}
@@ -306,18 +306,18 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
           {schema.$ref && (
             <div className="mt-1">
               <Badge variant="outline" className="text-xs">
-                → Reference: {schema.$ref.split('/').pop()}
+                → {t.specification.reference}: {schema.$ref.split('/').pop()}
               </Badge>
             </div>
           )}
 
           {resolvedSchema.additionalProperties === false && (
-            <p className="text-xs text-muted-foreground mt-1 italic">No additional properties allowed</p>
+            <p className="text-xs text-muted-foreground mt-1 italic">{t.specification.noAdditionalProperties}</p>
           )}
 
           {resolvedSchema.additionalProperties && typeof resolvedSchema.additionalProperties === 'object' && (
             <div className="mt-2">
-              <p className="text-xs font-medium mb-1">Additional Properties:</p>
+              <p className="text-xs font-medium mb-1">{t.specification.additionalProperties}:</p>
               <div className="ml-2">
                 <SchemaViewer
                   name="additionalProperties"
@@ -335,14 +335,16 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 }
 
 function RequestBodyViewer({ requestBody, spec }: { requestBody: any; spec: any }) {
+  const { t } = useSettings()
+  
   if (!requestBody) return null
 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <h4 className="text-sm font-semibold">Request Body</h4>
+        <h4 className="text-sm font-semibold">{t.specification.requestBody}</h4>
         {requestBody.required && (
-          <Badge variant="destructive" className="text-xs">Required</Badge>
+          <Badge variant="destructive" className="text-xs">{t.specification.required}</Badge>
         )}
       </div>
       {requestBody.description && (
@@ -362,7 +364,7 @@ function RequestBodyViewer({ requestBody, spec }: { requestBody: any; spec: any 
               {content.schema && (
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs font-medium mb-2">Schema:</p>
+                    <p className="text-xs font-medium mb-2">{t.specification.schema}:</p>
                     <div className="border rounded-lg p-4 bg-card">
                       <SchemaViewer name="body" schema={content.schema} spec={spec} />
                     </div>
@@ -370,7 +372,7 @@ function RequestBodyViewer({ requestBody, spec }: { requestBody: any; spec: any 
                   
                   {content.schema.example && (
                     <div>
-                      <p className="text-xs font-medium mb-2">Example Request:</p>
+                      <p className="text-xs font-medium mb-2">{t.specification.exampleRequest}:</p>
                       <div className="bg-muted rounded p-3 relative group">
                         <Button
                           variant="ghost"
@@ -390,7 +392,7 @@ function RequestBodyViewer({ requestBody, spec }: { requestBody: any; spec: any 
               )}
               {content.examples && Object.keys(content.examples).length > 0 && (
                 <div className="mt-3">
-                  <p className="text-xs font-medium mb-2">Examples:</p>
+                  <p className="text-xs font-medium mb-2">{t.specification.examples}:</p>
                   <div className="space-y-3">
                     {Object.entries(content.examples).map(([exampleName, example]: [string, any]) => (
                       <div key={exampleName} className="space-y-1">
@@ -425,11 +427,13 @@ function RequestBodyViewer({ requestBody, spec }: { requestBody: any; spec: any 
 }
 
 function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
+  const { t } = useSettings()
+  
   if (!responses) return null
 
   return (
     <div className="space-y-3">
-      <h4 className="text-sm font-semibold">Responses</h4>
+      <h4 className="text-sm font-semibold">{t.specification.responses}</h4>
       <Accordion type="multiple" className="space-y-2">
         {Object.entries(responses).map(([statusCode, responseRef]: [string, any]) => {
           const response = responseRef.$ref ? resolveRef(responseRef.$ref, spec) || responseRef : responseRef
@@ -448,7 +452,7 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
                   >
                     {statusCode}
                   </Badge>
-                  <span className="text-sm">{response.description || 'No description'}</span>
+                  <span className="text-sm">{response.description || t.specification.noDescription}</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="space-y-3 pt-4">
@@ -466,7 +470,7 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
                       {content.schema && (
                         <div className="space-y-3">
                           <div>
-                            <p className="text-xs font-medium mb-2">Schema:</p>
+                            <p className="text-xs font-medium mb-2">{t.specification.schema}:</p>
                             <div className="border rounded-lg p-4 bg-card">
                               <SchemaViewer name="response" schema={content.schema} spec={spec} />
                             </div>
@@ -474,7 +478,7 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
                           
                           {content.schema.example && (
                             <div>
-                              <p className="text-xs font-medium mb-2">Example Response:</p>
+                              <p className="text-xs font-medium mb-2">{t.specification.exampleResponse}:</p>
                               <div className="bg-muted rounded p-3 relative group">
                                 <Button
                                   variant="ghost"
@@ -494,7 +498,7 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
                       )}
                       {content.examples && Object.keys(content.examples).length > 0 && (
                         <div className="mt-3">
-                          <p className="text-xs font-medium mb-2">Examples:</p>
+                          <p className="text-xs font-medium mb-2">{t.specification.examples}:</p>
                           <div className="space-y-3">
                             {Object.entries(content.examples).map(([exampleName, example]: [string, any]) => (
                               <div key={exampleName} className="space-y-1">
@@ -526,7 +530,7 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
               )}
               {response.headers && Object.keys(response.headers).length > 0 && (
                 <div className="mt-3">
-                  <p className="text-xs font-medium mb-2">Response Headers:</p>
+                  <p className="text-xs font-medium mb-2">{t.specification.responseHeaders}:</p>
                   <div className="space-y-2">
                     {Object.entries(response.headers).map(([headerName, header]: [string, any]) => (
                       <div key={headerName} className="border rounded-lg p-3 bg-card">
@@ -538,7 +542,7 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
                             </Badge>
                           )}
                           {header.required && (
-                            <Badge variant="destructive" className="text-xs">Required</Badge>
+                            <Badge variant="destructive" className="text-xs">{t.specification.required}</Badge>
                           )}
                         </div>
                         {header.description && (
@@ -564,6 +568,7 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
 }
 
 export function SpecificationTab({ api }: SpecificationTabProps) {
+  const { t } = useSettings()
   const spec = api.parsedSpec
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [schemaFilter, setSchemaFilter] = useState('')
@@ -579,7 +584,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
   if (!api.parsedSpec) {
     return (
       <Card className="p-12 text-center">
-        <p className="text-muted-foreground">No OpenAPI specification available for this API.</p>
+        <p className="text-muted-foreground">{t.specification.noSpecification}</p>
       </Card>
     )
   }
@@ -588,7 +593,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
     <div className="space-y-6">
       {description && (
         <Card className="p-6">
-          <h2 className="text-xl font-display font-semibold mb-4">Description</h2>
+          <h2 className="text-xl font-display font-semibold mb-4">{t.specification.description}</h2>
           <div className="space-y-3">
             <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed font-mono">
               {displayedDescription}
@@ -601,7 +606,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                 onClick={() => setShowFullDescription(!showFullDescription)}
                 className="text-primary"
               >
-                {showFullDescription ? 'Show less' : 'Show more'}
+                {showFullDescription ? t.specification.showLess : t.specification.showMore}
               </Button>
             )}
           </div>
@@ -610,7 +615,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
       {spec.info?.version && (
         <Card className="p-6">
-          <h2 className="text-xl font-display font-semibold mb-4">Version</h2>
+          <h2 className="text-xl font-display font-semibold mb-4">{t.specification.version}</h2>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-base px-3 py-1 font-mono">
               {spec.info.version}
@@ -621,15 +626,15 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
       {spec.info?.license && (
         <Card className="p-6">
-          <h2 className="text-xl font-display font-semibold mb-4">License</h2>
+          <h2 className="text-xl font-display font-semibold mb-4">{t.specification.license}</h2>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">Name:</span>
+              <span className="text-sm font-semibold">{t.specification.name}:</span>
               <span className="text-sm">{spec.info.license.name}</span>
             </div>
             {spec.info.license.url && (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">URL:</span>
+                <span className="text-sm font-semibold">{t.specification.url}:</span>
                 <a 
                   href={spec.info.license.url} 
                   target="_blank" 
@@ -646,17 +651,17 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
       {spec.info?.contact && (
         <Card className="p-6">
-          <h2 className="text-xl font-display font-semibold mb-4">Contact</h2>
+          <h2 className="text-xl font-display font-semibold mb-4">{t.specification.contact}</h2>
           <div className="space-y-2">
             {spec.info.contact.name && (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">Name:</span>
+                <span className="text-sm font-semibold">{t.specification.name}:</span>
                 <span className="text-sm">{spec.info.contact.name}</span>
               </div>
             )}
             {spec.info.contact.email && (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">Email:</span>
+                <span className="text-sm font-semibold">{t.specification.email}:</span>
                 <a 
                   href={`mailto:${spec.info.contact.email}`}
                   className="text-sm text-primary hover:underline"
@@ -667,7 +672,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
             )}
             {spec.info.contact.url && (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">URL:</span>
+                <span className="text-sm font-semibold">{t.specification.url}:</span>
                 <a 
                   href={spec.info.contact.url} 
                   target="_blank" 
@@ -684,7 +689,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
       {spec.servers && spec.servers.length > 0 && (
         <Card className="p-6">
-          <h2 className="text-xl font-display font-semibold mb-4">Servers</h2>
+          <h2 className="text-xl font-display font-semibold mb-4">{t.specification.servers}</h2>
           <div className="space-y-2">
             {spec.servers.map((server: any, index: number) => (
               <div key={index} className="p-3 bg-muted rounded-lg">
@@ -700,7 +705,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
       {spec.paths && (
         <Card className="p-6">
-          <h2 className="text-xl font-display font-semibold mb-4">Endpoints</h2>
+          <h2 className="text-xl font-display font-semibold mb-4">{t.specification.endpoints}</h2>
           <Accordion type="single" collapsible className="space-y-3">
             {Object.entries(spec.paths).map(([path, pathItem]: [string, any]) => {
               const methods = Object.keys(pathItem).filter(key =>
@@ -730,14 +735,14 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                       <div className="space-y-6 pt-4">
                         {operation.summary && (
                           <div>
-                            <h4 className="text-sm font-semibold mb-1">Summary</h4>
+                            <h4 className="text-sm font-semibold mb-1">{t.specification.summary}</h4>
                             <p className="text-sm">{operation.summary}</p>
                           </div>
                         )}
 
                         {operation.description && (
                           <div>
-                            <h4 className="text-sm font-semibold mb-1">Description</h4>
+                            <h4 className="text-sm font-semibold mb-1">{t.specification.description}</h4>
                             <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                               {operation.description}
                             </p>
@@ -746,7 +751,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
                         {operation.tags && operation.tags.length > 0 && (
                           <div>
-                            <h4 className="text-sm font-semibold mb-2">Tags</h4>
+                            <h4 className="text-sm font-semibold mb-2">{t.specification.tags}</h4>
                             <div className="flex flex-wrap gap-1">
                               {operation.tags.map((tag: string) => (
                                 <Badge key={tag} variant="secondary" className="text-xs">
@@ -759,7 +764,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
                         {operation.parameters && operation.parameters.length > 0 && (
                           <div>
-                            <h4 className="text-sm font-semibold mb-3">Parameters</h4>
+                            <h4 className="text-sm font-semibold mb-3">{t.specification.parameters}</h4>
                             <div className="space-y-3">
                               {operation.parameters.map((paramRef: any, idx: number) => {
                                 const param = resolveParameter(paramRef, spec)
@@ -780,16 +785,16 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                                             </Badge>
                                           )}
                                           <Badge variant="outline" className="text-xs capitalize">
-                                            in: {param.in}
+                                            {t.specification.location}: {param.in}
                                           </Badge>
                                           {param.required && (
-                                            <Badge variant="destructive" className="text-xs">Required</Badge>
+                                            <Badge variant="destructive" className="text-xs">{t.specification.required}</Badge>
                                           )}
                                           {param.deprecated && (
-                                            <Badge variant="destructive" className="text-xs">Deprecated</Badge>
+                                            <Badge variant="destructive" className="text-xs">{t.common.deprecated}</Badge>
                                           )}
                                           {param.allowEmptyValue && (
-                                            <Badge variant="outline" className="text-xs">Allow Empty</Badge>
+                                            <Badge variant="outline" className="text-xs">{t.specification.allowEmpty}</Badge>
                                           )}
                                         </div>
                                         
@@ -799,7 +804,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
                                         {(param.schema?.minimum !== undefined || param.schema?.maximum !== undefined) && (
                                           <div className="flex items-center gap-2">
-                                            <p className="text-xs text-muted-foreground">Range:</p>
+                                            <p className="text-xs text-muted-foreground">{t.specification.range}:</p>
                                             <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
                                               {param.schema.minimum ?? '-∞'} to {param.schema.maximum ?? '+∞'}
                                             </code>
@@ -808,7 +813,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
                                         {(param.schema?.minLength !== undefined || param.schema?.maxLength !== undefined) && (
                                           <div className="flex items-center gap-2">
-                                            <p className="text-xs text-muted-foreground">Length:</p>
+                                            <p className="text-xs text-muted-foreground">{t.specification.length}:</p>
                                             <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
                                               {param.schema.minLength ?? '0'} to {param.schema.maxLength ?? '∞'}
                                             </code>
@@ -817,7 +822,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
                                         {(param.schema?.minItems !== undefined || param.schema?.maxItems !== undefined) && (
                                           <div className="flex items-center gap-2">
-                                            <p className="text-xs text-muted-foreground">Array items:</p>
+                                            <p className="text-xs text-muted-foreground">{t.specification.arrayItems}:</p>
                                             <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
                                               {param.schema.minItems ?? '0'} to {param.schema.maxItems ?? '∞'}
                                             </code>
@@ -826,7 +831,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
                                         {param.schema?.pattern && (
                                           <div className="flex items-center gap-2">
-                                            <p className="text-xs text-muted-foreground">Pattern:</p>
+                                            <p className="text-xs text-muted-foreground">{t.specification.pattern}:</p>
                                             <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono flex-1">
                                               {param.schema.pattern}
                                             </code>
@@ -836,7 +841,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                                               className="h-6 w-6"
                                               onClick={() => {
                                                 navigator.clipboard.writeText(param.schema.pattern)
-                                                toast.success('Pattern copied to clipboard')
+                                                toast.success(t.toasts.copiedToClipboard)
                                               }}
                                             >
                                               <Copy size={12} />
@@ -846,7 +851,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                                         
                                         {param.schema?.enum && param.schema.enum.length > 0 && (
                                           <div>
-                                            <p className="text-xs font-medium mb-1">Possible values:</p>
+                                            <p className="text-xs font-medium mb-1">{t.specification.possibleValues}:</p>
                                             <div className="flex flex-wrap gap-1">
                                               {param.schema.enum.map((value: any, enumIdx: number) => (
                                                 <Badge key={enumIdx} variant="secondary" className="text-xs font-mono">
@@ -859,7 +864,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                                         
                                         {param.schema?.default !== undefined && (
                                           <div className="flex items-center gap-2">
-                                            <p className="text-xs text-muted-foreground">Default:</p>
+                                            <p className="text-xs text-muted-foreground">{t.specification.default}:</p>
                                             <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
                                               {JSON.stringify(param.schema.default)}
                                             </code>
@@ -868,7 +873,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                                         
                                         {param.example !== undefined && (
                                           <div>
-                                            <p className="text-xs font-medium mb-1">Example:</p>
+                                            <p className="text-xs font-medium mb-1">{t.specification.example}:</p>
                                             <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono block">
                                               {JSON.stringify(param.example)}
                                             </code>
@@ -877,7 +882,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
                                         {param.examples && Object.keys(param.examples).length > 0 && (
                                           <div>
-                                            <p className="text-xs font-medium mb-1">Examples:</p>
+                                            <p className="text-xs font-medium mb-1">{t.specification.examples}:</p>
                                             <div className="space-y-1">
                                               {Object.entries(param.examples).map(([exName, ex]: [string, any]) => (
                                                 <div key={exName} className="bg-muted rounded p-2">
@@ -912,7 +917,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
                         {operation.security && operation.security.length > 0 && (
                           <div>
-                            <h4 className="text-sm font-semibold mb-2">Security</h4>
+                            <h4 className="text-sm font-semibold mb-2">{t.specification.security}</h4>
                             <div className="space-y-1">
                               {operation.security.map((security: any, idx: number) => (
                                 <div key={idx} className="text-xs bg-muted p-2 rounded">
@@ -926,7 +931,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                         {operation.deprecated && (
                           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
                             <p className="text-sm font-semibold text-destructive">
-                              ⚠️ This endpoint is deprecated
+                              ⚠️ {t.specification.deprecatedEndpoint}
                             </p>
                           </div>
                         )}
@@ -943,14 +948,14 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
       {spec.components?.schemas && (
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-display font-semibold">Schemas</h2>
+            <h2 className="text-xl font-display font-semibold">{t.specification.schemas}</h2>
             <div className="relative w-80">
               <MagnifyingGlass 
                 size={18} 
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
               <Input
-                placeholder="Filter by schema or field name..."
+                placeholder={t.specification.filterSchemas}
                 value={schemaFilter}
                 onChange={(e) => setSchemaFilter(e.target.value)}
                 className="pl-10 pr-10"
@@ -975,7 +980,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
             if (filteredSchemas.length === 0) {
               return (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p>No schemas match your filter &quot;{schemaFilter}&quot;</p>
+                  <p>{t.specification.noSchemasMatch} &quot;{schemaFilter}&quot;</p>
                 </div>
               )
             }
@@ -1000,7 +1005,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
       {spec.components?.securitySchemes && (
         <Card className="p-6">
-          <h2 className="text-xl font-display font-semibold mb-4">Security Schemes</h2>
+          <h2 className="text-xl font-display font-semibold mb-4">{t.specification.securitySchemes}</h2>
           <div className="space-y-3">
             {Object.entries(spec.components.securitySchemes).map(([name, scheme]: [string, any]) => (
               <div key={name} className="border rounded-lg p-4">
@@ -1014,25 +1019,25 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                 <dl className="text-xs space-y-1">
                   {scheme.scheme && (
                     <div className="flex gap-2">
-                      <dt className="text-muted-foreground">Scheme:</dt>
+                      <dt className="text-muted-foreground">{t.specification.scheme}:</dt>
                       <dd className="font-mono">{scheme.scheme}</dd>
                     </div>
                   )}
                   {scheme.bearerFormat && (
                     <div className="flex gap-2">
-                      <dt className="text-muted-foreground">Format:</dt>
+                      <dt className="text-muted-foreground">{t.specification.format}:</dt>
                       <dd className="font-mono">{scheme.bearerFormat}</dd>
                     </div>
                   )}
                   {scheme.in && (
                     <div className="flex gap-2">
-                      <dt className="text-muted-foreground">Location:</dt>
+                      <dt className="text-muted-foreground">{t.specification.location}:</dt>
                       <dd className="font-mono">{scheme.in}</dd>
                     </div>
                   )}
                   {scheme.name && (
                     <div className="flex gap-2">
-                      <dt className="text-muted-foreground">Parameter name:</dt>
+                      <dt className="text-muted-foreground">{t.specification.parameterName}:</dt>
                       <dd className="font-mono">{scheme.name}</dd>
                     </div>
                   )}
