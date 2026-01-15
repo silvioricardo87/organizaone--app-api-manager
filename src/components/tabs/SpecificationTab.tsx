@@ -186,7 +186,7 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
                   name={propName}
                   schema={{
                     ...propSchema,
-                    required: resolvedSchema.required?.includes(propName)
+                    required: Array.isArray(resolvedSchema.required) && resolvedSchema.required.includes(propName)
                   }}
                   level={level + 1}
                   spec={spec}
