@@ -18,8 +18,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useKV<Language>('app-language', 'pt')
   const [theme, setTheme] = useKV<Theme>('app-theme', 'light')
 
-  const currentLanguage = language || 'pt'
-  const currentTheme = theme || 'light'
+  const currentLanguage = (language ?? 'pt') as Language
+  const currentTheme = (theme ?? 'light') as Theme
 
   useEffect(() => {
     const root = document.documentElement
@@ -54,15 +54,15 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
   }, [currentTheme])
 
-  const t = translations[currentLanguage]
+  const t = translations[currentLanguage] || translations.pt
 
   return (
     <SettingsContext.Provider
       value={{
         language: currentLanguage,
-        setLanguage,
+        setLanguage: (lang) => setLanguage(lang),
         theme: currentTheme,
-        setTheme,
+        setTheme: (newTheme) => setTheme(newTheme),
         t,
       }}
     >
