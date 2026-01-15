@@ -1,6 +1,7 @@
 import { createContext, useContext, ReactNode, useEffect } from 'react'
-import { useKV } from '@github/spark/hooks'
 import { translations, Language } from '@/lib/i18n'
+import { usePersistedKV } from '@/hooks/use-persisted-kv'
+import { STORAGE_KEYS } from '@/lib/storage'
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -15,8 +16,8 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useKV<Language>('app-language', 'pt')
-  const [theme, setTheme] = useKV<Theme>('app-theme', 'light')
+  const [language, setLanguage] = usePersistedKV<Language>(STORAGE_KEYS.LANGUAGE, 'pt')
+  const [theme, setTheme] = usePersistedKV<Theme>(STORAGE_KEYS.THEME, 'light')
 
   const currentLanguage = (language ?? 'pt') as Language
   const currentTheme = (theme ?? 'light') as Theme
