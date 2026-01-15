@@ -21,6 +21,7 @@ import { BacklogTab } from './tabs/BacklogTab'
 import { PCMTab } from './tabs/PCMTab'
 import { TimelineTab } from './tabs/TimelineTab'
 import { toast } from 'sonner'
+import { useSettings } from '@/hooks/use-settings'
 
 interface APIDetailViewProps {
   api: APIContract
@@ -30,12 +31,13 @@ interface APIDetailViewProps {
 }
 
 export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailViewProps) {
+  const { t } = useSettings()
   const [activeTab, setActiveTab] = useState('overview')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const handleDeleteConfirm = () => {
     onDelete(api.id)
-    toast.success('API deleted successfully')
+    toast.success(t.toasts.apiDeleted)
     setDeleteDialogOpen(false)
   }
 
@@ -47,23 +49,23 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
         </Button>
         <div className="flex-1">
           <h1 className="text-3xl font-display font-bold">{api.name}</h1>
-          <p className="text-muted-foreground">Version {api.version}</p>
+          <p className="text-muted-foreground">{t.apiDetail.version} {api.version}</p>
         </div>
         <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
           <Trash size={20} weight="bold" className="mr-2" />
-          Delete API
+          {t.apiDetail.delete}
         </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="specification">Specification</TabsTrigger>
-          <TabsTrigger value="lifecycle">Lifecycle</TabsTrigger>
-          <TabsTrigger value="issues">Issues</TabsTrigger>
-          <TabsTrigger value="backlog">Backlog</TabsTrigger>
-          <TabsTrigger value="pcm">PCM</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="overview">{t.tabs.overview}</TabsTrigger>
+          <TabsTrigger value="specification">{t.tabs.specification}</TabsTrigger>
+          <TabsTrigger value="lifecycle">{t.tabs.lifecycle}</TabsTrigger>
+          <TabsTrigger value="issues">{t.tabs.issues}</TabsTrigger>
+          <TabsTrigger value="backlog">{t.tabs.backlog}</TabsTrigger>
+          <TabsTrigger value="pcm">{t.tabs.pcm}</TabsTrigger>
+          <TabsTrigger value="timeline">{t.tabs.timeline}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -98,17 +100,15 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete API Contract</AlertDialogTitle>
+            <AlertDialogTitle>{t.deleteDialog.title}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <strong>{api.name}</strong> (v{api.version})? 
-              This action cannot be undone and will permanently remove all associated data including 
-              lifecycle phases, issues, backlog items, and PCM configurations.
+              {t.deleteDialog.description} <strong>{api.name}</strong> (v{api.version})? {t.deleteDialog.warning}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

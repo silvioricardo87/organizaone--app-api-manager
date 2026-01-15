@@ -104,13 +104,13 @@ export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
       <div className="flex justify-end">
         <Button onClick={() => openDialog()}>
           <Plus size={20} weight="bold" className="mr-2" />
-          Add Issue
+          {t.issues.addIssue}
         </Button>
       </div>
 
       {api.knownIssues.length === 0 ? (
         <Card className="p-12 text-center">
-          <p className="text-muted-foreground">No known issues reported yet.</p>
+          <p className="text-muted-foreground">{t.issues.noIssuesReported}</p>
         </Card>
       ) : (
         <div className="space-y-4">
@@ -126,7 +126,7 @@ export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">{issue.description}</p>
                   <p className="text-xs text-muted-foreground">
-                    Updated {format(new Date(issue.updatedAt), 'PPP')}
+                    {t.issues.updated} {format(new Date(issue.updatedAt), 'PPP')}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -146,45 +146,45 @@ export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingIssue ? 'Edit Issue' : 'New Issue'}</DialogTitle>
+            <DialogTitle>{editingIssue ? t.issues.editIssue : t.issues.newIssue}</DialogTitle>
             <DialogDescription>
-              {editingIssue ? 'Update the issue details' : 'Report a new known issue'}
+              {editingIssue ? t.issues.updateDetails : t.issues.reportNewIssue}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="issue-title">Title *</Label>
+              <Label htmlFor="issue-title">{t.issues.issueTitle} *</Label>
               <Input
                 id="issue-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Brief description of the issue"
+                placeholder={t.issues.issueTitlePlaceholder}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="issue-description">Description</Label>
+              <Label htmlFor="issue-description">{t.issues.description}</Label>
               <Textarea
                 id="issue-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Detailed description of the issue"
+                placeholder={t.issues.descriptionPlaceholderLong}
                 rows={4}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="issue-status">Status</Label>
+              <Label htmlFor="issue-status">{t.issues.status}</Label>
               <Select value={status} onValueChange={(value) => setStatus(value as IssueStatus)}>
                 <SelectTrigger id="issue-status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="open">Open</SelectItem>
-                  <SelectItem value="investigating">Investigating</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="open">{t.issues.open}</SelectItem>
+                  <SelectItem value="investigating">{t.issues.investigating}</SelectItem>
+                  <SelectItem value="resolved">{t.issues.resolved}</SelectItem>
+                  <SelectItem value="closed">{t.issues.closed}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -192,10 +192,10 @@ export function IssuesTab({ api, onUpdate }: IssuesTabProps) {
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              {t.issues.cancel}
             </Button>
             <Button onClick={handleSave}>
-              {editingIssue ? 'Update' : 'Create'}
+              {editingIssue ? t.issues.update : t.issues.create}
             </Button>
           </div>
         </DialogContent>
