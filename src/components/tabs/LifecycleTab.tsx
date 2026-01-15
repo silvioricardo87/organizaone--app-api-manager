@@ -19,6 +19,7 @@ const phaseOrder: LifecyclePhase[] = ['implementing', 'certifying', 'current', '
 
 export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
   const [editingPhase, setEditingPhase] = useState<LifecyclePhase | null>(null)
+  const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({})
 
   const handleDateChange = (phase: LifecyclePhase, type: 'start' | 'end', date: Date | undefined) => {
     const updatedPhases = api.lifecyclePhases.map(p => {
@@ -37,6 +38,7 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
       updatedAt: new Date().toISOString()
     })
     
+    setOpenPopovers(prev => ({ ...prev, [`${phase}-${type}`]: false }))
     toast.success('Lifecycle phase updated')
   }
 
@@ -57,7 +59,7 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Start Date</Label>
-                <Popover>
+                <Popover open={openPopovers[`${phase}-start`]} onOpenChange={(open) => setOpenPopovers(prev => ({ ...prev, [`${phase}-start`]: open }))}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon size={16} className="mr-2" />
@@ -79,7 +81,7 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
 
               <div className="space-y-2">
                 <Label>End Date</Label>
-                <Popover>
+                <Popover open={openPopovers[`${phase}-end`]} onOpenChange={(open) => setOpenPopovers(prev => ({ ...prev, [`${phase}-end`]: open }))}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon size={16} className="mr-2" />
