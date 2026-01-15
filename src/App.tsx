@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
 import { Toaster } from '@/components/ui/sonner'
 import { APIContract } from '@/lib/types'
 import { APIList } from '@/components/APIList'
@@ -9,6 +8,8 @@ import { Dashboard } from '@/components/Dashboard'
 import { Roadmap } from '@/components/Roadmap'
 import { SettingsMenu } from '@/components/SettingsMenu'
 import { useSettings } from '@/hooks/use-settings'
+import { usePersistedKV } from '@/hooks/use-persisted-kv'
+import { STORAGE_KEYS, storage } from '@/lib/storage'
 import { FileText, ChartBar, MapTrifold } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 
@@ -16,7 +17,7 @@ type View = 'list' | 'dashboard' | 'roadmap' | 'detail'
 
 function App() {
   const { t } = useSettings()
-  const [apis, setApis] = useKV<APIContract[]>('openfinance-apis', [])
+  const [apis, setApis] = usePersistedKV<APIContract[]>(STORAGE_KEYS.APIS, [])
   const [selectedAPI, setSelectedAPI] = useState<APIContract | null>(null)
   const [newAPIDialogOpen, setNewAPIDialogOpen] = useState(false)
   const [currentView, setCurrentView] = useState<View>('list')
@@ -36,6 +37,7 @@ function App() {
 
   const handleDeleteAPI = (apiId: string) => {
     setApis((currentApis) => (currentApis || []).filter(api => api.id !== apiId))
+    storage.removeAPIConfig(apiId)
     setSelectedAPI(null)
     setCurrentView('list')
   }

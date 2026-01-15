@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -22,6 +22,7 @@ import { PCMTab } from './tabs/PCMTab'
 import { TimelineTab } from './tabs/TimelineTab'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
+import { storage } from '@/lib/storage'
 
 interface APIDetailViewProps {
   api: APIContract
@@ -35,7 +36,12 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
   const [activeTab, setActiveTab] = useState('overview')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
+  useEffect(() => {
+    storage.setAPIConfig(api.id, api)
+  }, [api])
+
   const handleDeleteConfirm = () => {
+    storage.removeAPIConfig(api.id)
     onDelete(api.id)
     toast.success(t.toasts.apiDeleted)
     setDeleteDialogOpen(false)
