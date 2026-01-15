@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { APIContract } from '@/lib/types'
-import { Copy, CaretRight } from '@phosphor-icons/react'
+import { Copy, CaretRight, MagnifyingGlass, X } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { resolveParameter, resolveRef, resolveSchema } from '@/lib/api-utils'
 
@@ -21,6 +22,55 @@ const METHOD_COLORS: Record<string, string> = {
   delete: 'bg-red-500/10 text-red-700 border-red-500/20',
   options: 'bg-purple-500/10 text-purple-700 border-purple-500/20',
   head: 'bg-gray-500/10 text-gray-700 border-gray-500/20'
+}
+
+function schemaMatchesFilter(schemaName: string, schema: any, filter: string, spec?: any): boolean {
+  if (!filter) return true
+  
+  const lowerFilter = filter.toLowerCase()
+  
+  if (schemaName.toLowerCase().includes(lowerFilter)) {
+    return true
+  }
+  
+  const resolvedSchema = spec && schema.$ref ? resolveRef(schema.$ref, spec) || schema : schema
+  
+  if (resolvedSchema.properties) {
+    const fieldNames = Object.keys(resolvedSchema.properties)
+    if (fieldNames.some(field => field.toLowerCase().includes(lowerFilter))) {
+      return true
+    }
+    
+    for (const [fieldName, fieldSchema] of Object.entries(resolvedSchema.properties)) {
+      if (schemaMatchesFilter(fieldName, fieldSchema as any, filter, spec)) {
+        return true
+      }
+    }
+  }
+  
+  if (resolvedSchema.items) {
+    return schemaMatchesFilter('items', resolvedSchema.items, filter, spec)
+  }
+  
+  if (resolvedSchema.allOf) {
+    return resolvedSchema.allOf.some((subSchema: any, idx: number) => 
+      schemaMatchesFilter(`allOf${idx}`, subSchema, filter, spec)
+    )
+  }
+  
+  if (resolvedSchema.oneOf) {
+    return resolvedSchema.oneOf.some((subSchema: any, idx: number) => 
+      schemaMatchesFilter(`oneOf${idx}`, subSchema, filter, spec)
+    )
+  }
+  
+  if (resolvedSchema.anyOf) {
+    return resolvedSchema.anyOf.some((subSchema: any, idx: number) => 
+      schemaMatchesFilter(`anyOf${idx}`, subSchema, filter, spec)
+    )
+  }
+  
+  return false
 }
 
 function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: string; level?: number; spec?: any }) {
@@ -514,6 +564,7 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
 export function SpecificationTab({ api }: SpecificationTabProps) {
   const spec = api.parsedSpec
   const [showFullDescription, setShowFullDescription] = useState(false)
+  const [schemaFilter, setSchemaFilter] = useState('')
 
   const description = spec?.info?.description || ''
   const descriptionLines = description.split('\n')
@@ -889,19 +940,59 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
       {spec.components?.schemas && (
         <Card className="p-6">
-          <h2 className="text-xl font-display font-semibold mb-4">Schemas</h2>
-          <Accordion type="single" collapsible className="space-y-2">
-            {Object.entries(spec.components.schemas).map(([name, schema]: [string, any]) => (
-              <AccordionItem key={name} value={name} className="border rounded-lg px-4">
-                <AccordionTrigger className="hover:no-underline">
-                  <code className="text-sm font-mono">{name}</code>
-                </AccordionTrigger>
-                <AccordionContent className="pt-4">
-                  <SchemaViewer name={name} schema={schema} spec={spec} />
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-display font-semibold">Schemas</h2>
+            <div className="relative w-80">
+              <MagnifyingGlass 
+                size={18} 
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                placeholder="Filter by schema or field name..."
+                value={schemaFilter}
+                onChange={(e) => setSchemaFilter(e.target.value)}
+                className="pl-10 pr-10"
+              />
+              {schemaFilter && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={() => setSchemaFilter('')}
+                >
+                  <X size={14} />
+                </Button>
+              )}
+            </div>
+          </div>
+          {(() => {
+            const filteredSchemas = Object.entries(spec.components.schemas).filter(
+              ([name, schema]: [string, any]) => schemaMatchesFilter(name, schema, schemaFilter, spec)
+            )
+            
+            if (filteredSchemas.length === 0) {
+              return (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No schemas match your filter &quot;{schemaFilter}&quot;</p>
+                </div>
+              )
+            }
+            
+            return (
+              <Accordion type="single" collapsible className="space-y-2">
+                {filteredSchemas.map(([name, schema]: [string, any]) => (
+                  <AccordionItem key={name} value={name} className="border rounded-lg px-4">
+                    <AccordionTrigger className="hover:no-underline">
+                      <code className="text-sm font-mono">{name}</code>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-4">
+                      <SchemaViewer name={name} schema={schema} spec={spec} />
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            )
+          })()}
         </Card>
       )}
 
