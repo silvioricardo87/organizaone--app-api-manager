@@ -379,24 +379,27 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
     <div className="space-y-3">
       <h4 className="text-sm font-semibold">Responses</h4>
       <Accordion type="multiple" className="space-y-2">
-        {Object.entries(responses).map(([statusCode, response]: [string, any]) => (
-          <AccordionItem 
-            key={statusCode} 
-            value={statusCode}
-            className="border rounded-lg px-4"
-          >
-            <AccordionTrigger className="hover:no-underline">
-              <div className="flex items-center gap-2">
-                <Badge 
-                  variant={statusCode.startsWith('2') ? 'default' : statusCode.startsWith('4') || statusCode.startsWith('5') ? 'destructive' : 'secondary'}
-                  className="font-mono"
-                >
-                  {statusCode}
-                </Badge>
-                <span className="text-sm">{response.description}</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="space-y-3 pt-4">
+        {Object.entries(responses).map(([statusCode, responseRef]: [string, any]) => {
+          const response = responseRef.$ref ? resolveRef(responseRef.$ref, spec) || responseRef : responseRef
+          
+          return (
+            <AccordionItem 
+              key={statusCode} 
+              value={statusCode}
+              className="border rounded-lg px-4"
+            >
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Badge 
+                    variant={statusCode.startsWith('2') ? 'default' : statusCode.startsWith('4') || statusCode.startsWith('5') ? 'destructive' : 'secondary'}
+                    className="font-mono"
+                  >
+                    {statusCode}
+                  </Badge>
+                  <span className="text-sm">{response.description || 'No description'}</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-4">
               {response.content && (
                 <Tabs defaultValue={Object.keys(response.content)[0]} className="w-full">
                   <TabsList>
@@ -501,7 +504,8 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
               )}
             </AccordionContent>
           </AccordionItem>
-        ))}
+          )
+        })}
       </Accordion>
     </div>
   )
