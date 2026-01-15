@@ -1,13 +1,12 @@
 export const STORAGE_KEYS = {
-  APIS: 'openfinance-apis',
   THEME: 'app-theme',
-  LANGUAGE: 'app-language',
-  API_CONFIG_PREFIX: 'api-config-',
+  API_CONFIG_PREFIX: 
+
 } as const
 
 export const storage = {
   get<T>(key: string): T | null {
-    try {
+      con
       const item = localStorage.getItem(key)
       return item ? JSON.parse(item) : null
     } catch (error) {
@@ -34,13 +33,13 @@ export const storage = {
 
   clear(): void {
     try {
-      localStorage.clear()
-    } catch (error) {
-      console.error('Error clearing localStorage:', error)
-    }
-  },
 
-  getAPIConfig<T>(apiId: string): T | null {
+    const key = `${ST
+  },
+  set
+    
+
+    const key = `${STORAGE_KEYS.API_CONFIG_P
     const key = `${STORAGE_KEYS.API_CONFIG_PREFIX}${apiId}`
     return storage.get<T>(key)
   },
@@ -71,4 +70,3 @@ export const storage = {
     }
   },
 }
-
