@@ -29,9 +29,9 @@ const PHASE_LABELS: Record<LifecyclePhase, string> = {
 
 const PHASE_COLORS: Record<LifecyclePhase, string> = {
   implementing: 'bg-[oklch(0.60_0.18_240)]',
-  certifying: 'bg-[oklch(0.65_0.16_260)]',
+  certifying: 'bg-[oklch(0.75_0.15_70)]',
   current: 'bg-[oklch(0.65_0.20_140)]',
-  deprecated: 'bg-[oklch(0.75_0.15_70)]',
+  deprecated: 'bg-[oklch(0.70_0.18_200)]',
   retired: 'bg-[oklch(0.60_0.22_25)]',
 }
 
@@ -50,7 +50,6 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
             date: parseISO(phaseData.startDate),
             type: 'phase',
             phase: phaseData.phase,
-            title: `${PHASE_LABELS[phaseData.phase]} Start`,
           })
         }
         if (phaseData.endDate) {
@@ -60,7 +59,6 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
             date: parseISO(phaseData.endDate),
             type: 'phase',
             phase: phaseData.phase,
-            title: `${PHASE_LABELS[phaseData.phase]} End`,
           })
         }
       })
@@ -86,32 +84,26 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
 
   const filteredTimelineData = useMemo(() => {
     if (!selectedApi) return timelineData
-    return timelineData.filter(event => {
-      const api = apis.find(a => a.name === event.apiName)
-      return api?.id === selectedApi
-    })
-  }, [timelineData, selectedApi, apis])
+    const api = apis.find(a => a.id === selectedApi)
+    if (!api) return []
+    return timelineData.filter(event => event.apiName === api.name)
+  }, [timelineData, apis, selectedApi])
 
   const dateRange = useMemo(() => {
-    const dataToUse = selectedApi ? filteredTimelineData : timelineData
-    
-    if (dataToUse.length === 0) {
-      const now = new Date()
+    const dates = timelineData.map(e => e.date)
+    if (dates.length === 0) {
       return {
-        start: now,
-        end: addMonths(now, 3),
+        start: new Date(),
+        end: addMonths(new Date(), 6),
       }
     }
-
-    const dates = dataToUse.map(e => e.date)
     const minDate = min(dates)
     const maxDate = max(dates)
-
     return {
-      start: minDate,
+      start: addMonths(minDate, -1),
       end: addMonths(maxDate, 1),
     }
-  }, [timelineData, filteredTimelineData, selectedApi])
+  }, [timelineData])
 
   const totalDays = differenceInDays(dateRange.end, dateRange.start)
 
