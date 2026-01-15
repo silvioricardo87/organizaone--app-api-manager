@@ -599,23 +599,62 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                             <div className="space-y-3">
                               {operation.parameters.map((param: any, idx: number) => (
                                 <div key={idx} className="border rounded-lg p-3 bg-card">
-                                  <SchemaViewer 
-                                    name={param.name} 
-                                    schema={{
-                                      ...param.schema,
-                                      description: param.description,
-                                      required: param.required
-                                    }}
-                                  />
-                                  <div className="mt-2 flex gap-2">
-                                    <Badge variant="outline" className="text-xs">
-                                      in: {param.in}
-                                    </Badge>
-                                    {param.deprecated && (
-                                      <Badge variant="destructive" className="text-xs">
-                                        Deprecated
-                                      </Badge>
-                                    )}
+                                  <div className="flex items-start gap-2 mb-2">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                                        <code className="font-mono text-sm font-semibold text-primary">{param.name}</code>
+                                        {param.schema?.type && (
+                                          <Badge variant="outline" className="text-xs">
+                                            {param.schema.type}
+                                          </Badge>
+                                        )}
+                                        {param.schema?.format && (
+                                          <Badge variant="secondary" className="text-xs">
+                                            {param.schema.format}
+                                          </Badge>
+                                        )}
+                                        <Badge variant="outline" className="text-xs">
+                                          in: {param.in}
+                                        </Badge>
+                                        {param.required && (
+                                          <Badge variant="destructive" className="text-xs">Required</Badge>
+                                        )}
+                                        {param.deprecated && (
+                                          <Badge variant="destructive" className="text-xs">Deprecated</Badge>
+                                        )}
+                                      </div>
+                                      {param.description && (
+                                        <p className="text-sm text-muted-foreground">{param.description}</p>
+                                      )}
+                                      {param.schema?.enum && param.schema.enum.length > 0 && (
+                                        <div className="mt-2">
+                                          <p className="text-xs font-medium mb-1">Possible values:</p>
+                                          <div className="flex flex-wrap gap-1">
+                                            {param.schema.enum.map((value: any, enumIdx: number) => (
+                                              <Badge key={enumIdx} variant="secondary" className="text-xs font-mono">
+                                                {JSON.stringify(value)}
+                                              </Badge>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                      {param.schema?.default !== undefined && (
+                                        <div className="mt-2 flex items-center gap-2">
+                                          <p className="text-xs text-muted-foreground">Default:</p>
+                                          <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
+                                            {JSON.stringify(param.schema.default)}
+                                          </code>
+                                        </div>
+                                      )}
+                                      {param.example !== undefined && (
+                                        <div className="mt-2">
+                                          <p className="text-xs font-medium mb-1">Example:</p>
+                                          <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
+                                            {JSON.stringify(param.example)}
+                                          </code>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               ))}
