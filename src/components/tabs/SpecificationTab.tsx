@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { APIContract } from '@/lib/types'
 import { Copy, CaretRight } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { marked } from 'marked'
 
 interface SpecificationTabProps {
   api: APIContract
@@ -401,6 +402,53 @@ function ResponseViewer({ responses }: { responses: any }) {
 }
 
 export function SpecificationTab({ api }: SpecificationTabProps) {
+  const spec = api.parsedSpec
+
+  const apiInfoMarkdown = useMemo(() => {
+    if (!spec) return ''
+    
+    const lines: string[] = []
+    
+    lines.push(`## ${spec.info?.title || 'API Information'}`)
+    lines.push('')
+    lines.push(`**Version:** \`${spec.info?.version}\``)
+    lines.push('')
+    
+    if (spec.info?.description) {
+      lines.push(`### Description`)
+      lines.push('')
+      lines.push(spec.info.description)
+      lines.push('')
+    }
+    
+    if (spec.info?.contact) {
+      lines.push(`### Contact Information`)
+      lines.push('')
+      if (spec.info.contact.name) {
+        lines.push(`- **Name:** ${spec.info.contact.name}`)
+      }
+      if (spec.info.contact.email) {
+        lines.push(`- **Email:** ${spec.info.contact.email}`)
+      }
+      if (spec.info.contact.url) {
+        lines.push(`- **URL:** [${spec.info.contact.url}](${spec.info.contact.url})`)
+      }
+      lines.push('')
+    }
+    
+    if (spec.info?.license) {
+      lines.push(`### License`)
+      lines.push('')
+      lines.push(`- **Name:** ${spec.info.license.name}`)
+      if (spec.info.license.url) {
+        lines.push(`- **URL:** [${spec.info.license.url}](${spec.info.license.url})`)
+      }
+      lines.push('')
+    }
+    
+    return marked(lines.join('\n'))
+  }, [spec])
+
   if (!api.parsedSpec) {
     return (
       <Card className="p-12 text-center">
@@ -409,42 +457,13 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
     )
   }
 
-  const spec = api.parsedSpec
-
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-xl font-display font-semibold mb-4">API Information</h2>
-        <dl className="space-y-3">
-          <div>
-            <dt className="text-sm font-medium text-muted-foreground">Title</dt>
-            <dd className="mt-1 text-sm">{spec.info?.title}</dd>
-          </div>
-          <div>
-            <dt className="text-sm font-medium text-muted-foreground">Version</dt>
-            <dd className="mt-1 text-sm font-mono">{spec.info?.version}</dd>
-          </div>
-          {spec.info?.description && (
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">Description</dt>
-              <dd className="mt-1 text-sm whitespace-pre-wrap">{spec.info.description}</dd>
-            </div>
-          )}
-          {spec.info?.contact && (
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">Contact</dt>
-              <dd className="mt-1 text-sm">
-                {spec.info.contact.name && <div>{spec.info.contact.name}</div>}
-                {spec.info.contact.email && <div>{spec.info.contact.email}</div>}
-                {spec.info.contact.url && (
-                  <a href={spec.info.contact.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                    {spec.info.contact.url}
-                  </a>
-                )}
-              </dd>
-            </div>
-          )}
-        </dl>
+        <div 
+          className="prose prose-sm max-w-none prose-headings:font-display prose-h2:text-xl prose-h2:font-semibold prose-h2:mb-4 prose-h3:text-lg prose-h3:font-semibold prose-h3:mb-2 prose-h3:mt-4 prose-p:text-sm prose-ul:text-sm prose-strong:font-semibold prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+          dangerouslySetInnerHTML={{ __html: apiInfoMarkdown }}
+        />
       </Card>
 
       {spec.servers && spec.servers.length > 0 && (
