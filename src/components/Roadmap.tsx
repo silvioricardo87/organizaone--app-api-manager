@@ -1,35 +1,35 @@
 import { useMemo, useState } from 'react'
-import { ArrowLeft, CalendarDots, FlagBanne
+import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
-import { APIContract, LifecyclePhase } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
+import { parseISO, format, differenceInDays, addMonths, subMonths, min, max } from 'date-fns'
 
-
-  implementing: 'Impl
-  current: 'Current'
- 
-
-  implementing: 'bg-[oklch(0.75_0.15_70)] text-warning
-  current: 'bg-[oklch(0.65_0.20
-  retired: 'bg-muted text-m
-
-  id: string
-  apiName: string
- 
-
+const PHASE_LABELS: Record<LifecyclePhase, string> = {
+  implementing: 'Implementing',
+  certifying: 'Certifying',
+  current: 'Current',
+  deprecated: 'Deprecated',
+  retired: 'Retired'
 }
-export function Roadmap({ apis, onBack }: RoadmapProps) {
 
-    const events: TimelineEvent[] = []
-    apis.forEach(api => {
-        if (phaseData.startDate) {
- 
+const PHASE_COLORS: Record<LifecyclePhase, string> = {
+  implementing: 'bg-[oklch(0.75_0.15_70)] text-warning-foreground',
+  certifying: 'bg-[oklch(0.60_0.18_240)] text-info-foreground',
+  current: 'bg-[oklch(0.65_0.20_140)] text-success-foreground',
+  deprecated: 'bg-[oklch(0.60_0.22_25)] text-destructive-foreground',
+  retired: 'bg-muted text-muted-foreground'
+}
 
-            date: parseIS
-            
-        }
+interface RoadmapProps {
+  apis: APIContract[]
+  onBack: () => void
+}
+
+interface TimelineEvent {
+  id: string
+  apiId: string
   apiName: string
   type: 'phase' | 'milestone'
   date: Date
@@ -127,184 +127,140 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
         .sort((a, b) => a.start.getTime() - b.start.getTime())
 
       return {
-          <A
-        <div className="fl
+        api,
+        events: apiEvents,
         phases,
-      <
+      }
     })
-          <CalendarDots size={24} weight="duotone
+  }, [filteredApis, timelineData, dateRange])
 
-          </div>
-        <div className
-            variant={selectedApi === null ? 'de
-            onClick={() =>
+  const monthMarkers = useMemo(() => {
+    const markers: { date: Date; position: number; label: string }[] = []
+    let currentDate = new Date(dateRange.start)
+    currentDate.setDate(1)
 
-          {apis.map(api => (
-              key={a
-              size="sm"
-            >
+    while (currentDate <= dateRange.end) {
+      markers.push({
+        date: new Date(currentDate),
+        position: getPositionPercent(currentDate),
         label: format(currentDate, 'MMM yyyy'),
       })
-
+      currentDate = addMonths(currentDate, 1)
     }
 
     return markers
-          <div cl
+  }, [dateRange])
 
-          
-                    className="
-                  >
-                  </div>
-              </div>
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" onClick={onBack}>
+          <ArrowLeft size={20} className="mr-2" />
+          Back
         </Button>
-              {apiRows.map(({ ap
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground font-mono">{api.version}</spa
+        <div className="flex items-center gap-2">
+          <CalendarDots size={24} weight="duotone" className="text-primary" />
+          <h2 className="text-2xl font-display font-bold">API Roadmap</h2>
         </div>
-            
+      </div>
 
-
-                        <div
-                          className={`absolute top-2 bottom-2 rounded ${PHASE_
-               
-                          }}
-                          {width > 8 && PHASE_LABELS[phaseBlock.phase]}
-                
-        </div>
-                      const position = getPosi
-                 
-                          key={event.id}
-                     
-                          {event.type === 'miles
+      <div className="flex gap-2 flex-wrap">
+        <Button
+          size="sm"
+          variant={selectedApi === null ? 'default' : 'outline'}
+          onClick={() => setSelectedApi(null)}
+        >
+          All APIs
+        </Button>
+        {apis.map(api => (
+          <Button
+            key={api.id}
+            size="sm"
+            variant={selectedApi === api.id ? 'default' : 'outline'}
+            onClick={() => setSelectedApi(api.id)}
           >
-                    
+            {api.name}
           </Button>
-                            
-            <Button
-                          
-                            <div className="w-2 h-full bg-border" />
-                       
-                    })}
+        ))}
+      </div>
 
-              {api.name}
-                     
-          ))}
-              
-      </Card>
-
-      )}
       <Card className="p-6">
-          <FlagBanner size={24} weight="duotone" className="text-primary" />
-        </h3>
-        </Card>
-           
-        <Card className="p-6">
-          <div className="flex items-
-            <span className="text-sm">
-        </div>
-    </div>
-}
-
-
-
-
-                    {marker.label}
-
-
-
-            </div>
-
-
-
-                <div key={api.id} className="space-y-3">
-
-
-
-                  </div>
-
-
-
-
-
-
-
-
-
-
-
-                          style={{
-
-                            width: `${width}%`,
-
-                        >
-
-                        </div>
-
-
-
-
-
-
-                      return (
-
-                          key={event.id}
-
-
-
-                          {event.type === 'milestone' ? (
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-              ))}
-
+        <div className="relative">
+          <div className="relative h-12 bg-muted/30 rounded mb-4">
+            {monthMarkers.map(marker => (
+              <div
+                key={marker.label}
+                className="absolute top-0 bottom-0 flex flex-col items-center"
+                style={{ left: `${marker.position}%` }}
+              >
+                <div className="w-px h-full bg-border" />
+                <span className="absolute -bottom-6 text-xs text-muted-foreground whitespace-nowrap">
+                  {marker.label}
+                </span>
+              </div>
+            ))}
           </div>
 
+          <div className="space-y-6 mt-8">
+            {apiRows.map(({ api, events, phases }) => (
+              <div key={api.id} className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold">{api.name}</span>
+                  <span className="text-xs text-muted-foreground font-mono">{api.version}</span>
+                </div>
+
+                <div className="relative h-12 bg-muted/20 rounded">
+                  {phases.map(phaseBlock => {
+                    const startPos = getPositionPercent(phaseBlock.start)
+                    const endPos = getPositionPercent(phaseBlock.end)
+                    const width = endPos - startPos
+
+                    return (
+                      <div
+                        key={`${api.id}-${phaseBlock.phase}`}
+                        className={`absolute top-2 bottom-2 rounded ${PHASE_COLORS[phaseBlock.phase]} flex items-center justify-center text-xs font-medium px-2`}
+                        style={{
+                          left: `${startPos}%`,
+                          width: `${width}%`,
+                        }}
+                      >
+                        {width > 8 && PHASE_LABELS[phaseBlock.phase]}
+                      </div>
+                    )
+                  })}
+
+                  {events.map(event => {
+                    const position = getPositionPercent(event.date)
+
+                    return (
+                      <div
+                        key={event.id}
+                        className="absolute top-0 bottom-0 flex flex-col items-center"
+                        style={{ left: `${position}%` }}
+                      >
+                        {event.type === 'milestone' ? (
+                          <FlagBanner size={20} weight="fill" className="text-primary" />
+                        ) : (
+                          <div className="w-2 h-full bg-border" />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      {timelineData.length === 0 && (
+        <Card className="p-6">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <CalendarDots size={24} weight="duotone" />
+            <span className="text-sm">No timeline data available. Add milestones and lifecycle phases to your APIs.</span>
+          </div>
+        </Card>
       )}
-
-      <Card className="p-6">
-
-
-
-        </h3>
-
-
-
-
-
-            </div>
-
-
-
-
-
-
-
     </div>
-
+  )
 }
