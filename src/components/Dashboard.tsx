@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from '@phosphor-icons/react'
 import { APIContract, LifecyclePhase, IssueStatus } from '@/lib/types'
+import { useSettings } from '@/hooks/use-settings'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 
 interface DashboardProps {
@@ -26,6 +27,8 @@ const STATUS_COLORS: Record<IssueStatus, string> = {
 }
 
 export function Dashboard({ apis, onBack }: DashboardProps) {
+  const { t } = useSettings()
+  
   const getCurrentPhase = (api: APIContract): LifecyclePhase | null => {
     const now = new Date()
     
@@ -137,29 +140,29 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
           <ArrowLeft size={20} />
         </Button>
         <div>
-          <h2 className="text-2xl font-display font-bold">Dashboard</h2>
-          <p className="text-sm text-muted-foreground">API lifecycle and issue statistics</p>
+          <h2 className="text-2xl font-display font-bold">{t.dashboard.title}</h2>
+          <p className="text-sm text-muted-foreground">{t.dashboard.overview}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-6">
-          <div className="text-sm text-muted-foreground mb-1">Total APIs</div>
+          <div className="text-sm text-muted-foreground mb-1">{t.dashboard.totalAPIs}</div>
           <div className="text-3xl font-display font-bold">{totalAPIs}</div>
         </Card>
         <Card className="p-6">
-          <div className="text-sm text-muted-foreground mb-1">Total Issues</div>
+          <div className="text-sm text-muted-foreground mb-1">{t.issues.title}</div>
           <div className="text-3xl font-display font-bold">{totalIssues}</div>
         </Card>
         <Card className="p-6">
-          <div className="text-sm text-muted-foreground mb-1">Total Backlog Items</div>
+          <div className="text-sm text-muted-foreground mb-1">{t.improvements.title}</div>
           <div className="text-3xl font-display font-bold">{totalBacklog}</div>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">API Lifecycle Distribution</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t.dashboard.byPhase}</h3>
           {lifecycleData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
