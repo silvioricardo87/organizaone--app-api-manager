@@ -185,13 +185,13 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              No lifecycle data available
+              {t.dashboard.noLifecycleData}
             </div>
           )}
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">Issue Status Distribution</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t.dashboard.issueStatusDistribution}</h3>
           {issueStatusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -214,13 +214,13 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              No issue data available
+              {t.dashboard.noIssuesData}
             </div>
           )}
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">Backlog Status</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t.dashboard.backlogStatus}</h3>
           {backlogStatusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -243,13 +243,13 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              No backlog data available
+              {t.dashboard.noBacklogData}
             </div>
           )}
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">Issues by API (Top 10)</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t.dashboard.issuesByAPI}</h3>
           {issuesByAPIData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={issuesByAPIData} layout="vertical">
@@ -263,7 +263,7 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              No issues to display
+              {t.dashboard.noIssuesToDisplay}
             </div>
           )}
         </Card>

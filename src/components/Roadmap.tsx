@@ -178,7 +178,7 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
         <Card className="p-12 text-center">
           <CalendarDots size={48} className="mx-auto mb-4 text-muted-foreground" />
           <p className="text-muted-foreground">
-            No timeline data available. Add lifecycle phases or milestones to APIs.
+            {t.roadmap.noTimelineData}
           </p>
         </Card>
       ) : (
