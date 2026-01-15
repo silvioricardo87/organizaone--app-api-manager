@@ -122,7 +122,7 @@ export function APIList({ apis, onSelectAPI, onNewAPI }: APIListProps) {
                 </div>
 
                 <div className="text-xs text-muted-foreground pt-2 border-t">
-                  Updated {format(new Date(api.updatedAt), 'MMM d, yyyy')}
+                  {t.dates.lastUpdated} {format(new Date(api.updatedAt), 'MMM d, yyyy')}
                 </div>
               </div>
             </Card>
@@ -132,7 +132,7 @@ export function APIList({ apis, onSelectAPI, onNewAPI }: APIListProps) {
 
       {filteredAPIs.length === 0 && searchQuery && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No APIs found matching "{searchQuery}"</p>
+          <p className="text-muted-foreground">{t.apiList.noResults} "{searchQuery}"</p>
         </div>
       )}
     </div>

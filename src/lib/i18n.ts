@@ -34,6 +34,8 @@ export const translations = {
       deprecated: 'Deprecated',
       retired: 'Retired',
       version: 'Version',
+      noResults: 'No APIs found matching',
+      updated: 'Updated',
     },
     apiDetail: {
       back: 'Back to list',
@@ -285,6 +287,14 @@ export const translations = {
       medium: 'Medium',
       high: 'High',
       critical: 'Critical',
+      noData: 'No data available',
+      issueStatusDistribution: 'Issue Status Distribution',
+      backlogStatus: 'Backlog Status',
+      issuesByAPI: 'Issues by API (Top 10)',
+      noIssuesData: 'No issue data available',
+      noBacklogData: 'No backlog data available',
+      noIssuesToDisplay: 'No issues to display',
+      noLifecycleData: 'No lifecycle data available',
     },
     roadmap: {
       title: 'Roadmap',
@@ -292,6 +302,7 @@ export const translations = {
       timeline: 'Timeline',
       noAPIs: 'No APIs to display',
       milestones: 'Milestones',
+      noTimelineData: 'No timeline data available. Add lifecycle phases or milestones to APIs.',
     },
     settings: {
       language: 'Language',
@@ -600,6 +611,8 @@ export const translations = {
       deprecated: 'Descontinuada',
       retired: 'Aposentada',
       version: 'Versão',
+      noResults: 'Nenhuma API encontrada correspondente a',
+      updated: 'Atualizado',
     },
     apiDetail: {
       back: 'Voltar para lista',
@@ -851,6 +864,14 @@ export const translations = {
       medium: 'Média',
       high: 'Alta',
       critical: 'Crítica',
+      noData: 'Nenhum dado disponível',
+      issueStatusDistribution: 'Distribuição de Status de Problemas',
+      backlogStatus: 'Status do Backlog',
+      issuesByAPI: 'Problemas por API (Top 10)',
+      noIssuesData: 'Nenhum dado de problema disponível',
+      noBacklogData: 'Nenhum dado de backlog disponível',
+      noIssuesToDisplay: 'Nenhum problema para exibir',
+      noLifecycleData: 'Nenhum dado de ciclo de vida disponível',
     },
     roadmap: {
       title: 'Roadmap',
@@ -858,6 +879,7 @@ export const translations = {
       timeline: 'Linha do Tempo',
       noAPIs: 'Nenhuma API para exibir',
       milestones: 'Marcos',
+      noTimelineData: 'Nenhum dado de linha do tempo disponível. Adicione fases de ciclo de vida ou marcos às APIs.',
     },
     settings: {
       language: 'Idioma',
