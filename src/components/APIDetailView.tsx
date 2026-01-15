@@ -1,6 +1,16 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { ArrowLeft, Trash } from '@phosphor-icons/react'
 import { APIContract } from '@/lib/types'
 import { OverviewTab } from './tabs/OverviewTab'
@@ -21,12 +31,12 @@ interface APIDetailViewProps {
 
 export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailViewProps) {
   const [activeTab, setActiveTab] = useState('overview')
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
-  const handleDelete = () => {
-    if (confirm(`Are you sure you want to delete "${api.name}"? This action cannot be undone.`)) {
-      onDelete(api.id)
-      toast.success('API deleted successfully')
-    }
+  const handleDeleteConfirm = () => {
+    onDelete(api.id)
+    toast.success('API deleted successfully')
+    setDeleteDialogOpen(false)
   }
 
   return (
@@ -39,7 +49,7 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
           <h1 className="text-3xl font-display font-bold">{api.name}</h1>
           <p className="text-muted-foreground">Version {api.version}</p>
         </div>
-        <Button variant="destructive" onClick={handleDelete}>
+        <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
           <Trash size={20} weight="bold" className="mr-2" />
           Delete API
         </Button>
@@ -84,6 +94,25 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
           <TimelineTab api={api} onUpdate={onUpdate} />
         </TabsContent>
       </Tabs>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete API Contract</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{api.name}</strong> (v{api.version})? 
+              This action cannot be undone and will permanently remove all associated data including 
+              lifecycle phases, issues, backlog items, and PCM configurations.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
