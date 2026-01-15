@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Upload } from '@phosphor-icons/react'
 import { parseOpenAPIYAML, extractAPIMetadata, generateId } from '@/lib/api-utils'
 import { APIContract, LifecyclePhaseData } from '@/lib/types'
+import { useSettings } from '@/hooks/use-settings'
 import { toast } from 'sonner'
 
 interface NewAPIDialogProps {
@@ -16,6 +17,7 @@ interface NewAPIDialogProps {
 }
 
 export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) {
+  const { t } = useSettings()
   const [name, setName] = useState('')
   const [yamlContent, setYamlContent] = useState('')
   const [version, setVersion] = useState('')
@@ -33,8 +35,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) 
       const result = parseOpenAPIYAML(content)
       
       if (!result.success) {
-        toast.error('Failed to parse YAML', {
-          description: result.error
+        toast.error(t.newAPIDialog.errorTitle, {
+          description: t.newAPIDialog.errorImporting
         })
         return
       }
@@ -50,9 +52,11 @@ export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) 
         setName(result.data.info.title)
       }
 
-      toast.success('YAML file imported successfully')
+      toast.success(t.newAPIDialog.successTitle, {
+        description: t.newAPIDialog.successMessage
+      })
     } catch (error) {
-      toast.error('Failed to read file')
+      toast.error(t.newAPIDialog.errorTitle)
     } finally {
       setIsProcessing(false)
     }
@@ -60,7 +64,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) 
 
   const handleSave = () => {
     if (!name.trim()) {
-      toast.error('API name is required')
+      toast.error(t.newAPIDialog.errorTitle)
       return
     }
 
@@ -91,7 +95,9 @@ export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) 
     onSave(newAPI)
     resetForm()
     onOpenChange(false)
-    toast.success('API contract created successfully')
+    toast.success(t.newAPIDialog.successTitle, {
+      description: t.newAPIDialog.successMessage
+    })
   }
 
   const resetForm = () => {
@@ -106,15 +112,15 @@ export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-display">New API Contract</DialogTitle>
+          <DialogTitle className="text-2xl font-display">{t.newAPIDialog.title}</DialogTitle>
           <DialogDescription>
-            Import an OpenAPI 3.0 YAML specification or manually enter API details
+            {t.newAPIDialog.importContract}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="yaml-upload">Import OpenAPI YAML</Label>
+            <Label htmlFor="yaml-upload">{t.apiDetail.importYAML}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="yaml-upload"
@@ -136,34 +142,34 @@ export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="api-name">API Name *</Label>
+            <Label htmlFor="api-name">{t.newAPIDialog.name} *</Label>
             <Input
               id="api-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., API Consents - Open Finance Brasil"
+              placeholder={t.newAPIDialog.namePlaceholder}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="api-version">Version</Label>
+              <Label htmlFor="api-version">{t.newAPIDialog.version}</Label>
               <Input
                 id="api-version"
                 value={version}
                 onChange={(e) => setVersion(e.target.value)}
-                placeholder="e.g., 3.3.1"
+                placeholder={t.newAPIDialog.versionPlaceholder}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="api-summary">Summary</Label>
+            <Label htmlFor="api-summary">{t.newAPIDialog.description}</Label>
             <Textarea
               id="api-summary"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              placeholder="Brief description of the API"
+              placeholder={t.newAPIDialog.descriptionPlaceholder}
               rows={3}
             />
           </div>
@@ -171,10 +177,10 @@ export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) 
           {parsedSpec && (
             <div className="rounded-lg bg-success/10 border border-success/20 p-4">
               <p className="text-sm text-success-foreground font-medium">
-                ✓ OpenAPI specification parsed successfully
+                ✓ {t.newAPIDialog.successMessage}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {Object.keys(parsedSpec.paths || {}).length} endpoints detected
+                {Object.keys(parsedSpec.paths || {}).length} {t.apiDetail.endpoints.toLowerCase()}
               </p>
             </div>
           )}
@@ -182,10 +188,10 @@ export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) 
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t.newAPIDialog.cancel}
           </Button>
           <Button onClick={handleSave} disabled={!name.trim()}>
-            Create API Contract
+            {t.newAPIDialog.create}
           </Button>
         </div>
       </DialogContent>

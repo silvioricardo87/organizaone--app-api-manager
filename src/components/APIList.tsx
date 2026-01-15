@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { MagnifyingGlass, Plus, FileText } from '@phosphor-icons/react'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { PhaseIndicator } from './PhaseIndicator'
+import { useSettings } from '@/hooks/use-settings'
 import { format } from 'date-fns'
 
 interface APIListProps {
@@ -15,6 +16,7 @@ interface APIListProps {
 }
 
 export function APIList({ apis, onSelectAPI, onNewAPI }: APIListProps) {
+  const { t } = useSettings()
   const [searchQuery, setSearchQuery] = useState('')
 
   const filteredAPIs = useMemo(() => {
@@ -53,13 +55,13 @@ export function APIList({ apis, onSelectAPI, onNewAPI }: APIListProps) {
         <div className="rounded-full bg-muted p-6 mb-4">
           <FileText size={48} className="text-muted-foreground" />
         </div>
-        <h2 className="text-2xl font-display font-semibold mb-2">No API Contracts Yet</h2>
+        <h2 className="text-2xl font-display font-semibold mb-2">{t.apiList.noAPIs}</h2>
         <p className="text-muted-foreground mb-6 max-w-md">
-          Get started by creating your first API contract. Import an OpenAPI 3.0 YAML specification to begin.
+          {t.apiList.noAPIsDescription}
         </p>
         <Button onClick={onNewAPI} size="lg">
           <Plus size={20} weight="bold" className="mr-2" />
-          Create First API
+          {t.apiList.newAPI}
         </Button>
       </div>
     )
@@ -71,7 +73,7 @@ export function APIList({ apis, onSelectAPI, onNewAPI }: APIListProps) {
         <div className="relative flex-1 max-w-md">
           <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
           <Input
-            placeholder="Search APIs..."
+            placeholder={t.apiList.search}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -79,7 +81,7 @@ export function APIList({ apis, onSelectAPI, onNewAPI }: APIListProps) {
         </div>
         <Button onClick={onNewAPI}>
           <Plus size={20} weight="bold" className="mr-2" />
-          New API
+          {t.apiList.newAPI}
         </Button>
       </div>
 
@@ -105,16 +107,16 @@ export function APIList({ apis, onSelectAPI, onNewAPI }: APIListProps) {
 
                 <div className="flex flex-wrap gap-2 pt-2">
                   <Badge variant="outline" className="text-xs">
-                    v{api.version}
+                    {t.apiList.version} {api.version}
                   </Badge>
                   {api.knownIssues.length > 0 && (
                     <Badge variant="outline" className="text-xs">
-                      {api.knownIssues.length} {api.knownIssues.length === 1 ? 'Issue' : 'Issues'}
+                      {api.knownIssues.length} {api.knownIssues.length === 1 ? t.issues.title.slice(0, -1) : t.issues.title}
                     </Badge>
                   )}
                   {api.backlogItems.length > 0 && (
                     <Badge variant="outline" className="text-xs">
-                      {api.backlogItems.length} Backlog
+                      {api.backlogItems.length} {t.improvements.title}
                     </Badge>
                   )}
                 </div>

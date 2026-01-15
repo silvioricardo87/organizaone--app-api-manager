@@ -7,12 +7,15 @@ import { APIDetailView } from '@/components/APIDetailView'
 import { NewAPIDialog } from '@/components/NewAPIDialog'
 import { Dashboard } from '@/components/Dashboard'
 import { Roadmap } from '@/components/Roadmap'
+import { SettingsMenu } from '@/components/SettingsMenu'
+import { SettingsProvider, useSettings } from '@/hooks/use-settings'
 import { FileText, ChartBar, MapTrifold } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 
 type View = 'list' | 'dashboard' | 'roadmap' | 'detail'
 
-function App() {
+function AppContent() {
+  const { t } = useSettings()
   const [apis, setApis] = useKV<APIContract[]>('openfinance-apis', [])
   const [selectedAPI, setSelectedAPI] = useState<APIContract | null>(null)
   const [newAPIDialogOpen, setNewAPIDialogOpen] = useState(false)
@@ -66,22 +69,25 @@ function App() {
                 <FileText size={28} weight="duotone" className="text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-display font-bold">OpenFinance API Manager</h1>
-                <p className="text-sm text-muted-foreground">Manage API contracts, lifecycle, and metrics</p>
+                <h1 className="text-2xl font-display font-bold">{t.header.title}</h1>
+                <p className="text-sm text-muted-foreground">{t.header.subtitle}</p>
               </div>
             </div>
-            {currentView === 'list' && currentApis.length > 0 && (
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setCurrentView('dashboard')}>
-                  <ChartBar size={20} weight="duotone" className="mr-2" />
-                  Dashboard
-                </Button>
-                <Button variant="outline" onClick={() => setCurrentView('roadmap')}>
-                  <MapTrifold size={20} weight="duotone" className="mr-2" />
-                  Roadmap
-                </Button>
-              </div>
-            )}
+            <div className="flex gap-2">
+              {currentView === 'list' && currentApis.length > 0 && (
+                <>
+                  <Button variant="outline" onClick={() => setCurrentView('dashboard')}>
+                    <ChartBar size={20} weight="duotone" className="mr-2" />
+                    {t.header.dashboard}
+                  </Button>
+                  <Button variant="outline" onClick={() => setCurrentView('roadmap')}>
+                    <MapTrifold size={20} weight="duotone" className="mr-2" />
+                    {t.header.roadmap}
+                  </Button>
+                </>
+              )}
+              <SettingsMenu />
+            </div>
           </div>
         </div>
       </header>
@@ -115,6 +121,14 @@ function App() {
 
       <Toaster />
     </div>
+  )
+}
+
+function App() {
+  return (
+    <SettingsProvider>
+      <AppContent />
+    </SettingsProvider>
   )
 }
 
