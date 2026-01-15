@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
-import { APIContract, LifecyclePhase } from '@/lib/types'
-import { format, parseISO, addMonths, differenceInDays, min, max } from 'date-fns'
+import { APIContract, LifecyclePhase } from
+
+  apis: APIContract[]
+}
 
 interface RoadmapProps {
   apis: APIContract[]
@@ -37,10 +37,10 @@ const PHASE_COLORS: Record<LifecyclePhase, string> = {
 
 export function Roadmap({ apis, onBack }: RoadmapProps) {
   const [selectedApi, setSelectedApi] = useState<string | null>(null)
-
+artDate) {
   const timelineData = useMemo(() => {
-    const events: TimelineEvent[] = []
-    apis.forEach(api => {
+    const events: TimelineEvent[] = [].phase}-start`,
+    apis.forEach(api => {ame,
       api.lifecyclePhases.forEach(phaseData => {
         if (phaseData.startDate) {
           events.push({
@@ -50,33 +50,28 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
             type: 'phase',
             phase: phaseData.phase,
             title: `${PHASE_LABELS[phaseData.phase]} Start`,
-          })
-        }
+          })apiName: api.name,
+        }SO(phaseData.endDate),
         if (phaseData.endDate) {
           events.push({
-            id: `${api.id}-${phaseData.phase}-end`,
+            id: `${api.id}-${phaseData.phase}-end`,} End`,
             apiName: api.name,
             date: parseISO(phaseData.endDate),
             type: 'phase',
             phase: phaseData.phase,
             title: `${PHASE_LABELS[phaseData.phase]} End`,
           })
-        }
+          id: milestone.id,
       })
 
       api.milestones.forEach(milestone => {
-        events.push({
+        events.push({tone.title,
           id: milestone.id,
           apiName: api.name,
           date: parseISO(milestone.date),
           type: 'milestone',
           title: milestone.title,
         })
-      })
-    })
-
-    return events.sort((a, b) => a.date.getTime() - b.date.getTime())
-  }, [apis])
 
   const filteredApis = useMemo(() => {
     if (!selectedApi) return apis
