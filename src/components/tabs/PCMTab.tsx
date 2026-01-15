@@ -139,7 +139,7 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
     return (
       <Card className="p-12 text-center">
         <p className="text-muted-foreground">
-          PCM configuration requires an OpenAPI specification. Please import a YAML file first.
+          {t.pcm.requiresSpec}
         </p>
       </Card>
     )
@@ -150,13 +150,13 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
       <div className="flex justify-end">
         <Button onClick={() => openDialog()}>
           <Plus size={20} weight="bold" className="mr-2" />
-          Add PCM Field
+          {t.pcm.addField}
         </Button>
       </div>
 
       {api.pcmFields.length === 0 ? (
         <Card className="p-12 text-center">
-          <p className="text-muted-foreground">No PCM fields configured yet.</p>
+          <p className="text-muted-foreground">{t.pcm.noFields}</p>
         </Card>
       ) : (
         <div className="space-y-4">
@@ -172,34 +172,34 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="font-medium text-muted-foreground">Definition:</span>
+                      <span className="font-medium text-muted-foreground">{t.pcm.definition}:</span>
                       <p>{pcmField.definition || '-'}</p>
                     </div>
                     <div>
-                      <span className="font-medium text-muted-foreground">Filling Rule:</span>
+                      <span className="font-medium text-muted-foreground">{t.pcm.fillingRule}:</span>
                       <p>{pcmField.fillingRule || '-'}</p>
                     </div>
                     {pcmField.roles.length > 0 && (
                       <div>
-                        <span className="font-medium text-muted-foreground">Roles:</span>
+                        <span className="font-medium text-muted-foreground">{t.pcm.roles}:</span>
                         <p>{pcmField.roles.join(', ')}</p>
                       </div>
                     )}
                     {pcmField.httpCodes.length > 0 && (
                       <div>
-                        <span className="font-medium text-muted-foreground">HTTP Codes:</span>
+                        <span className="font-medium text-muted-foreground">{t.pcm.httpCodes}:</span>
                         <p>{pcmField.httpCodes.join(', ')}</p>
                       </div>
                     )}
                     <div>
-                      <span className="font-medium text-muted-foreground">Mandatory:</span>
+                      <span className="font-medium text-muted-foreground">{t.pcm.mandatory}:</span>
                       <Badge variant="outline" className="ml-2">
                         {pcmField.mandatory === 'none' ? '-' : t.badges[pcmField.mandatory]}
                       </Badge>
                     </div>
                     {pcmField.maxSize && (
                       <div>
-                        <span className="font-medium text-muted-foreground">Max Size:</span>
+                        <span className="font-medium text-muted-foreground">{t.pcm.maxSize}:</span>
                         <p>{pcmField.maxSize}</p>
                       </div>
                     )}
@@ -207,7 +207,7 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
 
                   {pcmField.example && (
                     <div className="p-3 bg-muted rounded-lg">
-                      <span className="text-xs font-medium text-muted-foreground">Example:</span>
+                      <span className="text-xs font-medium text-muted-foreground">{t.pcm.example}:</span>
                       <pre className="text-xs font-mono mt-1">{pcmField.example}</pre>
                     </div>
                   )}
@@ -230,18 +230,18 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingField ? 'Edit PCM Field' : 'New PCM Field'}</DialogTitle>
+            <DialogTitle>{editingField ? t.pcm.editField : t.pcm.newField}</DialogTitle>
             <DialogDescription>
-              Configure metrics collection field for a specific endpoint and method
+              {t.pcm.configureField}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="pcm-endpoint">Endpoint *</Label>
+              <Label htmlFor="pcm-endpoint">{t.pcm.endpoint} *</Label>
               <Select value={endpoint} onValueChange={setEndpoint} disabled={!!editingField}>
                 <SelectTrigger id="pcm-endpoint">
-                  <SelectValue placeholder="Select endpoint" />
+                  <SelectValue placeholder={t.pcm.selectEndpoint} />
                 </SelectTrigger>
                 <SelectContent>
                   {endpoints.map(ep => (
@@ -255,10 +255,10 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
 
             {endpoint && (
               <div className="space-y-2">
-                <Label htmlFor="pcm-method">Method *</Label>
+                <Label htmlFor="pcm-method">{t.pcm.method} *</Label>
                 <Select value={method} onValueChange={setMethod} disabled={!!editingField}>
                   <SelectTrigger id="pcm-method">
-                    <SelectValue placeholder="Select method" />
+                    <SelectValue placeholder={t.pcm.selectMethod} />
                   </SelectTrigger>
                   <SelectContent>
                     {selectedEndpoint?.methods.map(m => (
@@ -273,10 +273,10 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
 
             {endpoint && method && (
               <div className="space-y-2">
-                <Label htmlFor="pcm-field">Field *</Label>
+                <Label htmlFor="pcm-field">{t.pcm.field} *</Label>
                 <Select value={field} onValueChange={setField} disabled={!!editingField}>
                   <SelectTrigger id="pcm-field">
-                    <SelectValue placeholder="Select field" />
+                    <SelectValue placeholder={t.pcm.selectField} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableFields.map(f => (
@@ -292,115 +292,115 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
             {field && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="pcm-definition">Definition</Label>
+                  <Label htmlFor="pcm-definition">{t.pcm.definition}</Label>
                   <Textarea
                     id="pcm-definition"
                     value={definition}
                     onChange={(e) => setDefinition(e.target.value)}
-                    placeholder="Field definition"
+                    placeholder={t.metrics.definitionPlaceholder}
                     rows={2}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="pcm-filling-rule">Filling Rule</Label>
+                  <Label htmlFor="pcm-filling-rule">{t.pcm.fillingRule}</Label>
                   <Textarea
                     id="pcm-filling-rule"
                     value={fillingRule}
                     onChange={(e) => setFillingRule(e.target.value)}
-                    placeholder="Rules for filling this field"
+                    placeholder={t.pcm.fillingRulePlaceholder}
                     rows={2}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="pcm-roles">Roles (comma-separated)</Label>
+                    <Label htmlFor="pcm-roles">{t.pcm.rolesCommaSeparated}</Label>
                     <Input
                       id="pcm-roles"
                       value={roles}
                       onChange={(e) => setRoles(e.target.value)}
-                      placeholder="CLIENT, SERVER"
+                      placeholder={t.pcm.rolesPlaceholder}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pcm-http-codes">HTTP Codes (comma-separated)</Label>
+                    <Label htmlFor="pcm-http-codes">{t.pcm.httpCodesCommaSeparated}</Label>
                     <Input
                       id="pcm-http-codes"
                       value={httpCodes}
                       onChange={(e) => setHttpCodes(e.target.value)}
-                      placeholder="200, 201, 400"
+                      placeholder={t.pcm.httpCodesPlaceholder}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="pcm-domain">Domain</Label>
+                    <Label htmlFor="pcm-domain">{t.pcm.domain}</Label>
                     <Input
                       id="pcm-domain"
                       value={domain}
                       onChange={(e) => setDomain(e.target.value)}
-                      placeholder="Domain"
+                      placeholder={t.pcm.domainPlaceholder}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pcm-versions">Versions (comma-separated)</Label>
+                    <Label htmlFor="pcm-versions">{t.pcm.versionsCommaSeparated}</Label>
                     <Input
                       id="pcm-versions"
                       value={versions}
                       onChange={(e) => setVersions(e.target.value)}
-                      placeholder="v1, v2, v3"
+                      placeholder={t.pcm.versionsPlaceholder}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="pcm-max-size">Max Size</Label>
+                    <Label htmlFor="pcm-max-size">{t.pcm.maxSize}</Label>
                     <Input
                       id="pcm-max-size"
                       value={maxSize}
                       onChange={(e) => setMaxSize(e.target.value)}
-                      placeholder="100"
+                      placeholder={t.pcm.maxSizePlaceholder}
                     />
                   </div>
 
                   <div className="space-y-2 col-span-2">
-                    <Label htmlFor="pcm-pattern">Pattern</Label>
+                    <Label htmlFor="pcm-pattern">{t.pcm.pattern}</Label>
                     <Input
                       id="pcm-pattern"
                       value={pattern}
                       onChange={(e) => setPattern(e.target.value)}
-                      placeholder="^[a-zA-Z0-9]+$"
+                      placeholder={t.pcm.patternPlaceholder}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="pcm-mandatory">Mandatory Reporting</Label>
+                  <Label htmlFor="pcm-mandatory">{t.pcm.mandatoryReporting}</Label>
                   <Select value={mandatory} onValueChange={(value) => setMandatory(value as PCMMandatoryType)}>
                     <SelectTrigger id="pcm-mandatory">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      <SelectItem value="server">Server Only</SelectItem>
-                      <SelectItem value="client">Client Only</SelectItem>
-                      <SelectItem value="both">Both Server & Client</SelectItem>
+                      <SelectItem value="none">{t.pcm.none}</SelectItem>
+                      <SelectItem value="server">{t.pcm.serverOnly}</SelectItem>
+                      <SelectItem value="client">{t.pcm.clientOnly}</SelectItem>
+                      <SelectItem value="both">{t.pcm.bothServerClient}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="pcm-example">Example</Label>
+                  <Label htmlFor="pcm-example">{t.pcm.example}</Label>
                   <Textarea
                     id="pcm-example"
                     value={example}
                     onChange={(e) => setExample(e.target.value)}
-                    placeholder="Example value"
+                    placeholder={t.pcm.examplePlaceholder}
                     rows={2}
                   />
                 </div>
@@ -410,10 +410,10 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button onClick={handleSave} disabled={!endpoint || !method || !field}>
-              {editingField ? 'Update' : 'Create'}
+              {editingField ? t.improvements.update : t.improvements.create}
             </Button>
           </div>
         </DialogContent>
