@@ -1,8 +1,8 @@
 import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { APIContract } from '@/lib/types'
 import { PhaseIndicator } from '../PhaseIndicator'
 import { format } from 'date-fns'
+import { useMemo } from 'react'
 
 interface OverviewTabProps {
   api: APIContract
@@ -18,48 +18,56 @@ export function OverviewTab({ api }: OverviewTabProps) {
     return start <= now && (!end || end >= now)
   })
 
+  const markdownContent = useMemo(() => {
+    const lines: string[] = []
+    
+    lines.push(`# ${api.name}`)
+    lines.push('')
+    lines.push(`**Version:** \`${api.version}\``)
+    lines.push('')
+    lines.push(`## Summary`)
+    lines.push('')
+    lines.push(api.summary)
+    lines.push('')
+    
+    if (currentPhase) {
+      lines.push(`## Current Phase`)
+      lines.push('')
+      lines.push(`**${currentPhase.phase.toUpperCase()}**`)
+      lines.push('')
+    }
+    
+    lines.push(`## Details`)
+    lines.push('')
+    lines.push(`- **Created:** ${format(new Date(api.createdAt), 'PPP')}`)
+    lines.push(`- **Last Updated:** ${format(new Date(api.updatedAt), 'PPP')}`)
+    
+    if (api.parsedSpec) {
+      const endpointCount = Object.keys(api.parsedSpec.paths || {}).length
+      lines.push(`- **Total Endpoints:** ${endpointCount}`)
+    }
+    
+    lines.push('')
+    lines.push(`## Statistics`)
+    lines.push('')
+    lines.push(`| Metric | Count | Details |`)
+    lines.push(`|--------|-------|---------|`)
+    lines.push(`| Known Issues | ${api.knownIssues.length} | ${api.knownIssues.filter(i => i.status === 'open').length} open |`)
+    lines.push(`| Backlog Items | ${api.backlogItems.length} | ${api.backlogItems.filter(i => i.status === 'in_progress').length} in progress |`)
+    lines.push(`| PCM Fields | ${api.pcmFields.length} | configured |`)
+    
+    return lines.join('\n')
+  }, [api, currentPhase])
+
   return (
     <div className="space-y-6">
       <Card className="p-6">
         <h2 className="text-xl font-display font-semibold mb-4">API Information</h2>
-        <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <dt className="text-sm font-medium text-muted-foreground">Name</dt>
-            <dd className="mt-1 text-sm">{api.name}</dd>
+        <div className="prose prose-sm max-w-none">
+          <div className="font-mono text-sm bg-muted/30 p-6 rounded-lg border border-border whitespace-pre-wrap">
+            {markdownContent}
           </div>
-          <div>
-            <dt className="text-sm font-medium text-muted-foreground">Version</dt>
-            <dd className="mt-1">
-              <Badge variant="outline">{api.version}</Badge>
-            </dd>
-          </div>
-          <div className="md:col-span-2">
-            <dt className="text-sm font-medium text-muted-foreground">Summary</dt>
-            <dd className="mt-1 text-sm">{api.summary}</dd>
-          </div>
-          {currentPhase && (
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">Current Phase</dt>
-              <dd className="mt-1">
-                <PhaseIndicator phase={currentPhase.phase} />
-              </dd>
-            </div>
-          )}
-          <div>
-            <dt className="text-sm font-medium text-muted-foreground">Created</dt>
-            <dd className="mt-1 text-sm">{format(new Date(api.createdAt), 'PPP')}</dd>
-          </div>
-          <div>
-            <dt className="text-sm font-medium text-muted-foreground">Last Updated</dt>
-            <dd className="mt-1 text-sm">{format(new Date(api.updatedAt), 'PPP')}</dd>
-          </div>
-          {api.parsedSpec && (
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">Endpoints</dt>
-              <dd className="mt-1 text-sm">{Object.keys(api.parsedSpec.paths || {}).length}</dd>
-            </div>
-          )}
-        </dl>
+        </div>
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
