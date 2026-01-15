@@ -110,3 +110,48 @@ export function getEndpointFields(spec: any, endpoint: string, method: string): 
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 }
+
+export function resolveRef(ref: string, spec: any): any {
+  if (!ref || !ref.startsWith('#/')) return null
+  
+  const parts = ref.split('/').slice(1)
+  let current = spec
+  
+  for (const part of parts) {
+    if (!current || typeof current !== 'object') return null
+    current = current[part]
+  }
+  
+  return current
+}
+
+export function resolveParameter(param: any, spec: any): any {
+  if (param.$ref) {
+    const resolved = resolveRef(param.$ref, spec)
+    return resolved || param
+  }
+  return param
+}
+
+export function resolveSchema(schema: any, spec: any): any {
+  if (!schema) return schema
+  
+  if (schema.$ref) {
+    const resolved = resolveRef(schema.$ref, spec)
+    return resolved ? resolveSchema(resolved, spec) : schema
+  }
+  
+  if (schema.allOf) {
+    const merged: any = {}
+    schema.allOf.forEach((subSchema: any) => {
+      const resolved = resolveSchema(subSchema, spec)
+      Object.assign(merged, resolved)
+      if (resolved.properties) {
+        merged.properties = { ...merged.properties, ...resolved.properties }
+      }
+    })
+    return { ...schema, ...merged }
+  }
+  
+  return schema
+}
