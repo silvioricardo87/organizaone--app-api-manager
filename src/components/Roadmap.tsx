@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, CalendarDots, FlagBanne
+import { Card } from '@/components/ui/card'
 import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
 import { APIContract, LifecyclePhase } from '@/lib/types'
-import { format, parseISO, addMonths, subMonths, differenceInDays, min, max } from 'date-fns'
+import { format, parseISO, addMonths, differenceInDays, min, max } from 'date-fns'
 
 interface RoadmapProps {
-const PHASE_LABELS: R
+  apis: APIContract[]
   onBack: () => void
- 
+}
 
 const PHASE_LABELS: Record<LifecyclePhase, string> = {
   implementing: 'Implementing',
@@ -16,114 +16,118 @@ const PHASE_LABELS: Record<LifecyclePhase, string> = {
   current: 'Current',
   deprecated: 'Deprecated',
   retired: 'Retired',
-
+}
 
 const PHASE_COLORS: Record<LifecyclePhase, string> = {
   implementing: 'bg-[oklch(0.60_0.18_240)]',
   certifying: 'bg-[oklch(0.65_0.16_260)]',
   current: 'bg-[oklch(0.65_0.20_140)]',
-  phase?: LifecyclePhase
+  deprecated: 'bg-[oklch(0.75_0.15_70)]',
   retired: 'bg-[oklch(0.60_0.22_25)]',
-e
+}
 
-  const timelineData = us
+interface TimelineEvent {
   id: string
-    apis.forEac
   apiName: string
-          ap
-          title
-          type: 'miles
+  date: Date
+  type: 'milestone' | 'phase'
+  phase?: LifecyclePhase
+  title?: string
+}
+
+export function Roadmap({ apis, onBack }: RoadmapProps) {
+  const [selectedApi, setSelectedApi] = useState<string | null>(null)
+
+  const timelineData = useMemo(() => {
+    const events: TimelineEvent[] = []
+    apis.forEach(api => {
+      api.lifecyclePhases.forEach(phaseData => {
+        if (phaseData.startDate) {
+          events.push({
+            id: `${api.id}-${phaseData.phase}-start`,
+            apiName: api.name,
+            date: parseISO(phaseData.startDate),
+            type: 'phase',
+            phase: phaseData.phase,
+            title: `${PHASE_LABELS[phaseData.phase]} Start`,
+          })
+        }
+        if (phaseData.endDate) {
+          events.push({
+            id: `${api.id}-${phaseData.phase}-end`,
+            apiName: api.name,
+            date: parseISO(phaseData.endDate),
+            type: 'phase',
+            phase: phaseData.phase,
+            title: `${PHASE_LABELS[phaseData.phase]} End`,
+          })
+        }
       })
 
- 
-
-    return apis.filter(api => api.id === selectedApi)
-
-
-      return {
-        end: addMonths(now, 3),
-
-    const dates = timelin
-    const maxDate = max(dates)
-    return {
-      end: addMonths(ma
-  }, [timelineData])
-  const totalDays = differ
-  const getPositionPercent = (
-    return (daysSinceStart / totalDays) * 100
-
-    return filteredApis.ma
-      const phases = api.lifecycleP
-        .map
-         
-        
-
-        api,
-        phases,
+      api.milestones.forEach(milestone => {
+        events.push({
+          id: milestone.id,
+          apiName: api.name,
+          date: parseISO(milestone.date),
+          type: 'milestone',
+          title: milestone.title,
+        })
+      })
     })
 
-    let currentDate = new Da
+    return events.sort((a, b) => a.date.getTime() - b.date.getTime())
+  }, [apis])
 
-      markers.push({
-        label: format(currentDate, 'MMM yyyy'
+  const filteredApis = useMemo(() => {
+    if (!selectedApi) return apis
+    return apis.filter(api => api.id === selectedApi)
+  }, [apis, selectedApi])
 
+  const dateRange = useMemo(() => {
+    if (timelineData.length === 0) {
+      const now = new Date()
+      return {
+        start: now,
+        end: addMonths(now, 3),
+      }
     }
-    retu
 
+    const dates = timelineData.map(e => e.date)
+    const minDate = min(dates)
+    const maxDate = max(dates)
 
-        <Button variant="ghost" onClick={onBack}>
-          Ba
+    return {
+      start: minDate,
+      end: addMonths(maxDate, 1),
+    }
+  }, [timelineData])
 
+  const totalDays = differenceInDays(dateRange.end, dateRange.start)
 
-        <Button
-          onClick={() => setSelectedApi(null)}
-          All APIs
+  const getPositionPercent = (date: Date) => {
+    const daysSinceStart = differenceInDays(date, dateRange.start)
+    return (daysSinceStart / totalDays) * 100
+  }
 
-            key={api.id}
-            onClick={() => setSelect
-            {api.name}
-        ))}
+  const apiRows = useMemo(() => {
+    return filteredApis.map(api => {
+      const phases = api.lifecyclePhases
+        .filter(p => p.startDate && p.endDate)
+        .map(p => ({
+          phase: p.phase,
+          start: parseISO(p.startDate!),
+          end: parseISO(p.endDate!),
+        }))
 
-        <Card className="p-12 t
-       
-     
+      const events = timelineData.filter(e => e.apiName === api.name)
 
-          <div className="relative min-h-[400px
-              {monthMarkers.ma
-                  key={idx}
-
-            
-                    {marker.label}
-                </div>
-     
-            <div cla
-
-                    <h3 className="font-display font-semibold">{api.
-
-                  <div className="relative h-1
-                      const startPercent = getPositionPercent(phas
-                      const widthPercent = en
-   
-
-                          style={
-                            width: `
-                        >
-                            {PHASE_LABEL
-                        </div>
-                    
-                    {even
-                      .map(event => {
-                        return (
-           
-                            style={{ left: `${position}%` }}
-
-              
-            
-                      })}
+      return {
+        api,
+        events,
         phases,
       }
     })
-  }, [filteredApis, timelineData, dateRange])
+  }, [filteredApis, timelineData])
 
   const monthMarkers = useMemo(() => {
     let currentDate = new Date(dateRange.start)
@@ -210,25 +214,26 @@ e
 
                       return (
                         <div
-
+                          key={idx}
                           className={`absolute top-2 bottom-2 ${PHASE_COLORS[phaseData.phase]} rounded opacity-80`}
                           style={{
                             left: `${startPercent}%`,
                             width: `${widthPercent}%`,
                           }}
-
+                        >
                           <div className="px-2 py-1 text-xs text-white font-medium truncate">
-
+                            {PHASE_LABELS[phaseData.phase]}
                           </div>
                         </div>
                       )
-
+                    })}
 
                     {events
                       .filter(e => e.type === 'milestone')
-
+                      .map(event => {
                         const position = getPositionPercent(event.date)
 
+                        return (
                           <div
                             key={event.id}
                             className="absolute top-0 bottom-0 flex flex-col items-center"
@@ -238,16 +243,16 @@ e
                             <div className="absolute top-1/2 -translate-y-1/2">
                               <FlagBanner size={20} weight="fill" className="text-accent" />
                             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
+                          </div>
+                        )
+                      })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
+    </div>
+  )
+}
