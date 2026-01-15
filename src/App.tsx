@@ -6,10 +6,11 @@ import { APIList } from '@/components/APIList'
 import { APIDetailView } from '@/components/APIDetailView'
 import { NewAPIDialog } from '@/components/NewAPIDialog'
 import { Dashboard } from '@/components/Dashboard'
-import { FileText, ChartBar } from '@phosphor-icons/react'
+import { Roadmap } from '@/components/Roadmap'
+import { FileText, ChartBar, MapTrifold } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 
-type View = 'list' | 'dashboard' | 'detail'
+type View = 'list' | 'dashboard' | 'roadmap' | 'detail'
 
 function App() {
   const [apis, setApis] = useKV<APIContract[]>('openfinance-apis', [])
@@ -51,6 +52,10 @@ function App() {
     setCurrentView('list')
   }
 
+  const handleBackFromRoadmap = () => {
+    setCurrentView('list')
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
@@ -66,10 +71,16 @@ function App() {
               </div>
             </div>
             {currentView === 'list' && currentApis.length > 0 && (
-              <Button variant="outline" onClick={() => setCurrentView('dashboard')}>
-                <ChartBar size={20} weight="duotone" className="mr-2" />
-                Dashboard
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setCurrentView('dashboard')}>
+                  <ChartBar size={20} weight="duotone" className="mr-2" />
+                  Dashboard
+                </Button>
+                <Button variant="outline" onClick={() => setCurrentView('roadmap')}>
+                  <MapTrifold size={20} weight="duotone" className="mr-2" />
+                  Roadmap
+                </Button>
+              </div>
             )}
           </div>
         </div>
@@ -78,6 +89,8 @@ function App() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {currentView === 'dashboard' ? (
           <Dashboard apis={currentApis} onBack={handleBackFromDashboard} />
+        ) : currentView === 'roadmap' ? (
+          <Roadmap apis={currentApis} onBack={handleBackFromRoadmap} />
         ) : currentView === 'detail' && selectedAPI ? (
           <APIDetailView
             api={selectedAPI}
