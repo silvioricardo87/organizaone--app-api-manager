@@ -8,13 +8,13 @@ import { NewAPIDialog } from '@/components/NewAPIDialog'
 import { Dashboard } from '@/components/Dashboard'
 import { Roadmap } from '@/components/Roadmap'
 import { SettingsMenu } from '@/components/SettingsMenu'
-import { SettingsProvider, useSettings } from '@/hooks/use-settings'
+import { useSettings } from '@/hooks/use-settings'
 import { FileText, ChartBar, MapTrifold } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 
 type View = 'list' | 'dashboard' | 'roadmap' | 'detail'
 
-function AppContent() {
+function App() {
   const { t } = useSettings()
   const [apis, setApis] = useKV<APIContract[]>('openfinance-apis', [])
   const [selectedAPI, setSelectedAPI] = useState<APIContract | null>(null)
@@ -121,14 +121,6 @@ function AppContent() {
 
       <Toaster />
     </div>
-  )
-}
-
-function App() {
-  return (
-    <SettingsProvider>
-      <AppContent />
-    </SettingsProvider>
   )
 }
 
