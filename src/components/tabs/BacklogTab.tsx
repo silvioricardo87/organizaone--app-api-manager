@@ -111,13 +111,13 @@ export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
       <div className="flex justify-end">
         <Button onClick={() => openDialog()}>
           <Plus size={20} weight="bold" className="mr-2" />
-          Add Backlog Item
+          {t.improvements.addBacklogItem}
         </Button>
       </div>
 
       {api.backlogItems.length === 0 ? (
         <Card className="p-12 text-center">
-          <p className="text-muted-foreground">No backlog items yet.</p>
+          <p className="text-muted-foreground">{t.improvements.noBacklogItems}</p>
         </Card>
       ) : (
         <div className="space-y-4">
@@ -137,12 +137,12 @@ export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
                   <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
                   {item.proposal && (
                     <div className="mt-3 p-3 bg-muted rounded-lg">
-                      <p className="text-xs font-medium mb-1">Proposal:</p>
+                      <p className="text-xs font-medium mb-1">{t.improvements.proposalLabel}</p>
                       <p className="text-sm">{item.proposal}</p>
                     </div>
                   )}
                   <p className="text-xs text-muted-foreground mt-3">
-                    Updated {format(new Date(item.updatedAt), 'PPP')}
+                    {t.improvements.updated} {format(new Date(item.updatedAt), 'PPP')}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -162,70 +162,70 @@ export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingItem ? 'Edit Backlog Item' : 'New Backlog Item'}</DialogTitle>
+            <DialogTitle>{editingItem ? t.improvements.editBacklogItem : t.improvements.newBacklogItem}</DialogTitle>
             <DialogDescription>
-              {editingItem ? 'Update the backlog item details' : 'Add a new improvement or enhancement'}
+              {editingItem ? t.improvements.updateDetails : t.improvements.addNewEnhancement}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="backlog-title">Title *</Label>
+              <Label htmlFor="backlog-title">{t.improvements.improvementTitle} *</Label>
               <Input
                 id="backlog-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Brief title of the improvement"
+                placeholder={t.improvements.titlePlaceholder}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="backlog-description">Description</Label>
+              <Label htmlFor="backlog-description">{t.improvements.description}</Label>
               <Textarea
                 id="backlog-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Detailed description of the enhancement"
+                placeholder={t.improvements.descriptionPlaceholderLong}
                 rows={3}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="backlog-proposal">Proposal</Label>
+              <Label htmlFor="backlog-proposal">{t.improvements.proposal}</Label>
               <Textarea
                 id="backlog-proposal"
                 value={proposal}
                 onChange={(e) => setProposal(e.target.value)}
-                placeholder="Proposed solution or implementation approach"
+                placeholder={t.improvements.proposalPlaceholderLong}
                 rows={3}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="backlog-origin">Origin</Label>
+                <Label htmlFor="backlog-origin">{t.improvements.origin}</Label>
                 <Select value={origin} onValueChange={(value) => setOrigin(value as BacklogOrigin)}>
                   <SelectTrigger id="backlog-origin">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ticket">Ticket</SelectItem>
-                    <SelectItem value="GT">GT</SelectItem>
-                    <SelectItem value="Banco Central">Banco Central</SelectItem>
+                    <SelectItem value="ticket">{t.improvements.ticket}</SelectItem>
+                    <SelectItem value="GT">{t.improvements.workingGroup}</SelectItem>
+                    <SelectItem value="Banco Central">{t.improvements.centralBank}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="backlog-status">Status</Label>
+                <Label htmlFor="backlog-status">{t.improvements.status}</Label>
                 <Select value={status} onValueChange={(value) => setStatus(value as BacklogStatus)}>
                   <SelectTrigger id="backlog-status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="backlog">Backlog</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="backlog">{t.improvements.backlog}</SelectItem>
+                    <SelectItem value="in_progress">{t.improvements.inProgress}</SelectItem>
+                    <SelectItem value="completed">{t.improvements.completed}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -234,10 +234,10 @@ export function BacklogTab({ api, onUpdate }: BacklogTabProps) {
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              {t.improvements.cancel}
             </Button>
             <Button onClick={handleSave}>
-              {editingItem ? 'Update' : 'Create'}
+              {editingItem ? t.improvements.update : t.improvements.create}
             </Button>
           </div>
         </DialogContent>

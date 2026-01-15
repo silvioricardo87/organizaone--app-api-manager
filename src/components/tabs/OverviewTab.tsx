@@ -62,7 +62,7 @@ export function OverviewTab({ api }: OverviewTabProps) {
           
           {endpointCount > 0 && (
             <div>
-              <dt className="text-sm font-medium text-muted-foreground mb-1">Total Endpoints</dt>
+              <dt className="text-sm font-medium text-muted-foreground mb-1">{t.cards.totalEndpoints}</dt>
               <dd className="text-base">{endpointCount}</dd>
             </div>
           )}
@@ -71,25 +71,25 @@ export function OverviewTab({ api }: OverviewTabProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-2">Known Issues</h3>
+          <h3 className="text-lg font-display font-semibold mb-2">{t.cards.knownIssues}</h3>
           <p className="text-3xl font-bold text-destructive">{api.knownIssues.length}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {api.knownIssues.filter(i => i.status === 'open').length} open
+            {api.knownIssues.filter(i => i.status === 'open').length} {t.cards.openIssues}
           </p>
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-2">Backlog Items</h3>
+          <h3 className="text-lg font-display font-semibold mb-2">{t.cards.backlogItems}</h3>
           <p className="text-3xl font-bold text-accent">{api.backlogItems.length}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {api.backlogItems.filter(i => i.status === 'in_progress').length} in progress
+            {api.backlogItems.filter(i => i.status === 'in_progress').length} {t.cards.inProgress}
           </p>
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-2">PCM Fields</h3>
+          <h3 className="text-lg font-display font-semibold mb-2">{t.cards.pcmFields}</h3>
           <p className="text-3xl font-bold text-primary">{api.pcmFields.length}</p>
-          <p className="text-sm text-muted-foreground mt-1">configured</p>
+          <p className="text-sm text-muted-foreground mt-1">{t.cards.configured}</p>
         </Card>
       </div>
     </div>
