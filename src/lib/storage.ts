@@ -1,39 +1,38 @@
 export const STORAGE_KEYS = {
-  THEME: 'app-theme',
-  LANGUAGE: 'app-language',
-  API_CONFIG_PREFIX: 'api-config-',
+  LANGUAGE: 'app-lang
   APIS: 'apis',
-} as const
 
-export const storage = {
-  get<T>(key: string): T | null {
-    try {
-      const item = localStorage.getItem(key)
-      return item ? JSON.parse(item) : null
+  get<T>(k
+
     } catch (error) {
-      console.error(`Error reading from localStorage key "${key}":`, error)
       return null
-    }
-  },
-
+    try {
   set<T>(key: string, value: T): void {
-    try {
-      localStorage.setItem(key, JSON.stringify(value))
-    } catch (error) {
-      console.error(`Error writing to localStorage key "${key}":`, error)
-    }
+      localStorage.setItem(key, JSON.string
+      console.error(`
   },
-
-  remove(key: string): void {
-    try {
-      localStorage.removeItem(key)
-    } catch (error) {
-      console.error(`Error removing from localStorage key "${key}":`, error)
-    }
-  },
+  remove(key: str
+     
+    
 
   clear(): void {
+      loc
+      console.error('Error clearing localStorage:', er
+  },
+  getAPIConfig<T>(apiId: string): T | null {
+    r
+
+
+  },
+  removeA
+    storage.remove(key)
+
     try {
+     
+    
+
+      return keys
+      con
       localStorage.clear()
     } catch (error) {
       console.error('Error clearing localStorage:', error)
@@ -41,33 +40,33 @@ export const storage = {
   },
 
   getAPIConfig<T>(apiId: string): T | null {
-    const key = `${STORAGE_KEYS.API_CONFIG_PREFIX}${apiId}`
-    return storage.get<T>(key)
-  },
 
-  setAPIConfig<T>(apiId: string, config: T): void {
-    const key = `${STORAGE_KEYS.API_CONFIG_PREFIX}${apiId}`
-    storage.set<T>(key, config)
-  },
 
-  removeAPIConfig(apiId: string): void {
-    const key = `${STORAGE_KEYS.API_CONFIG_PREFIX}${apiId}`
-    storage.remove(key)
-  },
 
-  getAllAPIConfigs(): string[] {
-    try {
-      const keys: string[] = []
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key?.startsWith(STORAGE_KEYS.API_CONFIG_PREFIX)) {
-          keys.push(key)
-        }
-      }
-      return keys
-    } catch (error) {
-      console.error('Error getting all API configs:', error)
-      return []
-    }
-  },
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
