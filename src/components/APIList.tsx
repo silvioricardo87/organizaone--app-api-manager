@@ -3,9 +3,10 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MagnifyingGlass, Plus, FileText } from '@phosphor-icons/react'
+import { MagnifyingGlass, Plus, FileText, UploadSimple } from '@phosphor-icons/react'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { PhaseIndicator } from './PhaseIndicator'
+import { ImportAPIDialog } from './ImportAPIDialog'
 import { useSettings } from '@/hooks/use-settings'
 import { format } from 'date-fns'
 
@@ -13,11 +14,13 @@ interface APIListProps {
   apis: APIContract[]
   onSelectAPI: (api: APIContract) => void
   onNewAPI: () => void
+  onImportAPI: (api: APIContract) => void
 }
 
-export function APIList({ apis, onSelectAPI, onNewAPI }: APIListProps) {
+export function APIList({ apis, onSelectAPI, onNewAPI, onImportAPI }: APIListProps) {
   const { t } = useSettings()
   const [searchQuery, setSearchQuery] = useState('')
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
 
   const filteredAPIs = useMemo(() => {
     if (!searchQuery.trim()) return apis
@@ -79,10 +82,16 @@ export function APIList({ apis, onSelectAPI, onNewAPI }: APIListProps) {
             className="pl-10"
           />
         </div>
-        <Button onClick={onNewAPI}>
-          <Plus size={20} weight="bold" className="mr-2" />
-          {t.apiList.newAPI}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <UploadSimple size={20} weight="bold" className="mr-2" />
+            {t.common.import}
+          </Button>
+          <Button onClick={onNewAPI}>
+            <Plus size={20} weight="bold" className="mr-2" />
+            {t.apiList.newAPI}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -135,6 +144,12 @@ export function APIList({ apis, onSelectAPI, onNewAPI }: APIListProps) {
           <p className="text-muted-foreground">{t.apiList.noResults} "{searchQuery}"</p>
         </div>
       )}
+
+      <ImportAPIDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={onImportAPI}
+      />
     </div>
   )
 }

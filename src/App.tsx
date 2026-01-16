@@ -28,6 +28,10 @@ function App() {
     setApis((currentApis) => [...(currentApis || []), api])
   }
 
+  const handleImportAPI = (api: APIContract) => {
+    setApis((currentApis) => [...(currentApis || []), api])
+  }
+
   const handleUpdateAPI = (updatedAPI: APIContract) => {
     setApis((currentApis) =>
       (currentApis || []).map(api => api.id === updatedAPI.id ? updatedAPI : api)
@@ -111,6 +115,7 @@ function App() {
             apis={currentApis}
             onSelectAPI={handleSelectAPI}
             onNewAPI={() => setNewAPIDialogOpen(true)}
+            onImportAPI={handleImportAPI}
           />
         )}
       </main>
