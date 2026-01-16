@@ -40,6 +40,7 @@ export const translations = {
     apiDetail: {
       back: 'Back to list',
       delete: 'Delete API',
+      export: 'Export',
       confirmDelete: 'Confirm Deletion',
       confirmDeleteMessage: 'Are you sure you want to delete this API contract? This action cannot be undone.',
       cancel: 'Cancel',
@@ -534,6 +535,7 @@ export const translations = {
       apiCreated: 'API created successfully',
       apiUpdated: 'API updated successfully',
       apiDeleted: 'API deleted successfully',
+      apiExported: 'API exported successfully',
       issueCreated: 'Issue created successfully',
       issueUpdated: 'Issue updated successfully',
       issueDeleted: 'Issue deleted successfully',
@@ -633,6 +635,7 @@ export const translations = {
     apiDetail: {
       back: 'Voltar para lista',
       delete: 'Excluir API',
+      export: 'Exportar',
       confirmDelete: 'Confirmar Exclusão',
       confirmDeleteMessage: 'Tem certeza que deseja excluir este contrato de API? Esta ação não pode ser desfeita.',
       cancel: 'Cancelar',
@@ -1127,6 +1130,7 @@ export const translations = {
       apiCreated: 'API criada com sucesso',
       apiUpdated: 'API atualizada com sucesso',
       apiDeleted: 'API excluída com sucesso',
+      apiExported: 'API exportada com sucesso',
       issueCreated: 'Problema criado com sucesso',
       issueUpdated: 'Problema atualizado com sucesso',
       issueDeleted: 'Problema excluído com sucesso',
