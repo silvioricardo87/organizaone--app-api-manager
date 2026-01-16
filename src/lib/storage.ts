@@ -1,14 +1,13 @@
 export const STORAGE_KEYS = {
-  THEME: 'app-theme',
+  APIS: 'api-contract
   APIS: 'api-contracts',
-  LANGUAGE: 'app-language',
 }
 
-export const storage = {
-  get<T>(key: string): T | null {
     try {
-      const item = localStorage.getItem(key)
-      return item ? JSON.parse(item) : null
+      return item ? JSON.parse(it
+      con
+    }
+
     } catch (error) {
       console.error(`Error getting item from localStorage (${key}):`, error)
       return null
@@ -30,12 +29,6 @@ export const storage = {
       console.error(`Error removing item from localStorage (${key}):`, error)
     }
   },
-
-  getAPIConfig<T>(apiId: string): T | null {
-    const key = `api-config-${apiId}`
-    return storage.get<T>(key)
-  },
-
   setAPIConfig<T>(apiId: string, config: T): void {
     const key = `api-config-${apiId}`
     storage.set(key, config)
