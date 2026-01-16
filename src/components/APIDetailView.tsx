@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ArrowLeft, Trash } from '@phosphor-icons/react'
+import { ArrowLeft, Trash, DownloadSimple } from '@phosphor-icons/react'
 import { APIContract } from '@/lib/types'
 import { OverviewTab } from './tabs/OverviewTab'
 import { LifecycleTab } from './tabs/LifecycleTab'
@@ -47,6 +47,43 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
     setDeleteDialogOpen(false)
   }
 
+  const handleExport = () => {
+    const exportData = {
+      api: {
+        id: api.id,
+        name: api.name,
+        version: api.version,
+        summary: api.summary,
+        createdAt: api.createdAt,
+        updatedAt: api.updatedAt,
+      },
+      contract: api.yamlContent,
+      specification: api.parsedSpec,
+      lifecycle: {
+        phases: api.lifecyclePhases,
+        milestones: api.milestones,
+      },
+      issues: api.knownIssues,
+      backlog: api.backlogItems,
+      pcm: api.pcmFields,
+      exportedAt: new Date().toISOString(),
+    }
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json',
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${api.name}-v${api.version}-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    
+    toast.success(t.toasts.apiExported)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -57,6 +94,10 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
           <h1 className="text-3xl font-display font-bold">{api.name}</h1>
           <p className="text-muted-foreground">{t.apiDetail.version} {api.version}</p>
         </div>
+        <Button variant="outline" onClick={handleExport}>
+          <DownloadSimple size={20} weight="bold" className="mr-2" />
+          {t.apiDetail.export}
+        </Button>
         <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
           <Trash size={20} weight="bold" className="mr-2" />
           {t.apiDetail.delete}
