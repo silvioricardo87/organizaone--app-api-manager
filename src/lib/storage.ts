@@ -1,56 +1,49 @@
 export const STORAGE_KEYS = {
   THEME: 'app-theme',
+  APIS: 'api-contracts',
+  LANGUAGE: 'app-language',
 }
-e
 
 export const storage = {
   get<T>(key: string): T | null {
     try {
       const item = localStorage.getItem(key)
       return item ? JSON.parse(item) : null
-  },
+    } catch (error) {
       console.error(`Error getting item from localStorage (${key}):`, error)
-    try {
+      return null
     }
-    
+  },
 
-
-      loc
+  set<T>(key: string, value: T): void {
+    try {
       localStorage.setItem(key, JSON.stringify(value))
     } catch (error) {
-
-    c
+      console.error(`Error setting item in localStorage (${key}):`, error)
+    }
   },
 
-    storage.set(key, config)
-
-    const key = `api-config-${apiI
+  remove(key: string): void {
+    try {
+      localStorage.removeItem(key)
+    } catch (error) {
+      console.error(`Error removing item from localStorage (${key}):`, error)
+    }
   },
-  getAllAPIConfigs(): string[] {
-     
-    
-
-  }
-
-
-
-
-
-
 
   getAPIConfig<T>(apiId: string): T | null {
     const key = `api-config-${apiId}`
-    return this.get<T>(key)
+    return storage.get<T>(key)
   },
 
   setAPIConfig<T>(apiId: string, config: T): void {
     const key = `api-config-${apiId}`
-    this.set(key, config)
+    storage.set(key, config)
   },
 
   removeAPIConfig(apiId: string): void {
     const key = `api-config-${apiId}`
-    this.remove(key)
+    storage.remove(key)
   },
 
   getAllAPIConfigs(): string[] {
@@ -63,3 +56,4 @@ export const storage = {
     }
   }
 }
+
