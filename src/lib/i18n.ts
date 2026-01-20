@@ -1,7 +1,7 @@
 export const translations = {
   en: {
     header: {
-      title: 'OpenFinance API Manager',
+      title: 'OrganizaOne - API Manager',
       subtitle: 'Manage API contracts, lifecycle, and metrics',
       dashboard: 'Dashboard',
       roadmap: 'Roadmap',
@@ -644,7 +644,7 @@ export const translations = {
   },
   pt: {
     header: {
-      title: 'Gerenciador de APIs OpenFinance',
+      title: 'OrganizaOne - Gerenciador de APIs',
       subtitle: 'Gerencie contratos de API, ciclo de vida e métricas',
       dashboard: 'Painel',
       roadmap: 'Roadmap',
