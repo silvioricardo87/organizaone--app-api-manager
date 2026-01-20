@@ -1000,41 +1000,40 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
 
       {spec.components?.schemas && (
         <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-display font-semibold">{t.specification.schemas}</h2>
-            <div className="flex flex-col gap-2">
-              <div className="relative w-80">
-                <MagnifyingGlass 
-                  size={18} 
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  placeholder={t.specification.filterSchemas}
-                  value={schemaFilter}
-                  onChange={(e) => setSchemaFilter(e.target.value)}
-                  className="pl-10 pr-10"
-                />
-                {schemaFilter && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={() => setSchemaFilter('')}
-                  >
-                    <X size={14} />
-                  </Button>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox 
-                  id="search-name-only" 
-                  checked={searchNameOnly}
-                  onCheckedChange={(checked) => setSearchNameOnly(checked === true)}
-                />
-                <Label htmlFor="search-name-only" className="text-sm cursor-pointer">
-                  {t.specification.searchNameOnly}
-                </Label>
-              </div>
+          <h2 className="text-xl font-display font-semibold mb-4">{t.specification.schemas}</h2>
+          
+          <div className="mb-6 p-4 bg-muted/50 rounded-lg border border-border space-y-3">
+            <div className="relative">
+              <MagnifyingGlass 
+                size={18} 
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                placeholder={t.specification.filterSchemas}
+                value={schemaFilter}
+                onChange={(e) => setSchemaFilter(e.target.value)}
+                className="pl-10 pr-10"
+              />
+              {schemaFilter && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={() => setSchemaFilter('')}
+                >
+                  <X size={14} />
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox 
+                id="search-name-only" 
+                checked={searchNameOnly}
+                onCheckedChange={(checked) => setSearchNameOnly(checked === true)}
+              />
+              <Label htmlFor="search-name-only" className="text-sm cursor-pointer">
+                {t.specification.searchNameOnly}
+              </Label>
             </div>
           </div>
           {(() => {
