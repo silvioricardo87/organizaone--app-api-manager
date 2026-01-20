@@ -16,9 +16,10 @@ interface ImportAPIDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onImport: (api: APIContract) => void
+  existingAPIs: APIContract[]
 }
 
-export function ImportAPIDialog({ open, onOpenChange, onImport }: ImportAPIDialogProps) {
+export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: ImportAPIDialogProps) {
   const { t } = useSettings()
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -54,6 +55,15 @@ export function ImportAPIDialog({ open, onOpenChange, onImport }: ImportAPIDialo
           pcmFields: importedData.pcm || [],
           createdAt: importedData.api.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString(),
+        }
+
+        const isDuplicate = existingAPIs.some(
+          api => api.name === restoredAPI.name && api.version === restoredAPI.version
+        )
+
+        if (isDuplicate) {
+          toast.error(t.toasts.duplicateAPI)
+          return
         }
 
         onImport(restoredAPI)

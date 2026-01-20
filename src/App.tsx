@@ -124,6 +124,7 @@ function App() {
         open={newAPIDialogOpen}
         onOpenChange={setNewAPIDialogOpen}
         onSave={handleSaveNewAPI}
+        existingAPIs={currentApis}
       />
 
       <Toaster />
