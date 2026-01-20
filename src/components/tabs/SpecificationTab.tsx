@@ -5,6 +5,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { APIContract } from '@/lib/types'
 import { Copy, CaretRight, MagnifyingGlass, X } from '@phosphor-icons/react'
 import { toast } from 'sonner'
@@ -25,56 +27,90 @@ const METHOD_COLORS: Record<string, string> = {
   head: 'bg-gray-500/10 text-gray-700 border-gray-500/20'
 }
 
-function schemaMatchesFilter(schemaName: string, schema: any, filter: string, spec?: any): boolean {
+function fieldMatchesSearch(fieldName: string, fieldSchema: any, filter: string, searchNameOnly: boolean, spec?: any): boolean {
   if (!filter) return true
   
   const lowerFilter = filter.toLowerCase()
+  const resolvedSchema = spec && fieldSchema.$ref ? resolveRef(fieldSchema.$ref, spec) || fieldSchema : fieldSchema
   
-  if (schemaName.toLowerCase().includes(lowerFilter)) {
+  if (fieldName.toLowerCase().includes(lowerFilter)) {
     return true
   }
   
-  const resolvedSchema = spec && schema.$ref ? resolveRef(schema.$ref, spec) || schema : schema
-  
-  if (resolvedSchema.properties) {
-    const fieldNames = Object.keys(resolvedSchema.properties)
-    if (fieldNames.some(field => field.toLowerCase().includes(lowerFilter))) {
-      return true
-    }
-    
-    for (const [fieldName, fieldSchema] of Object.entries(resolvedSchema.properties)) {
-      if (schemaMatchesFilter(fieldName, fieldSchema as any, filter, spec)) {
-        return true
-      }
-    }
-  }
-  
-  if (resolvedSchema.items) {
-    return schemaMatchesFilter('items', resolvedSchema.items, filter, spec)
-  }
-  
-  if (resolvedSchema.allOf) {
-    return resolvedSchema.allOf.some((subSchema: any, idx: number) => 
-      schemaMatchesFilter(`allOf${idx}`, subSchema, filter, spec)
-    )
-  }
-  
-  if (resolvedSchema.oneOf) {
-    return resolvedSchema.oneOf.some((subSchema: any, idx: number) => 
-      schemaMatchesFilter(`oneOf${idx}`, subSchema, filter, spec)
-    )
-  }
-  
-  if (resolvedSchema.anyOf) {
-    return resolvedSchema.anyOf.some((subSchema: any, idx: number) => 
-      schemaMatchesFilter(`anyOf${idx}`, subSchema, filter, spec)
-    )
+  if (!searchNameOnly && resolvedSchema.description && resolvedSchema.description.toLowerCase().includes(lowerFilter)) {
+    return true
   }
   
   return false
 }
 
-function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: string; level?: number; spec?: any }) {
+function filterSchemaFields(schema: any, filter: string, searchNameOnly: boolean, spec?: any): any {
+  if (!filter) return schema
+  
+  const resolvedSchema = spec && schema.$ref ? resolveRef(schema.$ref, spec) || schema : schema
+  
+  if (!resolvedSchema.properties) {
+    return schema
+  }
+  
+  const filteredProperties: Record<string, any> = {}
+  
+  for (const [fieldName, fieldSchema] of Object.entries(resolvedSchema.properties)) {
+    if (fieldMatchesSearch(fieldName, fieldSchema as any, filter, searchNameOnly, spec)) {
+      filteredProperties[fieldName] = fieldSchema
+    } else {
+      const nestedFiltered = filterSchemaFields(fieldSchema as any, filter, searchNameOnly, spec)
+      if (nestedFiltered && nestedFiltered.properties && Object.keys(nestedFiltered.properties).length > 0) {
+        filteredProperties[fieldName] = nestedFiltered
+      }
+    }
+  }
+  
+  if (Object.keys(filteredProperties).length === 0) {
+    return null
+  }
+  
+  return {
+    ...resolvedSchema,
+    properties: filteredProperties
+  }
+}
+
+function schemaHasMatchingFields(schema: any, filter: string, searchNameOnly: boolean, spec?: any): boolean {
+  if (!filter) return true
+  
+  const resolvedSchema = spec && schema.$ref ? resolveRef(schema.$ref, spec) || schema : schema
+  
+  if (!resolvedSchema.properties) return false
+  
+  for (const [fieldName, fieldSchema] of Object.entries(resolvedSchema.properties)) {
+    if (fieldMatchesSearch(fieldName, fieldSchema as any, filter, searchNameOnly, spec)) {
+      return true
+    }
+    
+    if (schemaHasMatchingFields(fieldSchema as any, filter, searchNameOnly, spec)) {
+      return true
+    }
+  }
+  
+  return false
+}
+
+function SchemaViewer({ 
+  schema, 
+  name, 
+  level = 0, 
+  spec, 
+  filter, 
+  searchNameOnly 
+}: { 
+  schema: any; 
+  name: string; 
+  level?: number; 
+  spec?: any;
+  filter?: string;
+  searchNameOnly?: boolean;
+}) {
   const { t } = useSettings()
   const [expanded, setExpanded] = useState(level < 2)
 
@@ -232,18 +268,26 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
 
           {expanded && hasProperties && (
             <div className="mt-3 space-y-2">
-              {Object.entries(resolvedSchema.properties).map(([propName, propSchema]: [string, any]) => (
-                <SchemaViewer
-                  key={propName}
-                  name={propName}
-                  schema={{
-                    ...propSchema,
-                    required: Array.isArray(resolvedSchema.required) && resolvedSchema.required.includes(propName)
-                  }}
-                  level={level + 1}
-                  spec={spec}
-                />
-              ))}
+              {Object.entries(resolvedSchema.properties)
+                .filter(([propName, propSchema]: [string, any]) => {
+                  if (!filter) return true
+                  return fieldMatchesSearch(propName, propSchema, filter, searchNameOnly || false, spec) ||
+                         schemaHasMatchingFields(propSchema, filter, searchNameOnly || false, spec)
+                })
+                .map(([propName, propSchema]: [string, any]) => (
+                  <SchemaViewer
+                    key={propName}
+                    name={propName}
+                    schema={{
+                      ...propSchema,
+                      required: Array.isArray(resolvedSchema.required) && resolvedSchema.required.includes(propName)
+                    }}
+                    level={level + 1}
+                    spec={spec}
+                    filter={filter}
+                    searchNameOnly={searchNameOnly}
+                  />
+                ))}
             </div>
           )}
 
@@ -254,6 +298,8 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
                 schema={resolvedSchema.items}
                 level={level + 1}
                 spec={spec}
+                filter={filter}
+                searchNameOnly={searchNameOnly}
               />
             </div>
           )}
@@ -268,6 +314,8 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
                   schema={subSchema}
                   level={level + 1}
                   spec={spec}
+                  filter={filter}
+                  searchNameOnly={searchNameOnly}
                 />
               ))}
             </div>
@@ -283,6 +331,8 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
                   schema={subSchema}
                   level={level + 1}
                   spec={spec}
+                  filter={filter}
+                  searchNameOnly={searchNameOnly}
                 />
               ))}
             </div>
@@ -298,6 +348,8 @@ function SchemaViewer({ schema, name, level = 0, spec }: { schema: any; name: st
                   schema={subSchema}
                   level={level + 1}
                   spec={spec}
+                  filter={filter}
+                  searchNameOnly={searchNameOnly}
                 />
               ))}
             </div>
@@ -572,6 +624,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
   const spec = api.parsedSpec
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [schemaFilter, setSchemaFilter] = useState('')
+  const [searchNameOnly, setSearchNameOnly] = useState(false)
 
   const description = spec?.info?.description || ''
   const descriptionLines = description.split('\n')
@@ -949,32 +1002,44 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-display font-semibold">{t.specification.schemas}</h2>
-            <div className="relative w-80">
-              <MagnifyingGlass 
-                size={18} 
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                placeholder={t.specification.filterSchemas}
-                value={schemaFilter}
-                onChange={(e) => setSchemaFilter(e.target.value)}
-                className="pl-10 pr-10"
-              />
-              {schemaFilter && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 absolute right-2 top-1/2 -translate-y-1/2"
-                  onClick={() => setSchemaFilter('')}
-                >
-                  <X size={14} />
-                </Button>
-              )}
+            <div className="flex flex-col gap-2">
+              <div className="relative w-80">
+                <MagnifyingGlass 
+                  size={18} 
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  placeholder={t.specification.filterSchemas}
+                  value={schemaFilter}
+                  onChange={(e) => setSchemaFilter(e.target.value)}
+                  className="pl-10 pr-10"
+                />
+                {schemaFilter && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 absolute right-2 top-1/2 -translate-y-1/2"
+                    onClick={() => setSchemaFilter('')}
+                  >
+                    <X size={14} />
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="search-name-only" 
+                  checked={searchNameOnly}
+                  onCheckedChange={(checked) => setSearchNameOnly(checked === true)}
+                />
+                <Label htmlFor="search-name-only" className="text-sm cursor-pointer">
+                  {t.specification.searchNameOnly}
+                </Label>
+              </div>
             </div>
           </div>
           {(() => {
             const filteredSchemas = Object.entries(spec.components.schemas).filter(
-              ([name, schema]: [string, any]) => schemaMatchesFilter(name, schema, schemaFilter, spec)
+              ([_, schema]: [string, any]) => schemaHasMatchingFields(schema, schemaFilter, searchNameOnly, spec)
             )
             
             if (filteredSchemas.length === 0) {
@@ -993,7 +1058,13 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                       <code className="text-sm font-mono">{name}</code>
                     </AccordionTrigger>
                     <AccordionContent className="pt-4">
-                      <SchemaViewer name={name} schema={schema} spec={spec} />
+                      <SchemaViewer 
+                        name={name} 
+                        schema={schema} 
+                        spec={spec} 
+                        filter={schemaFilter}
+                        searchNameOnly={searchNameOnly}
+                      />
                     </AccordionContent>
                   </AccordionItem>
                 ))}
