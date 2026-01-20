@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -9,7 +10,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from '@/components/ui/dropdown-menu'
-import { Gear, Sun, Moon, Desktop, Globe, DownloadSimple, UploadSimple, Database } from '@phosphor-icons/react'
+import { Gear, Sun, Moon, Desktop, Globe, Database } from '@phosphor-icons/react'
 import { useSettings } from '@/hooks/use-settings'
 import { APIContract } from '@/lib/types'
 
@@ -17,9 +18,10 @@ interface SettingsMenuProps {
   apis?: APIContract[]
   onExportAll?: () => void
   onImportAll?: () => void
+  onOpenDataManagement?: () => void
 }
 
-export function SettingsMenu({ apis, onExportAll, onImportAll }: SettingsMenuProps) {
+export function SettingsMenu({ apis, onOpenDataManagement }: SettingsMenuProps) {
   const { language, setLanguage, theme, setTheme, t } = useSettings()
 
   return (
@@ -66,28 +68,14 @@ export function SettingsMenu({ apis, onExportAll, onImportAll }: SettingsMenuPro
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
 
-        {(onExportAll || onImportAll) && (
+        {onOpenDataManagement && (
           <>
             <DropdownMenuSeparator />
             
-            <DropdownMenuLabel className="flex items-center gap-2">
-              <Database size={16} weight="duotone" />
+            <DropdownMenuItem onClick={onOpenDataManagement}>
+              <Database size={16} weight="duotone" className="mr-2" />
               {t.settings.dataManagement}
-            </DropdownMenuLabel>
-            
-            {onExportAll && (
-              <DropdownMenuItem onClick={onExportAll} disabled={!apis || apis.length === 0}>
-                <DownloadSimple size={16} weight="duotone" className="mr-2" />
-                {t.settings.exportAll}
-              </DropdownMenuItem>
-            )}
-            
-            {onImportAll && (
-              <DropdownMenuItem onClick={onImportAll}>
-                <UploadSimple size={16} weight="duotone" className="mr-2" />
-                {t.settings.importAll}
-              </DropdownMenuItem>
-            )}
+            </DropdownMenuItem>
           </>
         )}
       </DropdownMenuContent>
