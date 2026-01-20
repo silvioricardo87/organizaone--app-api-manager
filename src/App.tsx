@@ -5,7 +5,7 @@ import { APIContract } from '@/lib/types'
 import { APIList } from '@/components/APIList'
 import { APIDetailView } from '@/components/APIDetailView'
 import { NewAPIDialog } from '@/components/NewAPIDialog'
-import { BatchImportDialog } from '@/components/BatchImportDialog'
+import { DataManagementDialog } from '@/components/DataManagementDialog'
 import { Dashboard } from '@/components/Dashboard'
 import { Roadmap } from '@/components/Roadmap'
 import { SettingsMenu } from '@/components/SettingsMenu'
@@ -22,7 +22,7 @@ function App() {
   const [apis, setApis] = usePersistedKV<APIContract[]>(STORAGE_KEYS.APIS, [])
   const [selectedAPI, setSelectedAPI] = useState<APIContract | null>(null)
   const [newAPIDialogOpen, setNewAPIDialogOpen] = useState(false)
-  const [batchImportDialogOpen, setBatchImportDialogOpen] = useState(false)
+  const [dataManagementDialogOpen, setDataManagementDialogOpen] = useState(false)
   const [currentView, setCurrentView] = useState<View>('list')
 
   const currentApis = apis || []
@@ -68,38 +68,6 @@ function App() {
     setCurrentView('list')
   }
 
-  const handleExportAll = () => {
-    if (!currentApis || currentApis.length === 0) {
-      toast.error(t.toasts.noApisToExport)
-      return
-    }
-
-    try {
-      const exportData = {
-        version: '1.0.0',
-        exportDate: new Date().toISOString(),
-        apis: currentApis,
-      }
-
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-        type: 'application/json',
-      })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `all-apis-export-${new Date().toISOString().split('T')[0]}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
-      toast.success(t.toasts.allApisExported)
-    } catch (error) {
-      console.error('Error exporting all APIs:', error)
-      toast.error(t.toasts.errorExportingAll)
-    }
-  }
-
   const handleBatchImport = (importedApis: APIContract[]) => {
     setApis((currentApis) => [...(currentApis || []), ...importedApis])
   }
@@ -133,8 +101,7 @@ function App() {
               )}
               <SettingsMenu 
                 apis={currentApis}
-                onExportAll={handleExportAll}
-                onImportAll={() => setBatchImportDialogOpen(true)}
+                onOpenDataManagement={() => setDataManagementDialogOpen(true)}
               />
             </div>
           </div>
@@ -170,11 +137,11 @@ function App() {
         existingAPIs={currentApis}
       />
 
-      <BatchImportDialog
-        open={batchImportDialogOpen}
-        onOpenChange={setBatchImportDialogOpen}
+      <DataManagementDialog
+        open={dataManagementDialogOpen}
+        onOpenChange={setDataManagementDialogOpen}
+        apis={currentApis}
         onImport={handleBatchImport}
-        existingAPIs={currentApis}
       />
 
       <Toaster />
