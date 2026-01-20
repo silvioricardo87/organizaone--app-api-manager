@@ -52,6 +52,8 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
       api: {
         id: api.id,
         name: api.name,
+        displayName: api.displayName,
+        useDisplayName: api.useDisplayName,
         version: api.version,
         summary: api.summary,
         createdAt: api.createdAt,

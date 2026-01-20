@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Upload } from '@phosphor-icons/react'
 import { parseOpenAPIYAML, extractAPIMetadata, generateId } from '@/lib/api-utils'
 import { APIContract, LifecyclePhaseData } from '@/lib/types'
@@ -20,11 +21,19 @@ interface NewAPIDialogProps {
 export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAPIDialogProps) {
   const { t } = useSettings()
   const [name, setName] = useState('')
+  const [displayName, setDisplayName] = useState('')
+  const [useDisplayName, setUseDisplayName] = useState(false)
   const [yamlContent, setYamlContent] = useState('')
   const [version, setVersion] = useState('')
   const [summary, setSummary] = useState('')
   const [parsedSpec, setParsedSpec] = useState<any>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+
+  useEffect(() => {
+    if (!open) {
+      resetForm()
+    }
+  }, [open])
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -92,6 +101,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     const newAPI: APIContract = {
       id: generateId(),
       name: normalizedName,
+      displayName: displayName.trim() || undefined,
+      useDisplayName: displayName.trim() ? useDisplayName : false,
       version: normalizedVersion,
       summary: summary.trim() || 'No summary provided',
       yamlContent,
@@ -106,7 +117,6 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     }
 
     onSave(newAPI)
-    resetForm()
     onOpenChange(false)
     toast.success(t.newAPIDialog.successTitle, {
       description: t.newAPIDialog.successMessage
@@ -115,6 +125,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
 
   const resetForm = () => {
     setName('')
+    setDisplayName('')
+    setUseDisplayName(false)
     setYamlContent('')
     setVersion('')
     setSummary('')
@@ -162,6 +174,31 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
               onChange={(e) => setName(e.target.value)}
               placeholder={t.newAPIDialog.namePlaceholder}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="api-display-name">{t.newAPIDialog.displayName}</Label>
+            <Input
+              id="api-display-name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder={t.newAPIDialog.displayNamePlaceholder}
+            />
+            {displayName.trim() && (
+              <div className="flex items-center space-x-2 pt-2">
+                <Checkbox
+                  id="use-display-name"
+                  checked={useDisplayName}
+                  onCheckedChange={(checked) => setUseDisplayName(checked === true)}
+                />
+                <label
+                  htmlFor="use-display-name"
+                  className="text-sm text-muted-foreground cursor-pointer"
+                >
+                  {t.newAPIDialog.useDisplayNameLabel}
+                </label>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

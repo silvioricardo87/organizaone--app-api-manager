@@ -44,6 +44,8 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
         const restoredAPI: APIContract = {
           id: importedData.api.id,
           name: importedData.api.name,
+          displayName: importedData.api.displayName,
+          useDisplayName: importedData.api.useDisplayName || false,
           version: importedData.api.version || '1.0.0',
           summary: importedData.api.summary || '',
           yamlContent: importedData.contract || '',

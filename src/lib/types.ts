@@ -61,6 +61,8 @@ export interface PCMField {
 export interface APIContract {
   id: string
   name: string
+  displayName?: string
+  useDisplayName?: boolean
   version: string
   summary: string
   yamlContent: string
