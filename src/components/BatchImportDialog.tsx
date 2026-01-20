@@ -1,35 +1,35 @@
 import { useState, useRef } from 'react'
-import {
+  Dialog
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
+import { Uploa
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Upload, X } from '@phosphor-icons/react'
-import { useSettings } from '@/hooks/use-settings'
-import { APIContract } from '@/lib/types'
-import { toast } from 'sonner'
-
-interface BatchImportDialogProps {
-  open: boolean
   onOpenChange: (open: boolean) => void
-  onImport: (apis: APIContract[]) => void
   existingAPIs: APIContract[]
-}
 
-export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }: BatchImportDialogProps) {
   const { t } = useSettings()
-  const [isDragging, setIsDragging] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedFile, setSele
 
-  const handleFileSelect = (file: File) => {
-    if (file.type === 'application/json' || file.name.endsWith('.json')) {
-      setSelectedFile(file)
+    if (file.type === 'application
     } else {
-      toast.error(t.toasts.invalidFileFormat)
+    }
+
+    e.preventDefault()
+ 
+
+    }
+
+    if (!selectedFile) return
+    try {
+      const data = JSON.parse(text)
+
+        return
+
+      const skippedAPIs: st
+      for (c
+          (existing) => existing.name === api
     }
   }
 
@@ -63,71 +63,71 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
           (existing) => existing.name === api.name && existing.version === api.version
         )
 
-        if (duplicate) {
-          skippedAPIs.push(`${api.name} (${api.version})`)
-        } else {
-          apisToImport.push(api)
-        }
-      }
 
-      if (apisToImport.length > 0) {
-        onImport(apisToImport)
-        toast.success(t.toasts.allApisImported.replace('{count}', String(apisToImport.length)))
+              <div className="flex items-center justify-be
+                
+                </div>
+         
+       
+
+                >
+                </Button>
+            ) : (
         
-        if (skippedAPIs.length > 0) {
-          toast.warning(
-            `${skippedAPIs.length} APIs foram ignoradas (já existem): ${skippedAPIs.join(', ')}`
-          )
-        }
+                  <Button
+                    vari
+                  >
+           
+         
         
-        onOpenChange(false)
-        setSelectedFile(null)
-      } else {
-        toast.warning('Nenhuma API nova para importar. Todas já existem.')
-      }
-    } catch (error) {
-      console.error('Error importing APIs:', error)
-      toast.error(t.toasts.errorImportingAll)
-    }
-  }
+          </div>
 
-  const handleClose = () => {
-    setSelectedFile(null)
-    onOpenChange(false)
-  }
+          <But
+          </Button>
+       
+        </div>
+    </Dialog>
+}
 
-  return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{t.settings.importAll}</DialogTitle>
-          <DialogDescription>{t.settings.importAllDescription}</DialogDescription>
-        </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              isDragging
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50'
-            }`}
-            onDragOver={(e) => {
-              e.preventDefault()
-              setIsDragging(true)
-            }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={handleDrop}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) handleFileSelect(file)
-              }}
-            />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             {selectedFile ? (
               <div className="flex items-center justify-between bg-muted p-3 rounded-lg">
