@@ -21,8 +21,8 @@ interface BatchImportDialogProps {
 
 export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }: BatchImportDialogProps) {
   const { t } = useSettings()
-  const [isDragging, setIsDragging] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (file: File) => {
@@ -33,6 +33,15 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
     setSelectedFile(file)
   }
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = () => {
+    setIsDragging(false)
+  }
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
@@ -41,15 +50,6 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
     if (file) {
       handleFileSelect(file)
     }
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
-
-  const handleDragLeave = () => {
-    setIsDragging(false)
   }
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,34 +80,31 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
         )
 
         if (duplicate) {
-          skippedAPIs.push(`${api.name} v${api.version}`)
-        } else {
-          apisToImport.push({
-            ...api,
-            updatedAt: new Date().toISOString(),
-          })
+          skippedAPIs.push(`${api.name} (${api.version})`)
+          continue
         }
+
+        apisToImport.push(api)
       }
 
       if (apisToImport.length > 0) {
         onImport(apisToImport)
-        toast.success(t.toasts.allApisImported.replace('{count}', apisToImport.length.toString()))
+        toast.success(t.toasts.allApisImported.replace('{count}', String(apisToImport.length)))
       }
 
       if (skippedAPIs.length > 0) {
-        toast.warning(`${skippedAPIs.length} APIs skipped (duplicates): ${skippedAPIs.join(', ')}`)
+        toast.warning(`${t.toasts.duplicateAPI}: ${skippedAPIs.join(', ')}`)
       }
 
       handleClose()
     } catch (error) {
-      console.error('Error importing APIs:', error)
+      console.error('Error importing batch:', error)
       toast.error(t.toasts.errorImportingAll)
     }
   }
 
   const handleClose = () => {
     setSelectedFile(null)
-    setIsDragging(false)
     onOpenChange(false)
   }
 
@@ -121,7 +118,7 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div>
           <input
             ref={fileInputRef}
             type="file"
@@ -131,7 +128,7 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
           />
 
           <div
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
               isDragging
                 ? 'border-primary bg-primary/5'
                 : 'border-border hover:border-primary/50'
