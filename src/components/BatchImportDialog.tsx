@@ -1,36 +1,36 @@
 import { useState, useRef } from 'react'
-  Dialog
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-import { Uploa
+  DialogTitle,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Upload, X } from '@phosphor-icons/react'
+import { APIContract } from '@/lib/types'
+import { toast } from 'sonner'
+import { useSettings } from '@/hooks/use-settings'
+
+interface BatchImportDialogProps {
+  open: boolean
   onOpenChange: (open: boolean) => void
+  onImport: (apis: APIContract[]) => void
   existingAPIs: APIContract[]
+}
 
+export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }: BatchImportDialogProps) {
   const { t } = useSettings()
-  const [selectedFile, setSele
+  const [isDragging, setIsDragging] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-    if (file.type === 'application
-    } else {
+  const handleFileSelect = (file: File) => {
+    if (file.type !== 'application/json') {
+      toast.error(t.toasts.invalidFileFormat)
+      return
     }
-
-    e.preventDefault()
- 
-
-    }
-
-    if (!selectedFile) return
-    try {
-      const data = JSON.parse(text)
-
-        return
-
-      const skippedAPIs: st
-      for (c
-          (existing) => existing.name === api
-    }
+    setSelectedFile(file)
   }
 
   const handleDrop = (e: React.DragEvent) => {
@@ -38,6 +38,22 @@ import { Uploa
     setIsDragging(false)
     
     const file = e.dataTransfer.files[0]
+    if (file) {
+      handleFileSelect(file)
+    }
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = () => {
+    setIsDragging(false)
+  }
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
     if (file) {
       handleFileSelect(file)
     }
@@ -63,72 +79,68 @@ import { Uploa
           (existing) => existing.name === api.name && existing.version === api.version
         )
 
+        if (duplicate) {
+          skippedAPIs.push(`${api.name} v${api.version}`)
+        } else {
+          apisToImport.push({
+            ...api,
+            updatedAt: new Date().toISOString(),
+          })
+        }
+      }
 
-              <div className="flex items-center justify-be
-                
-                </div>
-         
-       
+      if (apisToImport.length > 0) {
+        onImport(apisToImport)
+        toast.success(t.toasts.allApisImported.replace('{count}', apisToImport.length.toString()))
+      }
 
-                >
-                </Button>
-            ) : (
-        
-                  <Button
-                    vari
-                  >
-           
-         
-        
-          </div>
+      if (skippedAPIs.length > 0) {
+        toast.warning(`${skippedAPIs.length} APIs skipped (duplicates): ${skippedAPIs.join(', ')}`)
+      }
 
-          <But
-          </Button>
-       
-        </div>
-    </Dialog>
-}
+      handleClose()
+    } catch (error) {
+      console.error('Error importing APIs:', error)
+      toast.error(t.toasts.errorImportingAll)
+    }
+  }
 
+  const handleClose = () => {
+    setSelectedFile(null)
+    setIsDragging(false)
+    onOpenChange(false)
+  }
 
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t.settings.importAll}</DialogTitle>
+          <DialogDescription>
+            {t.settings.importAllDescription}
+          </DialogDescription>
+        </DialogHeader>
 
+        <div className="space-y-4">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleFileInputChange}
+          />
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+          <div
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              isDragging
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:border-primary/50'
+            }`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => !selectedFile && fileInputRef.current?.click()}
+          >
             {selectedFile ? (
               <div className="flex items-center justify-between bg-muted p-3 rounded-lg">
                 <div className="flex items-center gap-2">
