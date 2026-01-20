@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Toaster } from '@/components/ui/sonner'
+import { toast } from 'sonner'
 import { APIContract } from '@/lib/types'
 import { APIList } from '@/components/APIList'
 import { APIDetailView } from '@/components/APIDetailView'
 import { NewAPIDialog } from '@/components/NewAPIDialog'
+import { BatchImportDialog } from '@/components/BatchImportDialog'
 import { Dashboard } from '@/components/Dashboard'
 import { Roadmap } from '@/components/Roadmap'
 import { SettingsMenu } from '@/components/SettingsMenu'
@@ -20,6 +22,7 @@ function App() {
   const [apis, setApis] = usePersistedKV<APIContract[]>(STORAGE_KEYS.APIS, [])
   const [selectedAPI, setSelectedAPI] = useState<APIContract | null>(null)
   const [newAPIDialogOpen, setNewAPIDialogOpen] = useState(false)
+  const [batchImportDialogOpen, setBatchImportDialogOpen] = useState(false)
   const [currentView, setCurrentView] = useState<View>('list')
 
   const currentApis = apis || []
@@ -65,6 +68,42 @@ function App() {
     setCurrentView('list')
   }
 
+  const handleExportAll = () => {
+    if (!currentApis || currentApis.length === 0) {
+      toast.error(t.toasts.noApisToExport)
+      return
+    }
+
+    try {
+      const exportData = {
+        version: '1.0.0',
+        exportDate: new Date().toISOString(),
+        apis: currentApis,
+      }
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json',
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `all-apis-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success(t.toasts.allApisExported)
+    } catch (error) {
+      console.error('Error exporting all APIs:', error)
+      toast.error(t.toasts.errorExportingAll)
+    }
+  }
+
+  const handleBatchImport = (importedApis: APIContract[]) => {
+    setApis((currentApis) => [...(currentApis || []), ...importedApis])
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
@@ -92,7 +131,11 @@ function App() {
                   </Button>
                 </>
               )}
-              <SettingsMenu />
+              <SettingsMenu 
+                apis={currentApis}
+                onExportAll={handleExportAll}
+                onImportAll={() => setBatchImportDialogOpen(true)}
+              />
             </div>
           </div>
         </div>
@@ -124,6 +167,13 @@ function App() {
         open={newAPIDialogOpen}
         onOpenChange={setNewAPIDialogOpen}
         onSave={handleSaveNewAPI}
+        existingAPIs={currentApis}
+      />
+
+      <BatchImportDialog
+        open={batchImportDialogOpen}
+        onOpenChange={setBatchImportDialogOpen}
+        onImport={handleBatchImport}
         existingAPIs={currentApis}
       />
 

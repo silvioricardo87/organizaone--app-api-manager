@@ -9,10 +9,17 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from '@/components/ui/dropdown-menu'
-import { Gear, Sun, Moon, Desktop, Globe } from '@phosphor-icons/react'
+import { Gear, Sun, Moon, Desktop, Globe, DownloadSimple, UploadSimple, Database } from '@phosphor-icons/react'
 import { useSettings } from '@/hooks/use-settings'
+import { APIContract } from '@/lib/types'
 
-export function SettingsMenu() {
+interface SettingsMenuProps {
+  apis?: APIContract[]
+  onExportAll?: () => void
+  onImportAll?: () => void
+}
+
+export function SettingsMenu({ apis, onExportAll, onImportAll }: SettingsMenuProps) {
   const { language, setLanguage, theme, setTheme, t } = useSettings()
 
   return (
@@ -58,6 +65,31 @@ export function SettingsMenu() {
             {t.settings.system}
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
+
+        {(onExportAll || onImportAll) && (
+          <>
+            <DropdownMenuSeparator />
+            
+            <DropdownMenuLabel className="flex items-center gap-2">
+              <Database size={16} weight="duotone" />
+              {t.settings.dataManagement}
+            </DropdownMenuLabel>
+            
+            {onExportAll && (
+              <DropdownMenuItem onClick={onExportAll} disabled={!apis || apis.length === 0}>
+                <DownloadSimple size={16} weight="duotone" className="mr-2" />
+                {t.settings.exportAll}
+              </DropdownMenuItem>
+            )}
+            
+            {onImportAll && (
+              <DropdownMenuItem onClick={onImportAll}>
+                <UploadSimple size={16} weight="duotone" className="mr-2" />
+                {t.settings.importAll}
+              </DropdownMenuItem>
+            )}
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
