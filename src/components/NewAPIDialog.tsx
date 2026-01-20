@@ -14,9 +14,10 @@ interface NewAPIDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSave: (api: APIContract) => void
+  existingAPIs: APIContract[]
 }
 
-export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) {
+export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAPIDialogProps) {
   const { t } = useSettings()
   const [name, setName] = useState('')
   const [yamlContent, setYamlContent] = useState('')
@@ -68,6 +69,18 @@ export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) 
       return
     }
 
+    const normalizedName = name.trim()
+    const normalizedVersion = version.trim() || '1.0.0'
+
+    const isDuplicate = existingAPIs.some(
+      api => api.name === normalizedName && api.version === normalizedVersion
+    )
+
+    if (isDuplicate) {
+      toast.error(t.toasts.duplicateAPI)
+      return
+    }
+
     const lifecyclePhases: LifecyclePhaseData[] = [
       { phase: 'implementing' },
       { phase: 'certifying' },
@@ -78,8 +91,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave }: NewAPIDialogProps) 
 
     const newAPI: APIContract = {
       id: generateId(),
-      name: name.trim(),
-      version: version.trim() || '1.0.0',
+      name: normalizedName,
+      version: normalizedVersion,
       summary: summary.trim() || 'No summary provided',
       yamlContent,
       parsedSpec,

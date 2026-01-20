@@ -149,6 +149,7 @@ export function APIList({ apis, onSelectAPI, onNewAPI, onImportAPI }: APIListPro
         open={importDialogOpen}
         onOpenChange={setImportDialogOpen}
         onImport={onImportAPI}
+        existingAPIs={apis}
       />
     </div>
   )
