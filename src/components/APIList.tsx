@@ -97,6 +97,7 @@ export function APIList({ apis, onSelectAPI, onNewAPI, onImportAPI }: APIListPro
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredAPIs.map(api => {
           const currentPhase = getCurrentPhase(api)
+          const displayTitle = api.useDisplayName && api.displayName ? api.displayName : api.name
           
           return (
             <Card
@@ -106,7 +107,7 @@ export function APIList({ apis, onSelectAPI, onNewAPI, onImportAPI }: APIListPro
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-display font-semibold text-lg leading-tight">{api.name}</h3>
+                  <h3 className="font-display font-semibold text-lg leading-tight">{displayTitle}</h3>
                   {currentPhase && <PhaseIndicator phase={currentPhase} />}
                 </div>
                 
