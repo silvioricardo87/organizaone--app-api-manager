@@ -640,6 +640,11 @@ export const translations = {
       invalidDate: 'Invalid date',
       created: 'Created',
       lastUpdated: 'Last Updated',
+      months: [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ],
+      weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     },
   },
   pt: {
@@ -1283,6 +1288,11 @@ export const translations = {
       invalidDate: 'Data inválida',
       created: 'Criado',
       lastUpdated: 'Última Atualização',
+      months: [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      ],
+      weekdays: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
     },
   },
 }
