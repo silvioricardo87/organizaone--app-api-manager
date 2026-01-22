@@ -49,13 +49,13 @@ function Calendar({
   const months = t.dates.months
 
   return (
-    <div className="w-[336px] h-[420px] flex flex-col bg-popover">
-      <div className="flex gap-2 px-4 pt-4 pb-3 border-b border-border">
+    <div className="w-[320px] h-[400px] flex flex-col bg-popover rounded-lg shadow-lg">
+      <div className="flex gap-2 px-3 pt-3 pb-3">
         <Select value={month.getMonth().toString()} onValueChange={handleMonthChange}>
-          <SelectTrigger className="flex-1 h-10">
+          <SelectTrigger className="flex-1 h-9 text-sm font-medium">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="max-h-[300px]">
+          <SelectContent className="max-h-[280px]">
             {months.map((monthName, index) => (
               <SelectItem key={index} value={index.toString()}>
                 {monthName}
@@ -64,10 +64,10 @@ function Calendar({
           </SelectContent>
         </Select>
         <Select value={month.getFullYear().toString()} onValueChange={handleYearChange}>
-          <SelectTrigger className="w-[110px] h-10">
+          <SelectTrigger className="w-[100px] h-9 text-sm font-medium">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="max-h-[300px]">
+          <SelectContent className="max-h-[280px]">
             {years.map((year) => (
               <SelectItem key={year} value={year.toString()}>
                 {year}
@@ -76,49 +76,44 @@ function Calendar({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex-1 overflow-hidden flex items-start">
+      <div className="flex-1 px-3 pb-3 overflow-hidden">
         <DayPicker
           month={month}
           onMonthChange={setMonth}
           showOutsideDays={showOutsideDays}
-          className={cn("p-4 w-full", className)}
+          className={cn("w-full h-full", className)}
           classNames={{
-            months: "flex flex-col w-full",
-            month: "flex flex-col gap-3 w-full",
+            months: "flex flex-col h-full w-full",
+            month: "flex flex-col h-full w-full",
             caption: "hidden",
             caption_label: "hidden",
             nav: "hidden",
             nav_button: "hidden",
             nav_button_previous: "hidden",
             nav_button_next: "hidden",
-            table: "w-full border-collapse border-spacing-0",
-            head_row: "flex w-full mb-1",
-            head_cell:
-              "text-muted-foreground rounded-md w-10 font-medium text-xs uppercase",
-            row: "flex w-full mt-1",
-            cell: cn(
-              "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
-              props.mode === "range"
-                ? "[&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
-                : ""
-            ),
-            day: cn(
+            month_grid: "w-full mt-0",
+            weekdays: "flex w-full",
+            weekday:
+              "text-muted-foreground w-9 font-medium text-[0.7rem] text-center uppercase tracking-wide",
+            week: "flex w-full mt-0.5",
+            day_button: cn(
               buttonVariants({ variant: "ghost" }),
-              "size-10 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground transition-colors"
+              "h-9 w-9 p-0 font-normal text-sm aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground transition-colors rounded-md"
             ),
-            day_range_start:
-              "day-range-start aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:rounded-l-md",
-            day_range_end:
-              "day-range-end aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:rounded-r-md",
-            day_selected:
-              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded-md",
-            day_today: "bg-accent text-accent-foreground font-semibold",
-            day_outside:
-              "day-outside text-muted-foreground/50 aria-selected:text-muted-foreground/50",
-            day_disabled: "text-muted-foreground/30 opacity-50",
-            day_range_middle:
+            day: "h-9 w-9 p-0 relative",
+            range_start:
+              "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:rounded-l-md",
+            range_end:
+              "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:rounded-r-md",
+            selected:
+              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded-md font-medium",
+            today: "bg-accent/50 text-accent-foreground font-semibold",
+            outside:
+              "text-muted-foreground/40 aria-selected:text-muted-foreground/40",
+            disabled: "text-muted-foreground/20 opacity-50 cursor-not-allowed",
+            range_middle:
               "aria-selected:bg-accent aria-selected:text-accent-foreground aria-selected:rounded-none",
-            day_hidden: "invisible",
+            hidden: "invisible",
             ...classNames,
           }}
           components={{
