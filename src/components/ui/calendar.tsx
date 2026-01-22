@@ -1,67 +1,10 @@
 import { ComponentProps } from "react"
 import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left"
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right"
-import { DayPicker, CaptionProps, useNavigation } from "react-day-picker"
+import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-function CustomCaption(props: CaptionProps) {
-  const { goToMonth } = useNavigation()
-  const { displayMonth } = props
-
-  const currentYear = displayMonth.getFullYear()
-  const currentMonth = displayMonth.getMonth()
-
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ]
-
-  const years = Array.from({ length: 20 }, (_, i) => currentYear - 10 + i)
-
-  const handleMonthChange = (month: string) => {
-    const newDate = new Date(displayMonth)
-    newDate.setMonth(parseInt(month))
-    goToMonth(newDate)
-  }
-
-  const handleYearChange = (year: string) => {
-    const newDate = new Date(displayMonth)
-    newDate.setFullYear(parseInt(year))
-    goToMonth(newDate)
-  }
-
-  return (
-    <div className="flex items-center gap-2">
-      <Select value={currentMonth.toString()} onValueChange={handleMonthChange}>
-        <SelectTrigger className="h-8 w-[140px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {months.map((month, index) => (
-            <SelectItem key={index} value={index.toString()}>
-              {month}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select value={currentYear.toString()} onValueChange={handleYearChange}>
-        <SelectTrigger className="h-8 w-[100px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {years.map((year) => (
-            <SelectItem key={year} value={year.toString()}>
-              {year}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  )
-}
 
 function Calendar({
   className,
@@ -116,7 +59,6 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Caption: CustomCaption,
         PreviousMonthButton: ({ className, ...props }) => (
           <ChevronLeft className={cn("size-4", className)} {...props} />
         ),
