@@ -1,16 +1,23 @@
 import { ComponentProps } from "react"
-import ChevronLeft from "lucide-react/dist/e
+import { DayPicker } from "react-day-picker"
 import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left"
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-  showOutsideDays =
-}: Component
+export type CalendarProps = ComponentProps<typeof DayPicker>
+
+function Calendar({
+  className,
   classNames,
   showOutsideDays = true,
   ...props
+}: CalendarProps) {
+  return (
+    <DayPicker
+      showOutsideDays={showOutsideDays}
+      className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row gap-2",
         month: "flex flex-col gap-4 w-full",
