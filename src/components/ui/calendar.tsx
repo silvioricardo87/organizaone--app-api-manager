@@ -1,5 +1,5 @@
 import { ComponentProps } from "react"
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-righ
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left"
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right"
 import { DayPicker, CaptionProps, useNavigation } from "react-day-picker"
 
@@ -15,31 +15,33 @@ function CustomCaption(props: CaptionProps) {
   const currentMonth = displayMonth.getMonth()
 
   const months = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
   ]
 
-        caption_label: "text-sm font-medium",
+  const years = Array.from({ length: 20 }, (_, i) => currentYear - 10 + i)
 
-        ),
-          buttonVariants({ variant: "outline" }),
-        ),
-   
+  const handleMonthChange = (month: string) => {
+    const newDate = new Date(displayMonth)
+    newDate.setMonth(parseInt(month))
+    goToMonth(newDate)
+  }
 
-        weekdays: "flex",
-          "text-muted-foreground rounded-md w-8 font-norma
-        day_button: cn
-   
+  const handleYearChange = (year: string) => {
+    const newDate = new Date(displayMonth)
+    newDate.setFullYear(parseInt(year))
+    goToMonth(newDate)
+  }
 
-          
-          "day-range-end aria-selected:bg-primary ar
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primar
-        outside:
-        disabled: "text-m
-          "aria-selected
-        ...classNames,
-      components={{
-          const Component = orientation === "left" ? ChevronL
+  return (
+    <div className="flex items-center gap-2">
+      <Select value={currentMonth.toString()} onValueChange={handleMonthChange}>
+        <SelectTrigger className="h-8 w-[140px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {months.map((month, index) => (
+            <SelectItem key={index} value={index.toString()}>
               {month}
             </SelectItem>
           ))}
@@ -121,15 +123,6 @@ function Calendar({
         NextMonthButton: ({ className, ...props }) => (
           <ChevronRight className={cn("size-4", className)} {...props} />
         ),
-      }}
-      {...props}
-    />
-  )
-}
-
-export { Calendar }
-          return <Component className="size-4" {...props} />
-        },
       }}
       {...props}
     />
