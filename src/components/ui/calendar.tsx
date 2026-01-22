@@ -1,10 +1,65 @@
 import { ComponentProps } from "react"
-import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left"
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-righ
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right"
-import { DayPicker } from "react-day-picker"
+import { DayPicker, CaptionProps, useNavigation } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+function CustomCaption(props: CaptionProps) {
+  const { goToMonth } = useNavigation()
+  const { displayMonth } = props
+
+  const currentYear = displayMonth.getFullYear()
+  const currentMonth = displayMonth.getMonth()
+
+  const months = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ]
+
+        caption_label: "text-sm font-medium",
+
+        ),
+          buttonVariants({ variant: "outline" }),
+        ),
+   
+
+        weekdays: "flex",
+          "text-muted-foreground rounded-md w-8 font-norma
+        day_button: cn
+   
+
+          
+          "day-range-end aria-selected:bg-primary ar
+          "bg-primary text-primary-foreground hover:bg-primary hover:text-primar
+        outside:
+        disabled: "text-m
+          "aria-selected
+        ...classNames,
+      components={{
+          const Component = orientation === "left" ? ChevronL
+              {month}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={currentYear.toString()} onValueChange={handleYearChange}>
+        <SelectTrigger className="h-8 w-[100px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {years.map((year) => (
+            <SelectItem key={year} value={year.toString()}>
+              {year}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
 
 function Calendar({
   className,
@@ -15,55 +70,64 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      captionLayout="dropdown"
-      fromYear={1900}
-      toYear={2100}
-      className={cn("p-3 min-h-[350px]", className)}
+      className={cn("p-3 min-h-[320px]", className)}
       classNames={{
         months: "flex flex-col sm:flex-row gap-2",
         month: "flex flex-col gap-4 w-full",
-        month_caption: "flex justify-center pt-1 relative items-center",
+        caption: "flex justify-center pt-1 relative items-center w-full",
         caption_label: "text-sm font-medium",
-        button_next: cn(
+        nav: "flex items-center gap-1",
+        nav_button: cn(
           buttonVariants({ variant: "outline" }),
-          "size-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-0"
+          "size-7 bg-transparent p-0 opacity-50 hover:opacity-100"
         ),
-        button_previous: cn(
-          buttonVariants({ variant: "outline" }),
-          "size-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-0"
-        ),
-        dropdowns: "flex gap-2 justify-center mb-2",
-        dropdown: "h-8 px-3 py-1 text-sm border border-input bg-background rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-        dropdown_root: "relative inline-block",
-        nav: "flex items-center justify-between w-full pt-1 relative",
-        month_grid: "w-full border-collapse mt-2",
-        weekdays: "flex",
-        weekday:
+        nav_button_previous: "absolute left-1",
+        nav_button_next: "absolute right-1",
+        table: "w-full border-collapse space-x-1",
+        head_row: "flex",
+        head_cell:
           "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
-        week: "flex w-full mt-2",
-        day_button: cn(
+        row: "flex w-full mt-2",
+        cell: cn(
+          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-range-end)]:rounded-r-md",
+          props.mode === "range"
+            ? "[&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
+            : "[&:has([aria-selected])]:rounded-md"
+        ),
+        day: cn(
           buttonVariants({ variant: "ghost" }),
           "size-8 p-0 font-normal aria-selected:opacity-100"
         ),
-        day: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
-        range_start:
+        day_range_start:
           "day-range-start aria-selected:bg-primary aria-selected:text-primary-foreground",
-        range_end:
+        day_range_end:
           "day-range-end aria-selected:bg-primary aria-selected:text-primary-foreground",
-        selected:
+        day_selected:
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        today: "bg-accent text-accent-foreground",
-        outside:
-          "day-outside text-muted-foreground aria-selected:text-muted-foreground opacity-50",
-        disabled: "text-muted-foreground opacity-50",
-        range_middle:
+        day_today: "bg-accent text-accent-foreground",
+        day_outside:
+          "day-outside text-muted-foreground aria-selected:text-muted-foreground",
+        day_disabled: "text-muted-foreground opacity-50",
+        day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
-        hidden: "invisible",
+        day_hidden: "invisible",
         ...classNames,
       }}
       components={{
-        Chevron: ({ orientation, ...props }) => {
-          const Component = orientation === "left" ? ChevronLeft : ChevronRight
+        Caption: CustomCaption,
+        PreviousMonthButton: ({ className, ...props }) => (
+          <ChevronLeft className={cn("size-4", className)} {...props} />
+        ),
+        NextMonthButton: ({ className, ...props }) => (
+          <ChevronRight className={cn("size-4", className)} {...props} />
+        ),
+      }}
+      {...props}
+    />
+  )
+}
+
+export { Calendar }
           return <Component className="size-4" {...props} />
         },
       }}
