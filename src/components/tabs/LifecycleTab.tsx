@@ -70,7 +70,7 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
                         : t.dates.selectDate}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={phaseData.startDate ? new Date(phaseData.startDate) : undefined}
@@ -92,7 +92,7 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
                         : t.dates.selectDate}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={phaseData.endDate ? new Date(phaseData.endDate) : undefined}
