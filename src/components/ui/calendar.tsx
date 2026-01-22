@@ -49,7 +49,7 @@ function Calendar({
   const months = t.dates.months
 
   return (
-    <div className="w-[320px] h-[420px] flex flex-col bg-popover rounded-lg shadow-lg p-3">
+    <div className="w-[320px] h-[400px] flex flex-col bg-popover rounded-lg shadow-lg p-3">
       <div className="flex gap-2 mb-3 shrink-0">
         <Select value={month.getMonth().toString()} onValueChange={handleMonthChange}>
           <SelectTrigger className="flex-1 h-9 text-sm font-medium">
