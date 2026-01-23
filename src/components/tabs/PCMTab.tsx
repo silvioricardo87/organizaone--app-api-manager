@@ -344,7 +344,7 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
               </div>
             )}
 
-            {field && (
+            {(field || (isCustomField && customFieldInput)) && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="pcm-definition">{t.pcm.definition}</Label>
