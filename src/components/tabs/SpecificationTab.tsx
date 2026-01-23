@@ -96,6 +96,52 @@ function schemaHasMatchingFields(schema: any, filter: string, searchNameOnly: bo
   return false
 }
 
+function endpointMatchesSearch(path: string, method: string, operation: any, filter: string, searchNameOnly: boolean, spec?: any): boolean {
+  if (!filter) return true
+  
+  const lowerFilter = filter.toLowerCase()
+  
+  if (path.toLowerCase().includes(lowerFilter)) {
+    return true
+  }
+  
+  if (method.toLowerCase().includes(lowerFilter)) {
+    return true
+  }
+  
+  if (!searchNameOnly) {
+    if (operation.summary && operation.summary.toLowerCase().includes(lowerFilter)) {
+      return true
+    }
+    
+    if (operation.description && operation.description.toLowerCase().includes(lowerFilter)) {
+      return true
+    }
+    
+    if (operation.operationId && operation.operationId.toLowerCase().includes(lowerFilter)) {
+      return true
+    }
+    
+    if (operation.tags && operation.tags.some((tag: string) => tag.toLowerCase().includes(lowerFilter))) {
+      return true
+    }
+    
+    if (operation.parameters) {
+      for (const paramRef of operation.parameters) {
+        const param = resolveParameter(paramRef, spec)
+        if (param.name && param.name.toLowerCase().includes(lowerFilter)) {
+          return true
+        }
+        if (param.description && param.description.toLowerCase().includes(lowerFilter)) {
+          return true
+        }
+      }
+    }
+  }
+  
+  return false
+}
+
 function SchemaViewer({ 
   schema, 
   name, 
@@ -625,6 +671,8 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [schemaFilter, setSchemaFilter] = useState('')
   const [searchNameOnly, setSearchNameOnly] = useState(false)
+  const [endpointFilter, setEndpointFilter] = useState('')
+  const [endpointSearchNameOnly, setEndpointSearchNameOnly] = useState(false)
 
   const description = spec?.info?.description || ''
   const descriptionLines = description.split('\n')
@@ -759,17 +807,74 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
       {spec.paths && (
         <Card className="p-6">
           <h2 className="text-xl font-display font-semibold mb-4">{t.specification.endpoints}</h2>
-          <Accordion type="single" collapsible className="space-y-3">
-            {Object.entries(spec.paths).map(([path, pathItem]: [string, any]) => {
+          
+          <div className="mb-6 p-4 bg-muted/50 rounded-lg border border-border space-y-3">
+            <div className="relative">
+              <MagnifyingGlass 
+                size={18} 
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                placeholder={t.specification.filterEndpoints}
+                value={endpointFilter}
+                onChange={(e) => setEndpointFilter(e.target.value)}
+                className="pl-10 pr-10"
+              />
+              {endpointFilter && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={() => setEndpointFilter('')}
+                >
+                  <X size={14} />
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox 
+                id="endpoint-search-name-only" 
+                checked={endpointSearchNameOnly}
+                onCheckedChange={(checked) => setEndpointSearchNameOnly(checked === true)}
+              />
+              <Label htmlFor="endpoint-search-name-only" className="text-sm cursor-pointer">
+                {t.specification.searchNameOnly}
+              </Label>
+            </div>
+          </div>
+          
+          {(() => {
+            const filteredEndpoints: Array<{ path: string; method: string; operation: any; operationId: string }> = []
+            
+            Object.entries(spec.paths).forEach(([path, pathItem]: [string, any]) => {
               const methods = Object.keys(pathItem).filter(key =>
                 ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'].includes(key.toLowerCase())
               )
 
-              return methods.map(method => {
+              methods.forEach(method => {
                 const operation = pathItem[method]
-                const operationId = `${path}-${method}`
-
-                return (
+                if (endpointMatchesSearch(path, method, operation, endpointFilter, endpointSearchNameOnly, spec)) {
+                  filteredEndpoints.push({
+                    path,
+                    method,
+                    operation,
+                    operationId: `${path}-${method}`
+                  })
+                }
+              })
+            })
+            
+            if (filteredEndpoints.length === 0) {
+              return (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>{t.specification.noEndpointsMatch} &quot;{endpointFilter}&quot;</p>
+                </div>
+              )
+            }
+            
+            return (
+              <Accordion type="single" collapsible className="space-y-3">
+                {filteredEndpoints.map(({ path, method, operation, operationId }) => (
                   <AccordionItem key={operationId} value={operationId} className="border rounded-lg">
                     <AccordionTrigger className="hover:no-underline px-4">
                       <div className="flex items-center gap-3 flex-1">
@@ -991,10 +1096,10 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                       </div>
                     </AccordionContent>
                   </AccordionItem>
-                )
-              })
-            })}
-          </Accordion>
+                ))}
+              </Accordion>
+            )
+          })()}
         </Card>
       )}
 
