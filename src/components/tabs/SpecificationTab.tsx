@@ -55,6 +55,10 @@ function filterSchemaFields(schema: any, filter: string, searchNameOnly: boolean
   }
   
   const filteredProperties: Record<string, any> = {}
+  let filteredItems: any = null
+  let filteredAllOf: any[] | null = null
+  let filteredOneOf: any[] | null = null
+  let filteredAnyOf: any[] | null = null
   
   if (resolvedSchema.properties) {
     for (const [fieldName, fieldSchema] of Object.entries(resolvedSchema.properties)) {
@@ -75,13 +79,51 @@ function filterSchemaFields(schema: any, filter: string, searchNameOnly: boolean
     }
   }
   
-  if (Object.keys(filteredProperties).length === 0 && !resolvedSchema.items && !resolvedSchema.allOf && !resolvedSchema.oneOf && !resolvedSchema.anyOf) {
+  if (resolvedSchema.items) {
+    const itemsFiltered = filterSchemaFields(resolvedSchema.items, filter, searchNameOnly, spec)
+    if (itemsFiltered) {
+      filteredItems = itemsFiltered
+    }
+  }
+  
+  if (resolvedSchema.allOf) {
+    const filtered = resolvedSchema.allOf
+      .map((subSchema: any) => filterSchemaFields(subSchema, filter, searchNameOnly, spec))
+      .filter((s: any) => s !== null)
+    if (filtered.length > 0) {
+      filteredAllOf = filtered
+    }
+  }
+  
+  if (resolvedSchema.oneOf) {
+    const filtered = resolvedSchema.oneOf
+      .map((subSchema: any) => filterSchemaFields(subSchema, filter, searchNameOnly, spec))
+      .filter((s: any) => s !== null)
+    if (filtered.length > 0) {
+      filteredOneOf = filtered
+    }
+  }
+  
+  if (resolvedSchema.anyOf) {
+    const filtered = resolvedSchema.anyOf
+      .map((subSchema: any) => filterSchemaFields(subSchema, filter, searchNameOnly, spec))
+      .filter((s: any) => s !== null)
+    if (filtered.length > 0) {
+      filteredAnyOf = filtered
+    }
+  }
+  
+  if (Object.keys(filteredProperties).length === 0 && !filteredItems && !filteredAllOf && !filteredOneOf && !filteredAnyOf) {
     return null
   }
   
   return {
     ...resolvedSchema,
-    properties: Object.keys(filteredProperties).length > 0 ? filteredProperties : undefined
+    properties: Object.keys(filteredProperties).length > 0 ? filteredProperties : undefined,
+    items: filteredItems || undefined,
+    allOf: filteredAllOf || undefined,
+    oneOf: filteredOneOf || undefined,
+    anyOf: filteredAnyOf || undefined
   }
 }
 
@@ -406,65 +448,82 @@ function SchemaViewer({
 
           {expanded && hasItems && (
             <div className="mt-3">
-              <SchemaViewer
-                name="items"
-                schema={resolvedSchema.items}
-                level={level + 1}
-                spec={spec}
-                filter={filter}
-                searchNameOnly={searchNameOnly}
-              />
+              {(!filter || schemaHasMatchingFields(resolvedSchema.items, filter, searchNameOnly || false, spec)) && (
+                <SchemaViewer
+                  name="items"
+                  schema={resolvedSchema.items}
+                  level={level + 1}
+                  spec={spec}
+                  filter={filter}
+                  searchNameOnly={searchNameOnly}
+                />
+              )}
             </div>
           )}
 
           {expanded && hasAllOf && (
             <div className="mt-3 space-y-2">
               <p className="text-xs font-medium text-muted-foreground">{t.specification.allOf}:</p>
-              {resolvedSchema.allOf.map((subSchema: any, idx: number) => (
-                <SchemaViewer
-                  key={idx}
-                  name={subSchema.$ref ? subSchema.$ref.split('/').pop() : `Schema ${idx + 1}`}
-                  schema={subSchema}
-                  level={level + 1}
-                  spec={spec}
-                  filter={filter}
-                  searchNameOnly={searchNameOnly}
-                />
-              ))}
+              {resolvedSchema.allOf
+                .filter((subSchema: any) => {
+                  if (!filter) return true
+                  return schemaHasMatchingFields(subSchema, filter, searchNameOnly || false, spec)
+                })
+                .map((subSchema: any, idx: number) => (
+                  <SchemaViewer
+                    key={idx}
+                    name={subSchema.$ref ? subSchema.$ref.split('/').pop() : `Schema ${idx + 1}`}
+                    schema={subSchema}
+                    level={level + 1}
+                    spec={spec}
+                    filter={filter}
+                    searchNameOnly={searchNameOnly}
+                  />
+                ))}
             </div>
           )}
 
           {expanded && hasOneOf && (
             <div className="mt-3 space-y-2">
               <p className="text-xs font-medium text-muted-foreground">{t.specification.oneOf}:</p>
-              {resolvedSchema.oneOf.map((subSchema: any, idx: number) => (
-                <SchemaViewer
-                  key={idx}
-                  name={subSchema.$ref ? subSchema.$ref.split('/').pop() : `Option ${idx + 1}`}
-                  schema={subSchema}
-                  level={level + 1}
-                  spec={spec}
-                  filter={filter}
-                  searchNameOnly={searchNameOnly}
-                />
-              ))}
+              {resolvedSchema.oneOf
+                .filter((subSchema: any) => {
+                  if (!filter) return true
+                  return schemaHasMatchingFields(subSchema, filter, searchNameOnly || false, spec)
+                })
+                .map((subSchema: any, idx: number) => (
+                  <SchemaViewer
+                    key={idx}
+                    name={subSchema.$ref ? subSchema.$ref.split('/').pop() : `Option ${idx + 1}`}
+                    schema={subSchema}
+                    level={level + 1}
+                    spec={spec}
+                    filter={filter}
+                    searchNameOnly={searchNameOnly}
+                  />
+                ))}
             </div>
           )}
 
           {expanded && hasAnyOf && (
             <div className="mt-3 space-y-2">
               <p className="text-xs font-medium text-muted-foreground">{t.specification.anyOf}:</p>
-              {resolvedSchema.anyOf.map((subSchema: any, idx: number) => (
-                <SchemaViewer
-                  key={idx}
-                  name={subSchema.$ref ? subSchema.$ref.split('/').pop() : `Option ${idx + 1}`}
-                  schema={subSchema}
-                  level={level + 1}
-                  spec={spec}
-                  filter={filter}
-                  searchNameOnly={searchNameOnly}
-                />
-              ))}
+              {resolvedSchema.anyOf
+                .filter((subSchema: any) => {
+                  if (!filter) return true
+                  return schemaHasMatchingFields(subSchema, filter, searchNameOnly || false, spec)
+                })
+                .map((subSchema: any, idx: number) => (
+                  <SchemaViewer
+                    key={idx}
+                    name={subSchema.$ref ? subSchema.$ref.split('/').pop() : `Option ${idx + 1}`}
+                    schema={subSchema}
+                    level={level + 1}
+                    spec={spec}
+                    filter={filter}
+                    searchNameOnly={searchNameOnly}
+                  />
+                ))}
             </div>
           )}
 
