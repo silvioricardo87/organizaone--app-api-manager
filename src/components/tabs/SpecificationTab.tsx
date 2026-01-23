@@ -777,8 +777,8 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                 <a 
                   href={spec.info.contact.url} 
                   target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
+                        </Badge>
+                        <code className="text-sm font-mono">{path}</code>
                 >
                   {spec.info.contact.url}
                 </a>
