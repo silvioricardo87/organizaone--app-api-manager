@@ -46,49 +46,95 @@ function fieldMatchesSearch(fieldName: string, fieldSchema: any, filter: string,
 
 function filterSchemaFields(schema: any, filter: string, searchNameOnly: boolean, spec?: any): any {
   if (!filter) return schema
+  if (!schema) return null
   
   const resolvedSchema = spec && schema.$ref ? resolveRef(schema.$ref, spec) || schema : schema
   
-  if (!resolvedSchema.properties) {
+  if (!resolvedSchema.properties && !resolvedSchema.items && !resolvedSchema.allOf && !resolvedSchema.oneOf && !resolvedSchema.anyOf) {
     return schema
   }
   
   const filteredProperties: Record<string, any> = {}
   
-  for (const [fieldName, fieldSchema] of Object.entries(resolvedSchema.properties)) {
-    if (fieldMatchesSearch(fieldName, fieldSchema as any, filter, searchNameOnly, spec)) {
-      filteredProperties[fieldName] = fieldSchema
-    } else {
-      const nestedFiltered = filterSchemaFields(fieldSchema as any, filter, searchNameOnly, spec)
-      if (nestedFiltered && nestedFiltered.properties && Object.keys(nestedFiltered.properties).length > 0) {
-        filteredProperties[fieldName] = nestedFiltered
+  if (resolvedSchema.properties) {
+    for (const [fieldName, fieldSchema] of Object.entries(resolvedSchema.properties)) {
+      if (fieldMatchesSearch(fieldName, fieldSchema as any, filter, searchNameOnly, spec)) {
+        filteredProperties[fieldName] = fieldSchema
+      } else {
+        const nestedFiltered = filterSchemaFields(fieldSchema as any, filter, searchNameOnly, spec)
+        if (nestedFiltered && (
+          (nestedFiltered.properties && Object.keys(nestedFiltered.properties).length > 0) ||
+          nestedFiltered.items ||
+          nestedFiltered.allOf ||
+          nestedFiltered.oneOf ||
+          nestedFiltered.anyOf
+        )) {
+          filteredProperties[fieldName] = nestedFiltered
+        }
       }
     }
   }
   
-  if (Object.keys(filteredProperties).length === 0) {
+  if (Object.keys(filteredProperties).length === 0 && !resolvedSchema.items && !resolvedSchema.allOf && !resolvedSchema.oneOf && !resolvedSchema.anyOf) {
     return null
   }
   
   return {
     ...resolvedSchema,
-    properties: filteredProperties
+    properties: Object.keys(filteredProperties).length > 0 ? filteredProperties : undefined
   }
 }
 
 function schemaHasMatchingFields(schema: any, filter: string, searchNameOnly: boolean, spec?: any): boolean {
   if (!filter) return true
+  if (!schema) return false
   
   const resolvedSchema = spec && schema.$ref ? resolveRef(schema.$ref, spec) || schema : schema
   
-  if (!resolvedSchema.properties) return false
+  if (resolvedSchema.properties) {
+    for (const [fieldName, fieldSchema] of Object.entries(resolvedSchema.properties)) {
+      if (fieldMatchesSearch(fieldName, fieldSchema as any, filter, searchNameOnly, spec)) {
+        return true
+      }
+      
+      if (schemaHasMatchingFields(fieldSchema as any, filter, searchNameOnly, spec)) {
+        return true
+      }
+    }
+  }
   
-  for (const [fieldName, fieldSchema] of Object.entries(resolvedSchema.properties)) {
-    if (fieldMatchesSearch(fieldName, fieldSchema as any, filter, searchNameOnly, spec)) {
+  if (resolvedSchema.items) {
+    if (schemaHasMatchingFields(resolvedSchema.items, filter, searchNameOnly, spec)) {
       return true
     }
-    
-    if (schemaHasMatchingFields(fieldSchema as any, filter, searchNameOnly, spec)) {
+  }
+  
+  if (resolvedSchema.allOf) {
+    for (const subSchema of resolvedSchema.allOf) {
+      if (schemaHasMatchingFields(subSchema, filter, searchNameOnly, spec)) {
+        return true
+      }
+    }
+  }
+  
+  if (resolvedSchema.oneOf) {
+    for (const subSchema of resolvedSchema.oneOf) {
+      if (schemaHasMatchingFields(subSchema, filter, searchNameOnly, spec)) {
+        return true
+      }
+    }
+  }
+  
+  if (resolvedSchema.anyOf) {
+    for (const subSchema of resolvedSchema.anyOf) {
+      if (schemaHasMatchingFields(subSchema, filter, searchNameOnly, spec)) {
+        return true
+      }
+    }
+  }
+  
+  if (resolvedSchema.additionalProperties && typeof resolvedSchema.additionalProperties === 'object') {
+    if (schemaHasMatchingFields(resolvedSchema.additionalProperties, filter, searchNameOnly, spec)) {
       return true
     }
   }
@@ -134,6 +180,27 @@ function endpointMatchesSearch(path: string, method: string, operation: any, fil
         }
         if (param.description && param.description.toLowerCase().includes(lowerFilter)) {
           return true
+        }
+      }
+    }
+    
+    if (operation.requestBody?.content) {
+      for (const content of Object.values(operation.requestBody.content) as any[]) {
+        if (content.schema && schemaHasMatchingFields(content.schema, filter, searchNameOnly, spec)) {
+          return true
+        }
+      }
+    }
+    
+    if (operation.responses) {
+      for (const response of Object.values(operation.responses) as any[]) {
+        const resolvedResponse = response.$ref ? resolveRef(response.$ref, spec) || response : response
+        if (resolvedResponse.content) {
+          for (const content of Object.values(resolvedResponse.content) as any[]) {
+            if (content.schema && schemaHasMatchingFields(content.schema, filter, searchNameOnly, spec)) {
+              return true
+            }
+          }
         }
       }
     }
@@ -432,7 +499,7 @@ function SchemaViewer({
   )
 }
 
-function RequestBodyViewer({ requestBody, spec }: { requestBody: any; spec: any }) {
+function RequestBodyViewer({ requestBody, spec, filter, searchNameOnly }: { requestBody: any; spec: any; filter?: string; searchNameOnly?: boolean }) {
   const { t } = useSettings()
   
   if (!requestBody) return null
@@ -464,7 +531,13 @@ function RequestBodyViewer({ requestBody, spec }: { requestBody: any; spec: any 
                   <div>
                     <p className="text-xs font-medium mb-2">{t.specification.schema}:</p>
                     <div className="border rounded-lg p-4 bg-card">
-                      <SchemaViewer name="body" schema={content.schema} spec={spec} />
+                      <SchemaViewer 
+                        name="body" 
+                        schema={content.schema} 
+                        spec={spec} 
+                        filter={filter}
+                        searchNameOnly={searchNameOnly}
+                      />
                     </div>
                   </div>
                   
@@ -524,7 +597,7 @@ function RequestBodyViewer({ requestBody, spec }: { requestBody: any; spec: any 
   )
 }
 
-function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
+function ResponseViewer({ responses, spec, filter, searchNameOnly }: { responses: any; spec: any; filter?: string; searchNameOnly?: boolean }) {
   const { t } = useSettings()
   
   if (!responses) return null
@@ -570,7 +643,13 @@ function ResponseViewer({ responses, spec }: { responses: any; spec: any }) {
                           <div>
                             <p className="text-xs font-medium mb-2">{t.specification.schema}:</p>
                             <div className="border rounded-lg p-4 bg-card">
-                              <SchemaViewer name="response" schema={content.schema} spec={spec} />
+                              <SchemaViewer 
+                                name="response" 
+                                schema={content.schema} 
+                                spec={spec} 
+                                filter={filter}
+                                searchNameOnly={searchNameOnly}
+                              />
                             </div>
                           </div>
                           
@@ -1066,11 +1145,21 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
                         )}
 
                         {operation.requestBody && (
-                          <RequestBodyViewer requestBody={operation.requestBody} spec={spec} />
+                          <RequestBodyViewer 
+                            requestBody={operation.requestBody} 
+                            spec={spec}
+                            filter={endpointFilter}
+                            searchNameOnly={endpointSearchNameOnly}
+                          />
                         )}
 
                         {operation.responses && (
-                          <ResponseViewer responses={operation.responses} spec={spec} />
+                          <ResponseViewer 
+                            responses={operation.responses} 
+                            spec={spec}
+                            filter={endpointFilter}
+                            searchNameOnly={endpointSearchNameOnly}
+                          />
                         )}
 
                         {operation.security && operation.security.length > 0 && (
