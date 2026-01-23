@@ -8,10 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { APIContract } from '@/lib/types'
-import { Copy, CaretRight, MagnifyingGlass, X } from '@phosphor-icons/react'
+import { Copy, CaretRight, MagnifyingGlass, X, Code } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { resolveParameter, resolveRef, resolveSchema } from '@/lib/api-utils'
 import { useSettings } from '@/hooks/use-settings'
+import { marked } from 'marked'
 
 interface SpecificationTabProps {
   api: APIContract
@@ -807,6 +808,7 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
   const { t } = useSettings()
   const spec = api.parsedSpec
   const [showFullDescription, setShowFullDescription] = useState(false)
+  const [showRawDescription, setShowRawDescription] = useState(false)
   const [schemaFilter, setSchemaFilter] = useState('')
   const [searchNameOnly, setSearchNameOnly] = useState(false)
   const [endpointFilter, setEndpointFilter] = useState('')
@@ -819,6 +821,14 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
   const displayedDescription = shouldTruncate && !showFullDescription
     ? descriptionLines.slice(0, MAX_LINES).join('\n')
     : description
+  
+  const parseMarkdown = (text: string) => {
+    try {
+      return marked.parse(text, { breaks: true, gfm: true })
+    } catch (error) {
+      return text
+    }
+  }
 
   if (!api.parsedSpec) {
     return (
@@ -832,12 +842,30 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
     <div className="space-y-6">
       {description && (
         <Card className="p-6">
-          <h2 className="text-xl font-display font-semibold mb-4">{t.specification.description}</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-display font-semibold">{t.specification.description}</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowRawDescription(!showRawDescription)}
+              className="gap-2"
+            >
+              <Code size={16} weight={showRawDescription ? "fill" : "regular"} />
+              {showRawDescription ? t.specification.showFormatted : t.specification.showRaw}
+            </Button>
+          </div>
           <div className="space-y-3">
-            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed font-mono">
-              {displayedDescription}
-              {shouldTruncate && !showFullDescription && '...'}
-            </p>
+            {showRawDescription ? (
+              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed font-mono bg-muted p-4 rounded-lg">
+                {displayedDescription}
+                {shouldTruncate && !showFullDescription && '...'}
+              </p>
+            ) : (
+              <div 
+                className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-display prose-headings:font-semibold prose-a:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm prose-pre:bg-muted prose-pre:border prose-pre:border-border"
+                dangerouslySetInnerHTML={{ __html: parseMarkdown(displayedDescription) }}
+              />
+            )}
             {shouldTruncate && (
               <Button
                 variant="ghost"
