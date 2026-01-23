@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Plus, Trash, Pencil } from '@phosphor-icons/react'
 import { APIContract, PCMField, PCMMandatoryType } from '@/lib/types'
 import { generateId, extractEndpoints, getEndpointFields } from '@/lib/api-utils'
@@ -25,6 +26,8 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
   const [endpoint, setEndpoint] = useState('')
   const [method, setMethod] = useState('')
   const [field, setField] = useState('')
+  const [isCustomField, setIsCustomField] = useState(false)
+  const [customFieldInput, setCustomFieldInput] = useState('')
   const [definition, setDefinition] = useState('')
   const [fillingRule, setFillingRule] = useState('')
   const [roles, setRoles] = useState('')
@@ -48,6 +51,8 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
       setEndpoint(pcmField.endpoint)
       setMethod(pcmField.method)
       setField(pcmField.field)
+      setIsCustomField(pcmField.isCustomField || false)
+      setCustomFieldInput(pcmField.isCustomField ? pcmField.field : '')
       setDefinition(pcmField.definition)
       setFillingRule(pcmField.fillingRule)
       setRoles(pcmField.roles.join(', '))
@@ -69,6 +74,8 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
     setEndpoint('')
     setMethod('')
     setField('')
+    setIsCustomField(false)
+    setCustomFieldInput('')
     setDefinition('')
     setFillingRule('')
     setRoles('')
@@ -82,7 +89,9 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
   }
 
   const handleSave = () => {
-    if (!endpoint || !method || !field) {
+    const finalField = isCustomField ? customFieldInput : field
+    
+    if (!endpoint || !method || !finalField) {
       toast.error(t.toasts.fieldRequired)
       return
     }
@@ -91,7 +100,8 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
       id: editingField?.id || generateId(),
       endpoint,
       method,
-      field,
+      field: finalField,
+      isCustomField,
       definition,
       fillingRule,
       roles: roles.split(',').map(r => r.trim()).filter(Boolean),
@@ -168,6 +178,11 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
                     <Badge className="bg-primary text-primary-foreground">{pcmField.method}</Badge>
                     <code className="text-sm font-mono">{pcmField.endpoint}</code>
                     <Badge variant="outline">{pcmField.field}</Badge>
+                    {pcmField.isCustomField && (
+                      <Badge variant="secondary" className="text-xs">
+                        {t.pcm.customField}
+                      </Badge>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -274,18 +289,58 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
             {endpoint && method && (
               <div className="space-y-2">
                 <Label htmlFor="pcm-field">{t.pcm.field} *</Label>
-                <Select value={field} onValueChange={setField} disabled={!!editingField}>
-                  <SelectTrigger id="pcm-field">
-                    <SelectValue placeholder={t.pcm.selectField} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableFields.map(f => (
-                      <SelectItem key={f} value={f}>
-                        {f}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2 items-start">
+                  <div className="flex-1">
+                    <Select 
+                      value={field} 
+                      onValueChange={setField} 
+                      disabled={!!editingField || isCustomField}
+                    >
+                      <SelectTrigger id="pcm-field">
+                        <SelectValue placeholder={t.pcm.selectField} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableFields.map(f => (
+                          <SelectItem key={f} value={f}>
+                            {f}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2 pt-2">
+                    <Checkbox 
+                      id="custom-field-checkbox"
+                      checked={isCustomField}
+                      onCheckedChange={(checked) => {
+                        setIsCustomField(checked as boolean)
+                        if (!checked) {
+                          setCustomFieldInput('')
+                        } else {
+                          setField('')
+                        }
+                      }}
+                      disabled={!!editingField}
+                    />
+                    <Label 
+                      htmlFor="custom-field-checkbox"
+                      className="text-sm cursor-pointer"
+                    >
+                      {t.pcm.customField}
+                    </Label>
+                  </div>
+                </div>
+                {isCustomField && (
+                  <div className="mt-2">
+                    <Input
+                      id="custom-field-input"
+                      value={customFieldInput}
+                      onChange={(e) => setCustomFieldInput(e.target.value)}
+                      placeholder={t.pcm.customFieldPlaceholder}
+                      disabled={!!editingField}
+                    />
+                  </div>
+                )}
               </div>
             )}
 
@@ -412,7 +467,10 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               {t.common.cancel}
             </Button>
-            <Button onClick={handleSave} disabled={!endpoint || !method || !field}>
+            <Button 
+              onClick={handleSave} 
+              disabled={!endpoint || !method || (!field && !isCustomField) || (isCustomField && !customFieldInput)}
+            >
               {editingField ? t.improvements.update : t.improvements.create}
             </Button>
           </div>
