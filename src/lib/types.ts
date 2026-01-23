@@ -46,6 +46,7 @@ export interface PCMField {
   endpoint: string
   method: string
   field: string
+  isCustomField?: boolean
   definition: string
   fillingRule: string
   roles: string[]
