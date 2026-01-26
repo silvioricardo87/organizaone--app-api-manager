@@ -22,24 +22,38 @@ interface APIListProps {
 export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI }: APIListProps) {
   const { t } = useSettings()
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [editingAPI, setEditingAPI] = useState<APIContract | null>(null)
 
+  const apiGroups = useMemo(() => {
+    const groups = apis
+      .map(api => api.apiGroup)
+      .filter((group): group is string => !!group)
+    return Array.from(new Set(groups)).sort()
+  }, [apis])
+
   const filteredAPIs = useMemo(() => {
-    if (!searchQuery.trim()) return apis
+    let result = apis
+
+    if (selectedGroup) {
+      result = result.filter(api => api.apiGroup === selectedGroup)
+    }
+
+    if (!searchQuery.trim()) return result
 
     const normalize = (str: string) => 
       str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 
     const query = normalize(searchQuery)
     
-    return apis.filter(api =>
+    return result.filter(api =>
       normalize(api.name).includes(query) ||
       (api.apiGroup && normalize(api.apiGroup).includes(query)) ||
       normalize(api.version).includes(query) ||
       normalize(api.summary).includes(query)
     )
-  }, [apis, searchQuery])
+  }, [apis, searchQuery, selectedGroup])
 
   const getCurrentPhase = (api: APIContract): LifecyclePhase | null => {
     const now = new Date()
@@ -80,26 +94,54 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
-          <Input
-            placeholder={t.apiList.search}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="relative flex-1 max-w-md">
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+            <Input
+              placeholder={t.apiList.search}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+              <UploadSimple size={20} weight="bold" className="mr-2" />
+              {t.common.import}
+            </Button>
+            <Button onClick={onNewAPI}>
+              <Plus size={20} weight="bold" className="mr-2" />
+              {t.apiList.newAPI}
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
-            <UploadSimple size={20} weight="bold" className="mr-2" />
-            {t.common.import}
-          </Button>
-          <Button onClick={onNewAPI}>
-            <Plus size={20} weight="bold" className="mr-2" />
-            {t.apiList.newAPI}
-          </Button>
-        </div>
+
+        {apiGroups.length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <Badge
+              variant={selectedGroup === null ? "default" : "outline"}
+              className="cursor-pointer px-3 py-1 text-sm transition-all"
+              onClick={() => setSelectedGroup(null)}
+            >
+              Todos
+            </Badge>
+            {apiGroups.map(group => (
+              <Badge
+                key={group}
+                variant={selectedGroup === group ? "default" : "outline"}
+                className={`cursor-pointer px-3 py-1 text-sm transition-all ${
+                  selectedGroup === group 
+                    ? "bg-primary text-primary-foreground" 
+                    : "hover:bg-primary/10 hover:border-primary/30"
+                }`}
+                onClick={() => setSelectedGroup(selectedGroup === group ? null : group)}
+              >
+                {group}
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
