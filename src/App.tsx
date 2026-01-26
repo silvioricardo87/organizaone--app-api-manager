@@ -124,6 +124,7 @@ function App() {
           <APIList
             apis={currentApis}
             onSelectAPI={handleSelectAPI}
+            onUpdateAPI={handleUpdateAPI}
             onNewAPI={() => setNewAPIDialogOpen(true)}
             onImportAPI={handleImportAPI}
           />
