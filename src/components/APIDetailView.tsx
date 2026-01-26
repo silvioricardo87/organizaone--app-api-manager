@@ -56,6 +56,7 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
         displayName: api.displayName,
         useDisplayName: api.useDisplayName,
         apiGroup: api.apiGroup,
+        isBeta: api.isBeta,
         version: api.version,
         summary: api.summary,
         createdAt: api.createdAt,
@@ -101,6 +102,11 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
               <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
                 <Tag size={12} weight="bold" className="mr-1" />
                 {api.apiGroup}
+              </Badge>
+            )}
+            {api.isBeta && (
+              <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 border-amber-200 dark:text-amber-400 dark:border-amber-900/50">
+                Beta
               </Badge>
             )}
           </div>

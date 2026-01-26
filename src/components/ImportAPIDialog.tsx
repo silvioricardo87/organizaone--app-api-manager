@@ -47,6 +47,7 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
           displayName: importedData.api.displayName,
           useDisplayName: importedData.api.useDisplayName || false,
           apiGroup: importedData.api.apiGroup,
+          isBeta: importedData.api.isBeta || false,
           version: importedData.api.version || '1.0.0',
           summary: importedData.api.summary || '',
           yamlContent: importedData.contract || '',
