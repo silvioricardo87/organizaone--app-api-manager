@@ -28,12 +28,16 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
   const filteredAPIs = useMemo(() => {
     if (!searchQuery.trim()) return apis
 
-    const query = searchQuery.toLowerCase()
+    const normalize = (str: string) => 
+      str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
+    const query = normalize(searchQuery)
+    
     return apis.filter(api =>
-      api.name.toLowerCase().includes(query) ||
-      api.apiGroup?.toLowerCase().includes(query) ||
-      api.version.toLowerCase().includes(query) ||
-      api.summary.toLowerCase().includes(query)
+      normalize(api.name).includes(query) ||
+      (api.apiGroup && normalize(api.apiGroup).includes(query)) ||
+      normalize(api.version).includes(query) ||
+      normalize(api.summary).includes(query)
     )
   }, [apis, searchQuery])
 
