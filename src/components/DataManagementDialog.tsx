@@ -363,7 +363,6 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
                     >
                       {t.importAPIDialog.selectFile}
                     </Button>

@@ -162,7 +162,6 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
                   >
                     {t.importAPIDialog.selectFile}
                   </Button>
