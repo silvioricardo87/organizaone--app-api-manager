@@ -3,24 +3,27 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MagnifyingGlass, Plus, FileText, UploadSimple } from '@phosphor-icons/react'
+import { MagnifyingGlass, Plus, FileText, UploadSimple, PencilSimple } from '@phosphor-icons/react'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { PhaseIndicator } from './PhaseIndicator'
 import { ImportAPIDialog } from './ImportAPIDialog'
+import { EditAPIDialog } from './EditAPIDialog'
 import { useSettings } from '@/hooks/use-settings'
 import { format } from 'date-fns'
 
 interface APIListProps {
   apis: APIContract[]
   onSelectAPI: (api: APIContract) => void
+  onUpdateAPI: (api: APIContract) => void
   onNewAPI: () => void
   onImportAPI: (api: APIContract) => void
 }
 
-export function APIList({ apis, onSelectAPI, onNewAPI, onImportAPI }: APIListProps) {
+export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI }: APIListProps) {
   const { t } = useSettings()
   const [searchQuery, setSearchQuery] = useState('')
   const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [editingAPI, setEditingAPI] = useState<APIContract | null>(null)
 
   const filteredAPIs = useMemo(() => {
     if (!searchQuery.trim()) return apis
@@ -108,8 +111,23 @@ export function APIList({ apis, onSelectAPI, onNewAPI, onImportAPI }: APIListPro
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-display font-semibold text-lg leading-tight">{displayTitle}</h3>
-                  {currentPhase && <PhaseIndicator phase={currentPhase} />}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display font-semibold text-lg leading-tight truncate">{displayTitle}</h3>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setEditingAPI(api)
+                      }}
+                    >
+                      <PencilSimple size={16} weight="bold" />
+                    </Button>
+                    {currentPhase && <PhaseIndicator phase={currentPhase} />}
+                  </div>
                 </div>
                 
                 <p className="text-sm text-muted-foreground line-clamp-2">
@@ -163,6 +181,15 @@ export function APIList({ apis, onSelectAPI, onNewAPI, onImportAPI }: APIListPro
         onImport={onImportAPI}
         existingAPIs={apis}
       />
+
+      {editingAPI && (
+        <EditAPIDialog
+          open={!!editingAPI}
+          onOpenChange={(open) => !open && setEditingAPI(null)}
+          api={editingAPI}
+          onSave={onUpdateAPI}
+        />
+      )}
     </div>
   )
 }
