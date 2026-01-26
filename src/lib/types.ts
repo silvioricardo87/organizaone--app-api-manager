@@ -64,6 +64,7 @@ export interface APIContract {
   name: string
   displayName?: string
   useDisplayName?: boolean
+  apiGroup?: string
   version: string
   summary: string
   yamlContent: string

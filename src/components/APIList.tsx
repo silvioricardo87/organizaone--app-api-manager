@@ -28,6 +28,7 @@ export function APIList({ apis, onSelectAPI, onNewAPI, onImportAPI }: APIListPro
     const query = searchQuery.toLowerCase()
     return apis.filter(api =>
       api.name.toLowerCase().includes(query) ||
+      api.apiGroup?.toLowerCase().includes(query) ||
       api.version.toLowerCase().includes(query) ||
       api.summary.toLowerCase().includes(query)
     )
@@ -119,6 +120,11 @@ export function APIList({ apis, onSelectAPI, onNewAPI, onImportAPI }: APIListPro
                   <Badge variant="outline" className="text-xs">
                     {t.apiList.version} {api.version}
                   </Badge>
+                  {api.apiGroup && (
+                    <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
+                      {api.apiGroup}
+                    </Badge>
+                  )}
                   {api.knownIssues.length > 0 && (
                     <Badge variant="outline" className="text-xs">
                       {api.knownIssues.length} {api.knownIssues.length === 1 ? t.issues.title.slice(0, -1) : t.issues.title}
