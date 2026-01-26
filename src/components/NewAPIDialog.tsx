@@ -23,6 +23,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
   const [name, setName] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [useDisplayName, setUseDisplayName] = useState(false)
+  const [isUseDisplayNameManuallySet, setIsUseDisplayNameManuallySet] = useState(false)
+  const [apiGroup, setApiGroup] = useState('')
   const [yamlContent, setYamlContent] = useState('')
   const [version, setVersion] = useState('')
   const [summary, setSummary] = useState('')
@@ -103,6 +105,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
       name: normalizedName,
       displayName: displayName.trim() || undefined,
       useDisplayName: displayName.trim() ? useDisplayName : false,
+      apiGroup: apiGroup.trim() || undefined,
       version: normalizedVersion,
       summary: summary.trim() || 'No summary provided',
       yamlContent,
@@ -127,6 +130,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     setName('')
     setDisplayName('')
     setUseDisplayName(false)
+    setIsUseDisplayNameManuallySet(false)
+    setApiGroup('')
     setYamlContent('')
     setVersion('')
     setSummary('')
@@ -181,7 +186,13 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
             <Input
               id="api-display-name"
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value
+                setDisplayName(value)
+                if (!isUseDisplayNameManuallySet) {
+                  setUseDisplayName(value.trim().length > 0)
+                }
+              }}
               placeholder={t.newAPIDialog.displayNamePlaceholder}
             />
             {displayName.trim() && (
@@ -189,7 +200,10 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
                 <Checkbox
                   id="use-display-name"
                   checked={useDisplayName}
-                  onCheckedChange={(checked) => setUseDisplayName(checked === true)}
+                  onCheckedChange={(checked) => {
+                    setUseDisplayName(checked === true)
+                    setIsUseDisplayNameManuallySet(true)
+                  }}
                 />
                 <label
                   htmlFor="use-display-name"
@@ -199,6 +213,16 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
                 </label>
               </div>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="api-group">{t.newAPIDialog.apiGroup}</Label>
+            <Input
+              id="api-group"
+              value={apiGroup}
+              onChange={(e) => setApiGroup(e.target.value)}
+              placeholder={t.newAPIDialog.apiGroupPlaceholder}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

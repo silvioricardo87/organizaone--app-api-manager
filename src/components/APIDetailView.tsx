@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ArrowLeft, Trash, DownloadSimple } from '@phosphor-icons/react'
+import { ArrowLeft, Trash, DownloadSimple, Tag } from '@phosphor-icons/react'
 import { APIContract } from '@/lib/types'
 import { OverviewTab } from './tabs/OverviewTab'
 import { LifecycleTab } from './tabs/LifecycleTab'
@@ -23,6 +23,7 @@ import { TimelineTab } from './tabs/TimelineTab'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 import { storage } from '@/lib/storage'
+import { Badge } from '@/components/ui/badge'
 
 interface APIDetailViewProps {
   api: APIContract
@@ -54,6 +55,7 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
         name: api.name,
         displayName: api.displayName,
         useDisplayName: api.useDisplayName,
+        apiGroup: api.apiGroup,
         version: api.version,
         summary: api.summary,
         createdAt: api.createdAt,
@@ -93,7 +95,15 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
           <ArrowLeft size={20} />
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-display font-bold">{api.name}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-display font-bold">{api.name}</h1>
+            {api.apiGroup && (
+              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                <Tag size={12} weight="bold" className="mr-1" />
+                {api.apiGroup}
+              </Badge>
+            )}
+          </div>
           <p className="text-muted-foreground">{t.apiDetail.version} {api.version}</p>
         </div>
         <Button variant="outline" onClick={handleExport}>
