@@ -25,6 +25,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
   const [useDisplayName, setUseDisplayName] = useState(false)
   const [isUseDisplayNameManuallySet, setIsUseDisplayNameManuallySet] = useState(false)
   const [apiGroup, setApiGroup] = useState('')
+  const [isBeta, setIsBeta] = useState(false)
   const [yamlContent, setYamlContent] = useState('')
   const [version, setVersion] = useState('')
   const [summary, setSummary] = useState('')
@@ -106,6 +107,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
       displayName: displayName.trim() || undefined,
       useDisplayName: displayName.trim() ? useDisplayName : false,
       apiGroup: apiGroup.trim() || undefined,
+      isBeta,
       version: normalizedVersion,
       summary: summary.trim() || 'No summary provided',
       yamlContent,
@@ -132,6 +134,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     setUseDisplayName(false)
     setIsUseDisplayNameManuallySet(false)
     setApiGroup('')
+    setIsBeta(false)
     setYamlContent('')
     setVersion('')
     setSummary('')
@@ -223,6 +226,20 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
               onChange={(e) => setApiGroup(e.target.value)}
               placeholder={t.newAPIDialog.apiGroupPlaceholder}
             />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="is-beta"
+              checked={isBeta}
+              onCheckedChange={(checked) => setIsBeta(checked === true)}
+            />
+            <label
+              htmlFor="is-beta"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+            >
+              {t.newAPIDialog.isBetaLabel}
+            </label>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

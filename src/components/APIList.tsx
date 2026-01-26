@@ -125,6 +125,11 @@ export function APIList({ apis, onSelectAPI, onNewAPI, onImportAPI }: APIListPro
                       {api.apiGroup}
                     </Badge>
                   )}
+                  {api.isBeta && (
+                    <Badge variant="secondary" className="text-xs bg-amber-500/10 text-amber-600 border-amber-200 hover:bg-amber-500/20 dark:text-amber-400 dark:border-amber-900/50 transition-colors">
+                      Beta
+                    </Badge>
+                  )}
                   {api.knownIssues.length > 0 && (
                     <Badge variant="outline" className="text-xs">
                       {api.knownIssues.length} {api.knownIssues.length === 1 ? t.issues.title.slice(0, -1) : t.issues.title}
