@@ -1,0 +1,50 @@
+name: Prepare & Validate
+
+on:
+  workflow_call:
+    outputs:
+      build_type:
+        description: "The determined build type (debug or release)"
+        value: ${{ jobs.prepare.outputs.build_type }}
+      start_time:
+        description: "Unix timestamp when build started"
+        value: ${{ jobs.prepare.outputs.start_time }}
+
+jobs:
+  prepare:
+    name: Prepare & Validate
+    runs-on: ubuntu-latest
+    outputs:
+      build_type: ${{ steps.build_type.outputs.type }}
+      start_time: ${{ steps.build_type.outputs.start_time }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Determine build type
+        id: build_type
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            BUILD_TYPE="${{ inputs.build_type || 'debug' }}"
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            BUILD_TYPE="release"
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            BUILD_TYPE="release"
+          else
+            BUILD_TYPE="debug"
+          fi
+          echo "type=$BUILD_TYPE" >> $GITHUB_OUTPUT
+          echo "Building $BUILD_TYPE version"
+
+          # Record start time
+          echo "start_time=$(date +%s)" >> $GITHUB_OUTPUT
+
