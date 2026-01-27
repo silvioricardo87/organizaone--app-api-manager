@@ -96,15 +96,18 @@ export function getEndpointFields(spec: any, endpoint: string, method: string): 
     }
 
     if (operation.parameters) {
-      operation.parameters.forEach((param: any) => {
-        fields.add(param.name)
+      operation.parameters.forEach((p: any) => {
+        const param = resolveParameter(p, spec)
+        if (param && param.name) {
+          fields.add(param.name)
+        }
       })
     }
   } catch (error) {
     console.error('Error extracting fields:', error)
   }
   
-  return Array.from(fields)
+  return Array.from(fields).filter(f => typeof f === 'string' && f.length > 0)
 }
 
 export function generateId(): string {

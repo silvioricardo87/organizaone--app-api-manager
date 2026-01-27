@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -44,6 +44,29 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
   const availableFields = endpoint && method && api.parsedSpec
     ? getEndpointFields(api.parsedSpec, endpoint, method)
     : []
+
+  useEffect(() => {
+    if (endpoint && method && !editingField) {
+      if (availableFields.length === 0) {
+        setIsCustomField(true)
+      }
+    }
+  }, [endpoint, method, availableFields.length, editingField])
+
+  const handleEndpointChange = (val: string) => {
+    setEndpoint(val)
+    setMethod('')
+    setField('')
+    setIsCustomField(false)
+    setCustomFieldInput('')
+  }
+
+  const handleMethodChange = (val: string) => {
+    setMethod(val)
+    setField('')
+    setIsCustomField(false)
+    setCustomFieldInput('')
+  }
 
   const openDialog = (pcmField?: PCMField) => {
     if (pcmField) {
@@ -254,7 +277,7 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="pcm-endpoint">{t.pcm.endpoint} *</Label>
-              <Select value={endpoint} onValueChange={setEndpoint} disabled={!!editingField}>
+              <Select value={endpoint} onValueChange={handleEndpointChange} disabled={!!editingField}>
                 <SelectTrigger id="pcm-endpoint">
                   <SelectValue placeholder={t.pcm.selectEndpoint} />
                 </SelectTrigger>
@@ -271,7 +294,7 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
             {endpoint && (
               <div className="space-y-2">
                 <Label htmlFor="pcm-method">{t.pcm.method} *</Label>
-                <Select value={method} onValueChange={setMethod} disabled={!!editingField}>
+                <Select value={method} onValueChange={handleMethodChange} disabled={!!editingField}>
                   <SelectTrigger id="pcm-method">
                     <SelectValue placeholder={t.pcm.selectMethod} />
                   </SelectTrigger>
@@ -294,10 +317,10 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
                     <Select 
                       value={field} 
                       onValueChange={setField} 
-                      disabled={!!editingField || isCustomField}
+                      disabled={!!editingField || isCustomField || availableFields.length === 0}
                     >
                       <SelectTrigger id="pcm-field">
-                        <SelectValue placeholder={t.pcm.selectField} />
+                        <SelectValue placeholder={availableFields.length === 0 ? t.pcm.noFieldsFound || "Nenhum campo encontrado" : t.pcm.selectField} />
                       </SelectTrigger>
                       <SelectContent>
                         {availableFields.map(f => (
@@ -320,7 +343,7 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
                           setField('')
                         }
                       }}
-                      disabled={!!editingField}
+                      disabled={!!editingField || availableFields.length === 0}
                     />
                     <Label 
                       htmlFor="custom-field-checkbox"
