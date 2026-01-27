@@ -1,0 +1,186 @@
+name: Notify Build Status
+
+on:
+  workflow_call:
+    inputs:
+      build_type:
+        description: "The build type (debug or release)"
+        required: true
+        type: string
+      prepare_result:
+        description: "Result of prepare job"
+        required: true
+        type: string
+      web_deploy_result:
+        description: "Result of web deploy job"
+        required: false
+        type: string
+        default: "skipped"
+    secrets:
+      TELEGRAM_BOT_TOKEN:
+        required: true
+      TELEGRAM_CHAT_ID:
+        required: true
+
+jobs:
+  notify:
+    name: Notify Build Status
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine workflow status
+        id: status
+        run: |
+          if [[ "${{ inputs.prepare_result }}" == "failure" ]] || \
+             [[ "${{ inputs.web_deploy_result }}" == "failure" ]]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+          elif [[ "${{ inputs.prepare_result }}" == "cancelled" ]] || \
+               [[ "${{ inputs.web_deploy_result }}" == "cancelled" ]]; then
+            echo "status=cancelled" >> $GITHUB_OUTPUT
+          else
+            echo "status=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send failure notification
+        if: steps.status.outputs.status == 'failure'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:"%s" | sed 's/["`]//g')
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          BUILD_TYPE="${{ inputs.build_type }}"
+          
+          if [[ "$BUILD_TYPE" == "release" ]]; then
+            ICON="🚀"
+            BUILD_NAME="Release"
+          else
+            ICON="🔨"
+            BUILD_NAME="Debug"
+          fi
+          
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${{ github.ref_name }}"
+            REF_INFO="Version: \`${VERSION}\`"
+          else
+            BRANCH="${GITHUB_REF#refs/heads/}"
+            REF_INFO="Branch: \`${BRANCH}\`"
+          fi
+          
+          MESSAGE="━━━━━━━━━━━━━━━━━━━━━━━━━%0A"
+          MESSAGE="${MESSAGE}❌ *OrganizaOne - Build Failed*%0A"
+          MESSAGE="${MESSAGE}━━━━━━━━━━━━━━━━━━━━━━━━━%0A%0A"
+          MESSAGE="${MESSAGE}🔴 *Status:* \`Build Error\`%0A%0A"
+          MESSAGE="${MESSAGE}📦 *Build Information*%0A"
+          MESSAGE="${MESSAGE}┣ 🏷️ Type: *${BUILD_NAME}*%0A"
+          MESSAGE="${MESSAGE}┣ 🌿 ${REF_INFO}%0A"
+          MESSAGE="${MESSAGE}┣ 📝 Commit: \`${COMMIT_SHA}\`%0A"
+          MESSAGE="${MESSAGE}┗ 💬 Message: _${COMMIT_MSG}_%0A%0A"
+          MESSAGE="${MESSAGE}👤 *Author:* \`${{ github.actor }}\`%0A"
+          MESSAGE="${MESSAGE}🔗 [Check Workflow Logs ➜](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})%0A%0A"
+          MESSAGE="${MESSAGE}━━━━━━━━━━━━━━━━━━━━━━━━━%0A"
+          MESSAGE="${MESSAGE}⚠️ *Action Required:* Check the logs for details.%0A"
+          MESSAGE="${MESSAGE}━━━━━━━━━━━━━━━━━━━━━━━━━"
+          
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+               -d "chat_id=${TELEGRAM_CHAT_ID}" \
+               -d "text=${MESSAGE}" \
+               -d "parse_mode=Markdown" \
+               -d "disable_web_page_preview=true" || true
+
+      - name: Send cancellation notification
+        if: steps.status.outputs.status == 'cancelled'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:"%s" | sed 's/["`]//g')
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          BUILD_TYPE="${{ inputs.build_type }}"
+          
+          if [[ "$BUILD_TYPE" == "release" ]]; then
+            ICON="🚀"
+            BUILD_NAME="Release"
+          else
+            ICON="🔨"
+            BUILD_NAME="Debug"
+          fi
+          
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${{ github.ref_name }}"
+            REF_INFO="Version: \`${VERSION}\`"
+          else
+            BRANCH="${GITHUB_REF#refs/heads/}"
+            REF_INFO="Branch: \`${BRANCH}\`"
+          fi
+          
+          MESSAGE="━━━━━━━━━━━━━━━━━━━━━━━━━%0A"
+          MESSAGE="${MESSAGE}⚠️ *OrganizaOne - Build Cancelled*%0A"
+          MESSAGE="${MESSAGE}━━━━━━━━━━━━━━━━━━━━━━━━━%0A%0A"
+          MESSAGE="${MESSAGE}🟡 *Status:* \`Cancelled\`%0A%0A"
+          MESSAGE="${MESSAGE}📦 *Build Information*%0A"
+          MESSAGE="${MESSAGE}┣ 🏷️ Type: *${BUILD_NAME}*%0A"
+          MESSAGE="${MESSAGE}┣ 🌿 ${REF_INFO}%0A"
+          MESSAGE="${MESSAGE}┣ 📝 Commit: \`${COMMIT_SHA}\`%0A"
+          MESSAGE="${MESSAGE}┗ 💬 Message: _${COMMIT_MSG}_%0A%0A"
+          MESSAGE="${MESSAGE}👤 *Author:* \`${{ github.actor }}\`%0A"
+          MESSAGE="${MESSAGE}🔗 [View Workflow Run ➜](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})%0A"
+          MESSAGE="${MESSAGE}━━━━━━━━━━━━━━━━━━━━━━━━━"
+          
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+               -d "chat_id=${TELEGRAM_CHAT_ID}" \
+               -d "text=${MESSAGE}" \
+               -d "parse_mode=Markdown" \
+               -d "disable_web_page_preview=true" || true
+
+      - name: Send success notification
+        if: steps.status.outputs.status == 'success'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:"%s" | sed 's/["`]//g')
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          BUILD_TYPE="${{ inputs.build_type }}"
+          
+          if [[ "$BUILD_TYPE" == "release" ]]; then
+            ICON="🚀"
+            BUILD_NAME="Release"
+          else
+            ICON="🔨"
+            BUILD_NAME="Debug"
+          fi
+          
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${{ github.ref_name }}"
+            REF_INFO="Version: \`${VERSION}\`"
+          else
+            BRANCH="${GITHUB_REF#refs/heads/}"
+            REF_INFO="Branch: \`${BRANCH}\`"
+          fi
+          
+          MESSAGE="━━━━━━━━━━━━━━━━━━━━━━━━━%0A"
+          MESSAGE="${MESSAGE}${ICON} *OrganizaOne - Build Success*%0A"
+          MESSAGE="${MESSAGE}━━━━━━━━━━━━━━━━━━━━━━━━━%0A%0A"
+          MESSAGE="${MESSAGE}🟢 *Status:* \`Success\`%0A%0A"
+          MESSAGE="${MESSAGE}📦 *Build Information*%0A"
+          MESSAGE="${MESSAGE}┣ 🏷️ Type: *${BUILD_NAME}*%0A"
+          MESSAGE="${MESSAGE}┣ 🌿 ${REF_INFO}%0A"
+          MESSAGE="${MESSAGE}┣ 📝 Commit: \`${COMMIT_SHA}\`%0A"
+          MESSAGE="${MESSAGE}┗ 💬 Message: _${COMMIT_MSG}_%0A%0A"
+          MESSAGE="${MESSAGE}✅ *Final Results*%0A"
+          MESSAGE="${MESSAGE}┗ 📂 Web Deploy: \`${{ inputs.web_deploy_result }}\`%0A%0A"
+          MESSAGE="${MESSAGE}👤 *Author:* \`${{ github.actor }}\`%0A"
+          MESSAGE="${MESSAGE}🔗 [View Workflow Run ➜](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})%0A"
+          MESSAGE="${MESSAGE}━━━━━━━━━━━━━━━━━━━━━━━━━"
+          
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+               -d "chat_id=${TELEGRAM_CHAT_ID}" \
+               -d "text=${MESSAGE}" \
+               -d "parse_mode=Markdown" \
+               -d "disable_web_page_preview=true" || true
+
