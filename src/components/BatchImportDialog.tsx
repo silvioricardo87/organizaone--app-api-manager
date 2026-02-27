@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Upload, X } from '@phosphor-icons/react'
 import { APIContract } from '@/lib/types'
+import { generatePCMFields } from '@/lib/pcm-field-generator'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 
@@ -87,9 +88,24 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
         apisToImport.push(api)
       }
 
-      if (apisToImport.length > 0) {
-        onImport(apisToImport)
-        toast.success(t.toasts.allApisImported.replace('{count}', String(apisToImport.length)))
+      let pcmMappedCount = 0
+      const apisWithPCM = apisToImport.map(api => {
+        if (api.parsedSpec && (!api.pcmFields || api.pcmFields.length === 0)) {
+          const { fields } = generatePCMFields(api.name, api.parsedSpec, api.version)
+          if (fields.length > 0) {
+            pcmMappedCount++
+            return { ...api, pcmFields: fields }
+          }
+        }
+        return api
+      })
+
+      if (apisWithPCM.length > 0) {
+        onImport(apisWithPCM)
+        const msg = t.toasts.allApisImported.replace('{count}', String(apisWithPCM.length))
+        toast.success(pcmMappedCount > 0
+          ? `${msg} (${pcmMappedCount} ${t.pcm.autoMapButton.toLowerCase()})`
+          : msg)
       }
 
       if (skippedAPIs.length > 0) {

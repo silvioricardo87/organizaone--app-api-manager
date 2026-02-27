@@ -8,9 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Plus, Trash, Pencil } from '@phosphor-icons/react'
+import { Plus, Trash, Pencil, Lightning, FilePdf, FileMagnifyingGlass } from '@phosphor-icons/react'
 import { APIContract, PCMField, PCMMandatoryType } from '@/lib/types'
 import { generateId, extractEndpoints, getEndpointFields } from '@/lib/api-utils'
+import { generatePCMFields, mergeWithExistingFields } from '@/lib/pcm-field-generator'
+import { BASE_PCM_FIELDS } from '@/lib/pcm-rules'
+import { exportPCMFieldsPDF } from '@/lib/pcm-pdf-export'
+import { PCMAutoMapDialog } from '@/components/PCMAutoMapDialog'
+import { ValidateReportDialog } from '@/components/ValidateReportDialog'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 
@@ -20,9 +25,15 @@ interface PCMTabProps {
 }
 
 export function PCMTab({ api, onUpdate }: PCMTabProps) {
-  const { t } = useSettings()
+  const { t, language } = useSettings()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingField, setEditingField] = useState<PCMField | null>(null)
+  const [autoMapDialogOpen, setAutoMapDialogOpen] = useState(false)
+  const [autoMapFields, setAutoMapFields] = useState<PCMField[]>([])
+  const [autoMapFamily, setAutoMapFamily] = useState<string | null>(null)
+  const [autoMapBaseCount, setAutoMapBaseCount] = useState(0)
+  const [autoMapAdditionalCount, setAutoMapAdditionalCount] = useState(0)
+  const [validateDialogOpen, setValidateDialogOpen] = useState(false)
   const [endpoint, setEndpoint] = useState('')
   const [method, setMethod] = useState('')
   const [field, setField] = useState('')
@@ -168,6 +179,48 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
     toast.success(t.toasts.metricDeleted)
   }
 
+  const handleAutoMap = () => {
+    const { fields, detectedFamily } = generatePCMFields(api.name, api.parsedSpec, api.version)
+    const endpoints = api.parsedSpec ? extractEndpoints(api.parsedSpec) : []
+    const endpointCount = endpoints.reduce((acc, ep) => acc + ep.methods.length, 0)
+    const baseCount = endpointCount * BASE_PCM_FIELDS.length
+    const additionalCount = fields.length - baseCount
+
+    setAutoMapFields(fields)
+    setAutoMapFamily(detectedFamily?.family || null)
+    setAutoMapBaseCount(baseCount)
+    setAutoMapAdditionalCount(Math.max(0, additionalCount))
+    setAutoMapDialogOpen(true)
+  }
+
+  const handleAutoMapConfirm = (selectedFields: PCMField[]) => {
+    if (api.pcmFields.length > 0) {
+      const merged = mergeWithExistingFields(selectedFields, api.pcmFields)
+      const newCount = merged.length - api.pcmFields.length
+      const skippedCount = selectedFields.length - newCount
+      onUpdate({
+        ...api,
+        pcmFields: merged,
+        updatedAt: new Date().toISOString(),
+      })
+      toast.success(t.toasts.pcmFieldsMerged
+        .replace('{new}', String(newCount))
+        .replace('{skipped}', String(skippedCount)))
+    } else {
+      onUpdate({
+        ...api,
+        pcmFields: selectedFields,
+        updatedAt: new Date().toISOString(),
+      })
+      toast.success(t.toasts.pcmAutoMapped.replace('{count}', String(selectedFields.length)))
+    }
+  }
+
+  const handleExportPDF = () => {
+    exportPCMFieldsPDF(api, language)
+    toast.success(t.pcm.pdfExported)
+  }
+
   if (!api.parsedSpec) {
     return (
       <Card className="p-12 text-center">
@@ -180,7 +233,23 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2 flex-wrap">
+        <Button variant="outline" onClick={handleAutoMap}>
+          <Lightning size={20} weight="bold" className="mr-2" />
+          {t.pcm.autoMapButton}
+        </Button>
+        {api.pcmFields.length > 0 && (
+          <>
+            <Button variant="outline" onClick={handleExportPDF}>
+              <FilePdf size={20} weight="bold" className="mr-2" />
+              {t.pcm.exportPDF}
+            </Button>
+            <Button variant="outline" onClick={() => setValidateDialogOpen(true)}>
+              <FileMagnifyingGlass size={20} weight="bold" className="mr-2" />
+              {t.pcm.validateReport}
+            </Button>
+          </>
+        )}
         <Button onClick={() => openDialog()}>
           <Plus size={20} weight="bold" className="mr-2" />
           {t.pcm.addField}
@@ -264,6 +333,22 @@ export function PCMTab({ api, onUpdate }: PCMTabProps) {
           ))}
         </div>
       )}
+
+      <PCMAutoMapDialog
+        open={autoMapDialogOpen}
+        onOpenChange={setAutoMapDialogOpen}
+        fields={autoMapFields}
+        detectedFamily={autoMapFamily}
+        baseFieldCount={autoMapBaseCount}
+        additionalFieldCount={autoMapAdditionalCount}
+        onConfirm={handleAutoMapConfirm}
+      />
+
+      <ValidateReportDialog
+        open={validateDialogOpen}
+        onOpenChange={setValidateDialogOpen}
+        api={api}
+      />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">

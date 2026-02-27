@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ArrowLeft, Trash, DownloadSimple, Tag } from '@phosphor-icons/react'
+import { ArrowLeft, Trash, DownloadSimple, Tag, FilePdf } from '@phosphor-icons/react'
 import { APIContract } from '@/lib/types'
 import { OverviewTab } from './tabs/OverviewTab'
 import { LifecycleTab } from './tabs/LifecycleTab'
@@ -20,6 +20,7 @@ import { IssuesTab } from './tabs/IssuesTab'
 import { BacklogTab } from './tabs/BacklogTab'
 import { PCMTab } from './tabs/PCMTab'
 import { TimelineTab } from './tabs/TimelineTab'
+import { exportPCMFieldsPDF } from '@/lib/pcm-pdf-export'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 import { storage } from '@/lib/storage'
@@ -33,7 +34,7 @@ interface APIDetailViewProps {
 }
 
 export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailViewProps) {
-  const { t } = useSettings()
+  const { t, language } = useSettings()
   const [activeTab, setActiveTab] = useState('overview')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
@@ -112,6 +113,15 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
           </div>
           <p className="text-muted-foreground">{t.apiDetail.version} {api.version}</p>
         </div>
+        {api.pcmFields.length > 0 && (
+          <Button variant="outline" onClick={() => {
+            exportPCMFieldsPDF(api, language)
+            toast.success(t.pcm.pdfExported)
+          }}>
+            <FilePdf size={20} weight="bold" className="mr-2" />
+            {t.pcm.exportPDF}
+          </Button>
+        )}
         <Button variant="outline" onClick={handleExport}>
           <DownloadSimple size={20} weight="bold" className="mr-2" />
           {t.apiDetail.export}

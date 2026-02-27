@@ -6,8 +6,11 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Upload } from '@phosphor-icons/react'
-import { parseOpenAPIYAML, extractAPIMetadata, generateId } from '@/lib/api-utils'
-import { APIContract, LifecyclePhaseData } from '@/lib/types'
+import { parseOpenAPIYAML, extractAPIMetadata, generateId, extractEndpoints } from '@/lib/api-utils'
+import { generatePCMFields, mergeWithExistingFields } from '@/lib/pcm-field-generator'
+import { BASE_PCM_FIELDS } from '@/lib/pcm-rules'
+import { APIContract, LifecyclePhaseData, PCMField } from '@/lib/types'
+import { PCMAutoMapDialog } from '@/components/PCMAutoMapDialog'
 import { useSettings } from '@/hooks/use-settings'
 import { toast } from 'sonner'
 
@@ -31,6 +34,12 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
   const [summary, setSummary] = useState('')
   const [parsedSpec, setParsedSpec] = useState<any>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [autoMapDialogOpen, setAutoMapDialogOpen] = useState(false)
+  const [pendingAPI, setPendingAPI] = useState<APIContract | null>(null)
+  const [autoMapFields, setAutoMapFields] = useState<PCMField[]>([])
+  const [autoMapFamily, setAutoMapFamily] = useState<string | null>(null)
+  const [autoMapBaseCount, setAutoMapBaseCount] = useState(0)
+  const [autoMapAdditionalCount, setAutoMapAdditionalCount] = useState(0)
 
   useEffect(() => {
     if (!open) {
@@ -121,7 +130,46 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
       updatedAt: new Date().toISOString()
     }
 
+    if (parsedSpec) {
+      const { fields, detectedFamily } = generatePCMFields(normalizedName, parsedSpec, normalizedVersion)
+      if (fields.length > 0) {
+        const endpoints = extractEndpoints(parsedSpec)
+        const endpointCount = endpoints.reduce((acc: number, ep: { methods: string[] }) => acc + ep.methods.length, 0)
+        const baseCount = endpointCount * BASE_PCM_FIELDS.length
+        const additionalCount = fields.length - baseCount
+
+        setPendingAPI(newAPI)
+        setAutoMapFields(fields)
+        setAutoMapFamily(detectedFamily?.family || null)
+        setAutoMapBaseCount(baseCount)
+        setAutoMapAdditionalCount(Math.max(0, additionalCount))
+        setAutoMapDialogOpen(true)
+        return
+      }
+    }
+
     onSave(newAPI)
+    onOpenChange(false)
+    toast.success(t.newAPIDialog.successTitle, {
+      description: t.newAPIDialog.successMessage
+    })
+  }
+
+  const handleAutoMapConfirm = (selectedFields: PCMField[]) => {
+    if (!pendingAPI) return
+    onSave({ ...pendingAPI, pcmFields: selectedFields })
+    setPendingAPI(null)
+    onOpenChange(false)
+    toast.success(t.newAPIDialog.successTitle, {
+      description: t.toasts.pcmAutoMapped.replace('{count}', String(selectedFields.length))
+    })
+  }
+
+  const handleAutoMapSkip = () => {
+    if (!pendingAPI) return
+    onSave(pendingAPI)
+    setPendingAPI(null)
+    setAutoMapDialogOpen(false)
     onOpenChange(false)
     toast.success(t.newAPIDialog.successTitle, {
       description: t.newAPIDialog.successMessage
@@ -139,6 +187,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     setVersion('')
     setSummary('')
     setParsedSpec(null)
+    setPendingAPI(null)
+    setAutoMapFields([])
   }
 
   return (
@@ -286,6 +336,19 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
           </Button>
         </div>
       </DialogContent>
+
+      <PCMAutoMapDialog
+        open={autoMapDialogOpen}
+        onOpenChange={(open) => {
+          setAutoMapDialogOpen(open)
+          if (!open) handleAutoMapSkip()
+        }}
+        fields={autoMapFields}
+        detectedFamily={autoMapFamily}
+        baseFieldCount={autoMapBaseCount}
+        additionalFieldCount={autoMapAdditionalCount}
+        onConfirm={handleAutoMapConfirm}
+      />
     </Dialog>
   )
 }

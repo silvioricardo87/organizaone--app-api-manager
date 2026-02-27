@@ -9,8 +9,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Card } from '@/components/ui/card'
-import { Upload, Download, X, FileArrowDown, CheckCircle, Warning } from '@phosphor-icons/react'
+import { Upload, Download, X, FileArrowDown, CheckCircle, Warning, Database } from '@phosphor-icons/react'
 import { APIContract } from '@/lib/types'
+import { generatePCMFields } from '@/lib/pcm-field-generator'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 
@@ -21,7 +23,7 @@ interface DataManagementDialogProps {
   onImport: (apis: APIContract[]) => void
 }
 
-type ViewState = 'menu' | 'export' | 'import'
+type ViewState = 'menu' | 'export' | 'import' | 'sample'
 
 export function DataManagementDialog({ open, onOpenChange, apis, onImport }: DataManagementDialogProps) {
   const { t } = useSettings()
@@ -33,6 +35,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
   const [exportData, setExportData] = useState<{ version: string; exportDate: string; apis: APIContract[] } | null>(null)
   const [importSummary, setImportSummary] = useState<{ toImport: APIContract[]; skipped: string[] } | null>(null)
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+  const [autoMapPCM, setAutoMapPCM] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleClose = () => {
@@ -44,6 +47,79 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
     setProgress(0)
     setIsProcessing(false)
     onOpenChange(false)
+  }
+
+  const handleSampleDataClick = () => {
+    setViewState('sample')
+  }
+
+  const handleLoadSampleData = async () => {
+    setIsProcessing(true)
+    setProgress(20)
+
+    try {
+      const response = await fetch('/sample-data.json')
+      if (!response.ok) throw new Error('Failed to fetch')
+
+      setProgress(40)
+      const data = await response.json()
+
+      if (!Array.isArray(data.apis)) {
+        toast.error(t.toasts.invalidFileFormat)
+        setIsProcessing(false)
+        return
+      }
+
+      setProgress(60)
+
+      const apisToImport: APIContract[] = []
+      const skippedAPIs: string[] = []
+
+      for (const api of data.apis) {
+        const duplicate = apis.find(
+          (existing) => existing.name === api.name && existing.version === api.version
+        )
+        if (duplicate) {
+          skippedAPIs.push(`${api.name} (${api.version})`)
+          continue
+        }
+        apisToImport.push(api)
+      }
+
+      setProgress(80)
+
+      let apisWithPCM = apisToImport
+      if (autoMapPCM) {
+        apisWithPCM = apisToImport.map(api => {
+          if (api.parsedSpec && (!api.pcmFields || api.pcmFields.length === 0)) {
+            const { fields } = generatePCMFields(api.name, api.parsedSpec, api.version)
+            if (fields.length > 0) {
+              return { ...api, pcmFields: fields }
+            }
+          }
+          return api
+        })
+      }
+
+      if (apisWithPCM.length > 0) {
+        onImport(apisWithPCM)
+      }
+
+      setProgress(100)
+
+      toast.success(t.settings.sampleDataLoaded.replace('{count}', String(apisWithPCM.length)))
+
+      if (skippedAPIs.length > 0) {
+        toast.warning(`${t.toasts.duplicateAPI}: ${skippedAPIs.slice(0, 3).join(', ')}${skippedAPIs.length > 3 ? '...' : ''}`)
+      }
+
+      setIsProcessing(false)
+      handleClose()
+    } catch (error) {
+      console.error('Error loading sample data:', error)
+      toast.error(t.settings.sampleDataError)
+      setIsProcessing(false)
+    }
   }
 
   const handleExportClick = async () => {
@@ -206,18 +282,19 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{t.settings.dataManagement}</DialogTitle>
           <DialogDescription>
             {viewState === 'menu' && t.settings.dataManagementDescription}
             {viewState === 'export' && t.settings.exportDescription}
             {viewState === 'import' && t.settings.importDescription}
+            {viewState === 'sample' && t.settings.loadSampleDataDescription}
           </DialogDescription>
         </DialogHeader>
 
         {viewState === 'menu' && (
-          <div className="grid grid-cols-2 gap-4 py-4">
+          <div className="grid grid-cols-3 gap-4 py-4">
             <Card className="p-6 hover:border-primary transition-colors cursor-pointer" onClick={handleExportClick}>
               <div className="flex flex-col items-center text-center gap-4">
                 <div className="p-4 bg-primary/10 rounded-full">
@@ -244,6 +321,21 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                 </div>
                 <Button variant="outline" className="w-full">
                   {t.settings.importData}
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="p-6 hover:border-primary transition-colors cursor-pointer" onClick={handleSampleDataClick}>
+              <div className="flex flex-col items-center text-center gap-4">
+                <div className="p-4 bg-green-500/10 rounded-full">
+                  <Database size={32} weight="duotone" className="text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-display font-semibold text-lg mb-1">{t.settings.loadSampleData}</h3>
+                  <p className="text-sm text-muted-foreground">{t.settings.loadSampleDataDescription}</p>
+                </div>
+                <Button variant="outline" className="w-full">
+                  {t.settings.loadSampleData}
                 </Button>
               </div>
             </Card>
@@ -441,6 +533,52 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                   {t.settings.confirmImport}
                 </Button>
               )}
+            </div>
+          </div>
+        )}
+        {viewState === 'sample' && (
+          <div className="space-y-4 py-4">
+            <Card className="p-4 bg-muted/50">
+              <div className="flex items-start gap-3">
+                <Database size={24} weight="duotone" className="text-green-600 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-2">{t.settings.loadSampleData}</h4>
+                  <p className="text-sm text-muted-foreground">{t.settings.loadSampleDataDescription}</p>
+                  <div className="flex items-center space-x-2 mt-4">
+                    <Checkbox
+                      id="auto-map-pcm"
+                      checked={autoMapPCM}
+                      onCheckedChange={(checked) => setAutoMapPCM(checked === true)}
+                    />
+                    <label
+                      htmlFor="auto-map-pcm"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      {t.settings.autoMapPCMOnImport}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {isProcessing && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t.settings.loadingSampleData}</span>
+                  <span className="font-medium">{progress}%</span>
+                </div>
+                <Progress value={progress} />
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={handleClose}>
+                {t.common.cancel}
+              </Button>
+              <Button onClick={handleLoadSampleData} disabled={isProcessing}>
+                <Database size={16} weight="duotone" className="mr-2" />
+                {t.settings.loadSampleData}
+              </Button>
             </div>
           </div>
         )}

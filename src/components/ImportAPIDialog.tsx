@@ -8,7 +8,11 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { UploadSimple } from '@phosphor-icons/react'
-import { APIContract } from '@/lib/types'
+import { APIContract, PCMField } from '@/lib/types'
+import { generatePCMFields, mergeWithExistingFields } from '@/lib/pcm-field-generator'
+import { BASE_PCM_FIELDS } from '@/lib/pcm-rules'
+import { extractEndpoints } from '@/lib/api-utils'
+import { PCMAutoMapDialog } from '@/components/PCMAutoMapDialog'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 
@@ -23,6 +27,12 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
   const { t } = useSettings()
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [autoMapDialogOpen, setAutoMapDialogOpen] = useState(false)
+  const [pendingAPI, setPendingAPI] = useState<APIContract | null>(null)
+  const [autoMapFields, setAutoMapFields] = useState<PCMField[]>([])
+  const [autoMapFamily, setAutoMapFamily] = useState<string | null>(null)
+  const [autoMapBaseCount, setAutoMapBaseCount] = useState(0)
+  const [autoMapAdditionalCount, setAutoMapAdditionalCount] = useState(0)
 
   const handleFileSelect = (file: File) => {
     if (file.type !== 'application/json') {
@@ -70,6 +80,24 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
           return
         }
 
+        if (restoredAPI.parsedSpec && (!restoredAPI.pcmFields || restoredAPI.pcmFields.length === 0)) {
+          const { fields, detectedFamily } = generatePCMFields(restoredAPI.name, restoredAPI.parsedSpec, restoredAPI.version)
+          if (fields.length > 0) {
+            const endpoints = extractEndpoints(restoredAPI.parsedSpec)
+            const endpointCount = endpoints.reduce((acc, ep) => acc + ep.methods.length, 0)
+            const baseCount = endpointCount * BASE_PCM_FIELDS.length
+            const additionalCount = fields.length - baseCount
+
+            setPendingAPI(restoredAPI)
+            setAutoMapFields(fields)
+            setAutoMapFamily(detectedFamily?.family || null)
+            setAutoMapBaseCount(baseCount)
+            setAutoMapAdditionalCount(Math.max(0, additionalCount))
+            setAutoMapDialogOpen(true)
+            return
+          }
+        }
+
         onImport(restoredAPI)
         onOpenChange(false)
         toast.success(t.toasts.apiImported)
@@ -110,6 +138,23 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
     if (file) {
       handleFileSelect(file)
     }
+  }
+
+  const handleAutoMapConfirm = (selectedFields: PCMField[]) => {
+    if (!pendingAPI) return
+    onImport({ ...pendingAPI, pcmFields: selectedFields })
+    setPendingAPI(null)
+    onOpenChange(false)
+    toast.success(t.toasts.apiImported)
+  }
+
+  const handleAutoMapSkip = () => {
+    if (!pendingAPI) return
+    onImport(pendingAPI)
+    setPendingAPI(null)
+    setAutoMapDialogOpen(false)
+    onOpenChange(false)
+    toast.success(t.toasts.apiImported)
   }
 
   return (
@@ -159,6 +204,19 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
           </div>
         </div>
       </DialogContent>
+
+      <PCMAutoMapDialog
+        open={autoMapDialogOpen}
+        onOpenChange={(open) => {
+          setAutoMapDialogOpen(open)
+          if (!open && pendingAPI) handleAutoMapSkip()
+        }}
+        fields={autoMapFields}
+        detectedFamily={autoMapFamily}
+        baseFieldCount={autoMapBaseCount}
+        additionalFieldCount={autoMapAdditionalCount}
+        onConfirm={handleAutoMapConfirm}
+      />
     </Dialog>
   )
 }
