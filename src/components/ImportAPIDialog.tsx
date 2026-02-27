@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { UploadSimple } from '@phosphor-icons/react'
-import { APIContract, PCMField } from '@/lib/types'
+import { APIContract, PCMField, singleImportSchema } from '@/lib/types'
 import { generatePCMFields, mergeWithExistingFields } from '@/lib/pcm-field-generator'
 import { BASE_PCM_FIELDS } from '@/lib/pcm-rules'
 import { extractEndpoints } from '@/lib/api-utils'
@@ -45,12 +45,15 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string
-        const importedData = JSON.parse(content)
+        const rawData = JSON.parse(content)
 
-        if (!importedData.api || !importedData.api.id || !importedData.api.name) {
+        const parsed = singleImportSchema.safeParse(rawData)
+        if (!parsed.success) {
           toast.error(t.toasts.invalidFileFormat)
           return
         }
+
+        const importedData = parsed.data
 
         const restoredAPI: APIContract = {
           id: importedData.api.id,
@@ -60,14 +63,14 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
           apiGroup: importedData.api.apiGroup,
           isBeta: importedData.api.isBeta || false,
           version: importedData.api.version || '1.0.0',
-          summary: importedData.api.summary || '',
-          yamlContent: importedData.contract || '',
+          summary: '',
+          yamlContent: importedData.contract,
           parsedSpec: importedData.specification,
           lifecyclePhases: importedData.lifecycle?.phases || [],
           milestones: importedData.lifecycle?.milestones || [],
-          knownIssues: importedData.issues || [],
-          backlogItems: importedData.backlog || [],
-          pcmFields: importedData.pcm || [],
+          knownIssues: importedData.issues,
+          backlogItems: importedData.backlog,
+          pcmFields: importedData.pcm,
           createdAt: importedData.api.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         }

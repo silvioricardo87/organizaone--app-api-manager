@@ -1,8 +1,10 @@
-import yaml from 'js-yaml'
+import yaml, { JSON_SCHEMA } from 'js-yaml'
+
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
 
 export function parseOpenAPIYAML(yamlContent: string): { success: boolean; data?: any; error?: string } {
   try {
-    const parsed = yaml.load(yamlContent)
+    const parsed = yaml.load(yamlContent, { schema: JSON_SCHEMA })
     
     if (!parsed || typeof parsed !== 'object') {
       return { success: false, error: 'Invalid YAML content' }
@@ -55,9 +57,20 @@ export function getEndpointFields(spec: any, endpoint: string, method: string): 
     const operation = pathItem[method.toLowerCase()]
     if (!operation) return []
 
+    const visited = new Set<string>()
     const extractFieldsFromSchema = (schema: any, prefix = '') => {
       if (!schema) return
-      
+
+      if (schema.$ref) {
+        if (visited.has(schema.$ref)) return
+        visited.add(schema.$ref)
+        const component = resolveRef(schema.$ref, spec)
+        if (component) {
+          extractFieldsFromSchema(component, prefix)
+        }
+        return
+      }
+
       if (schema.properties) {
         Object.keys(schema.properties).forEach(prop => {
           const fullPath = prefix ? `${prefix}.${prop}` : prop
@@ -65,17 +78,9 @@ export function getEndpointFields(spec: any, endpoint: string, method: string): 
           extractFieldsFromSchema(schema.properties[prop], fullPath)
         })
       }
-      
+
       if (schema.items) {
         extractFieldsFromSchema(schema.items, prefix)
-      }
-      
-      if (schema.$ref) {
-        const refPath = schema.$ref.split('/').pop()
-        const component = spec.components?.schemas?.[refPath]
-        if (component) {
-          extractFieldsFromSchema(component, prefix)
-        }
       }
     }
 
@@ -116,15 +121,17 @@ export function generateId(): string {
 
 export function resolveRef(ref: string, spec: any): any {
   if (!ref || !ref.startsWith('#/')) return null
-  
+
   const parts = ref.split('/').slice(1)
   let current = spec
-  
+
   for (const part of parts) {
     if (!current || typeof current !== 'object') return null
+    if (DANGEROUS_KEYS.has(part)) return null
+    if (!Object.prototype.hasOwnProperty.call(current, part)) return null
     current = current[part]
   }
-  
+
   return current
 }
 
@@ -136,18 +143,20 @@ export function resolveParameter(param: any, spec: any): any {
   return param
 }
 
-export function resolveSchema(schema: any, spec: any): any {
+export function resolveSchema(schema: any, spec: any, visited: Set<string> = new Set()): any {
   if (!schema) return schema
-  
+
   if (schema.$ref) {
+    if (visited.has(schema.$ref)) return schema
+    visited.add(schema.$ref)
     const resolved = resolveRef(schema.$ref, spec)
-    return resolved ? resolveSchema(resolved, spec) : schema
+    return resolved ? resolveSchema(resolved, spec, visited) : schema
   }
-  
+
   if (schema.allOf) {
     const merged: any = {}
     schema.allOf.forEach((subSchema: any) => {
-      const resolved = resolveSchema(subSchema, spec)
+      const resolved = resolveSchema(subSchema, spec, visited)
       Object.assign(merged, resolved)
       if (resolved.properties) {
         merged.properties = { ...merged.properties, ...resolved.properties }
@@ -155,6 +164,6 @@ export function resolveSchema(schema: any, spec: any): any {
     })
     return { ...schema, ...merged }
   }
-  
+
   return schema
 }

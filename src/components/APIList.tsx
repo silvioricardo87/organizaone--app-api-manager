@@ -135,7 +135,7 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
               className="cursor-pointer px-3 py-1 text-sm transition-all"
               onClick={() => setSelectedGroup(null)}
             >
-              Todos
+              {t.apiList.allGroups}
             </Badge>
             {apiGroups.map(group => (
               <Badge

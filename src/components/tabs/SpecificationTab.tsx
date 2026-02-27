@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { resolveParameter, resolveRef, resolveSchema } from '@/lib/api-utils'
 import { useSettings } from '@/hooks/use-settings'
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 interface SpecificationTabProps {
   api: APIContract
@@ -824,9 +825,10 @@ export function SpecificationTab({ api }: SpecificationTabProps) {
   
   const parseMarkdown = (text: string) => {
     try {
-      return marked.parse(text, { breaks: true, gfm: true })
-    } catch (error) {
-      return text
+      const html = marked.parse(text, { breaks: true, gfm: true })
+      return DOMPurify.sanitize(html as string)
+    } catch {
+      return ''
     }
   }
 

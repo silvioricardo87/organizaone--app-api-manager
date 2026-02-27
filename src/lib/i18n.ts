@@ -36,6 +36,7 @@ export const translations = {
       version: 'Version',
       noResults: 'No APIs found matching',
       updated: 'Updated',
+      allGroups: 'All',
     },
     apiDetail: {
       back: 'Back to list',
@@ -743,6 +744,7 @@ export const translations = {
       version: 'Versão',
       noResults: 'Nenhuma API encontrada correspondente a',
       updated: 'Atualizado',
+      allGroups: 'Todos',
     },
     apiDetail: {
       back: 'Voltar para lista',

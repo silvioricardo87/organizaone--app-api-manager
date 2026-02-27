@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Upload, X } from '@phosphor-icons/react'
-import { APIContract } from '@/lib/types'
+import { APIContract, batchImportSchema } from '@/lib/types'
 import { generatePCMFields } from '@/lib/pcm-field-generator'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
@@ -65,17 +65,20 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
 
     try {
       const text = await selectedFile.text()
-      const data = JSON.parse(text)
+      const rawData = JSON.parse(text)
 
-      if (!Array.isArray(data.apis)) {
+      const parsed = batchImportSchema.safeParse(rawData)
+      if (!parsed.success) {
         toast.error(t.toasts.invalidFileFormat)
         return
       }
 
+      const data = parsed.data
+
       const apisToImport: APIContract[] = []
       const skippedAPIs: string[] = []
 
-      for (const api of data.apis) {
+      for (const api of data.apis as APIContract[]) {
         const duplicate = existingAPIs.find(
           (existing) => existing.name === api.name && existing.version === api.version
         )

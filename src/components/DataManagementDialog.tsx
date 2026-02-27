@@ -34,7 +34,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
   const [progress, setProgress] = useState(0)
   const [exportData, setExportData] = useState<{ version: string; exportDate: string; apis: APIContract[] } | null>(null)
   const [importSummary, setImportSummary] = useState<{ toImport: APIContract[]; skipped: string[] } | null>(null)
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+  const [downloaded, setDownloaded] = useState(false)
   const [autoMapPCM, setAutoMapPCM] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -43,7 +43,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
     setSelectedFile(null)
     setImportSummary(null)
     setExportData(null)
-    setDownloadUrl(null)
+    setDownloaded(false)
     setProgress(0)
     setIsProcessing(false)
     onOpenChange(false)
@@ -152,7 +152,6 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
         type: 'application/json',
       })
       const url = URL.createObjectURL(blob)
-      setDownloadUrl(url)
 
       const a = document.createElement('a')
       a.href = url
@@ -160,6 +159,8 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      setDownloaded(true)
 
       toast.success(t.toasts.allApisExported)
     } catch (error) {
@@ -381,7 +382,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                   </div>
                 </Card>
 
-                {downloadUrl && (
+                {downloaded && (
                   <Card className="p-4 bg-success/10 border-success/20">
                     <div className="flex items-center gap-3">
                       <FileArrowDown size={24} weight="duotone" className="text-success" />
@@ -397,9 +398,9 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={handleClose}>
-                {downloadUrl ? t.common.close : t.common.cancel}
+                {downloaded ? t.common.close : t.common.cancel}
               </Button>
-              {!downloadUrl && !isProcessing && (
+              {!downloaded && !isProcessing && (
                 <Button onClick={handleConfirmExport}>
                   <Download size={16} weight="duotone" className="mr-2" />
                   {t.settings.downloadFile}

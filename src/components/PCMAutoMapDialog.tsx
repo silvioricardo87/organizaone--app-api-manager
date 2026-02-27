@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,12 @@ export function PCMAutoMapDialog({
   const { t } = useSettings()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set(fields.map(f => f.id)))
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (open) {
+      setSelectedIds(new Set(fields.map(f => f.id)))
+    }
+  }, [open, fields])
 
   const groupedFields = useMemo(() => {
     const groups: Record<string, PCMField[]> = {}

@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 export type LifecyclePhase = 'implementing' | 'certifying' | 'current' | 'deprecated' | 'retired'
 
 export type IssueStatus = 'open' | 'investigating' | 'resolved' | 'closed'
@@ -78,3 +80,55 @@ export interface APIContract {
   createdAt: string
   updatedAt: string
 }
+
+// Zod schemas for import validation
+
+const apiContractImportSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  version: z.string(),
+  summary: z.string().optional().default(''),
+  displayName: z.string().optional(),
+  useDisplayName: z.boolean().optional().default(false),
+  apiGroup: z.string().optional(),
+  isBeta: z.boolean().optional().default(false),
+  yamlContent: z.string().optional().default(''),
+  parsedSpec: z.any().optional(),
+  lifecyclePhases: z.array(z.object({
+    phase: z.enum(['implementing', 'certifying', 'current', 'deprecated', 'retired']),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+  })).optional().default([]),
+  milestones: z.array(z.any()).optional().default([]),
+  knownIssues: z.array(z.any()).optional().default([]),
+  backlogItems: z.array(z.any()).optional().default([]),
+  pcmFields: z.array(z.any()).optional().default([]),
+  createdAt: z.string().optional().default(new Date().toISOString()),
+  updatedAt: z.string().optional().default(new Date().toISOString()),
+})
+
+export const singleImportSchema = z.object({
+  api: z.object({
+    id: z.string(),
+    name: z.string(),
+    displayName: z.string().optional(),
+    useDisplayName: z.boolean().optional(),
+    apiGroup: z.string().optional(),
+    isBeta: z.boolean().optional(),
+    version: z.string().optional(),
+    createdAt: z.string().optional(),
+  }),
+  contract: z.string().optional().default(''),
+  specification: z.any().optional(),
+  lifecycle: z.object({
+    phases: z.array(z.any()).optional().default([]),
+    milestones: z.array(z.any()).optional().default([]),
+  }).optional(),
+  issues: z.array(z.any()).optional().default([]),
+  backlog: z.array(z.any()).optional().default([]),
+  pcm: z.array(z.any()).optional().default([]),
+})
+
+export const batchImportSchema = z.object({
+  apis: z.array(apiContractImportSchema),
+})
