@@ -28,6 +28,7 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [autoMapDialogOpen, setAutoMapDialogOpen] = useState(false)
+  const autoMapConfirmedRef = useRef(false)
   const [pendingAPI, setPendingAPI] = useState<APIContract | null>(null)
   const [autoMapFields, setAutoMapFields] = useState<PCMField[]>([])
   const [autoMapFamily, setAutoMapFamily] = useState<string | null>(null)
@@ -142,6 +143,7 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
 
   const handleAutoMapConfirm = (selectedFields: PCMField[]) => {
     if (!pendingAPI) return
+    autoMapConfirmedRef.current = true
     onImport({ ...pendingAPI, pcmFields: selectedFields })
     setPendingAPI(null)
     onOpenChange(false)
@@ -209,7 +211,10 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
         open={autoMapDialogOpen}
         onOpenChange={(open) => {
           setAutoMapDialogOpen(open)
-          if (!open && pendingAPI) handleAutoMapSkip()
+          if (!open && !autoMapConfirmedRef.current) {
+            handleAutoMapSkip()
+          }
+          autoMapConfirmedRef.current = false
         }}
         fields={autoMapFields}
         detectedFamily={autoMapFamily}

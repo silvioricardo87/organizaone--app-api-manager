@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -40,6 +40,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
   const [autoMapFamily, setAutoMapFamily] = useState<string | null>(null)
   const [autoMapBaseCount, setAutoMapBaseCount] = useState(0)
   const [autoMapAdditionalCount, setAutoMapAdditionalCount] = useState(0)
+  const autoMapConfirmedRef = useRef(false)
 
   useEffect(() => {
     if (!open) {
@@ -157,6 +158,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
 
   const handleAutoMapConfirm = (selectedFields: PCMField[]) => {
     if (!pendingAPI) return
+    autoMapConfirmedRef.current = true
     onSave({ ...pendingAPI, pcmFields: selectedFields })
     setPendingAPI(null)
     onOpenChange(false)
@@ -341,7 +343,10 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
         open={autoMapDialogOpen}
         onOpenChange={(open) => {
           setAutoMapDialogOpen(open)
-          if (!open) handleAutoMapSkip()
+          if (!open && !autoMapConfirmedRef.current) {
+            handleAutoMapSkip()
+          }
+          autoMapConfirmedRef.current = false
         }}
         fields={autoMapFields}
         detectedFamily={autoMapFamily}
