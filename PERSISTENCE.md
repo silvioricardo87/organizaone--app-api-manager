@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este aplicativo implementa **persistência dupla** de dados, combinando a API `useKV` do Spark com `localStorage` do navegador. Isso garante que todos os dados sejam persistidos localmente no navegador do usuário.
+Este aplicativo utiliza `localStorage` do navegador para persistência de dados. Todos os dados são armazenados localmente no navegador do usuário.
 
 ## Arquitetura de Persistência
 
@@ -10,18 +10,15 @@ Este aplicativo implementa **persistência dupla** de dados, combinando a API `u
 
 Localização: `/src/hooks/use-persisted-kv.ts`
 
-Este hook combina:
-- **Spark KV API** (`useKV`) - Persistência nativa do Spark
-- **localStorage** - Armazenamento local do navegador
+Este hook encapsula operações de leitura/escrita no localStorage com tipagem TypeScript e API reativa via `useState`.
 
 ```typescript
 const [value, setValue, deleteValue] = usePersistedKV<T>(key, defaultValue)
 ```
 
 **Características:**
-- Sincronização automática entre useKV e localStorage
 - Carregamento inicial de dados do localStorage
-- Atualização bidirecional (ambos os storages são atualizados simultaneamente)
+- Atualização automática do localStorage a cada escrita
 - Type-safe com TypeScript
 
 ### 2. Utilitário de Storage
@@ -139,29 +136,18 @@ const [theme, setTheme] = usePersistedKV<Theme>(STORAGE_KEYS.THEME, 'light')
 
 ### Leitura (Inicialização)
 1. Componente monta e chama `usePersistedKV`
-2. Hook tenta carregar de `localStorage`
-3. Se encontrado, sincroniza com `useKV`
-4. Se não encontrado, usa valor padrão
+2. Hook carrega de `localStorage`
+3. Se não encontrado, usa valor padrão
 
 ### Escrita (Atualização)
 1. Componente chama `setValue(newValue)`
-2. Hook atualiza `useKV` (Spark persistence)
-3. Hook atualiza `localStorage` simultaneamente
-4. Ambos os storages ficam sincronizados
+2. Hook atualiza `localStorage`
+3. Estado React é atualizado
 
 ### Exclusão
 1. Componente chama `deleteValue()` ou `storage.remove()`
-2. Dados removidos de ambos os storages
+2. Dados removidos do localStorage
 3. Hook retorna ao valor padrão
-
-## Vantagens desta Abordagem
-
-1. **Redundância**: Dados em dois lugares (useKV + localStorage)
-2. **Performance**: Acesso rápido via localStorage
-3. **Compatibilidade**: Funciona com a infraestrutura Spark existente
-4. **Type Safety**: TypeScript garante tipos corretos
-5. **Sincronização Automática**: Não requer gerenciamento manual
-6. **Recuperação de Dados**: Configurações individuais de API para backup
 
 ## Debugging
 
@@ -200,11 +186,3 @@ Para grandes volumes de dados YAML, considere:
 - Compressão antes de salvar
 - IndexedDB para contratos muito grandes
 - Limpeza periódica de dados antigos
-
-## Migração de Dados
-
-Se você tinha dados apenas em `useKV` antes desta implementação:
-1. Os dados serão automaticamente migrados para localStorage
-2. Na primeira renderização, `usePersistedKV` carrega de `useKV`
-3. Em seguida, salva em localStorage
-4. Sincronização completa após primeira execução
