@@ -126,7 +126,7 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:!max-w-[90vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t.pcm.validationTitle}</DialogTitle>
           <DialogDescription>{t.pcm.validationDescription}</DialogDescription>
