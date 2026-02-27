@@ -38,15 +38,15 @@ jobs:
     uses: ./.github/workflows/deploy-web.yml
     secrets: inherit
 
-  # --- NOTIFICATION STAGE ---
-  notify:
-    name: Utils | Notifications
-    needs: [prepare, deploy-web]
-    if: always()
-    uses: ./.github/workflows/notify.yml
-    with:
-      build_type: ${{ needs.prepare.outputs.build_type || 'debug' }}
-      prepare_result: ${{ needs.prepare.result }}
-      web_deploy_result: ${{ needs.deploy-web.result }}
-    secrets: inherit
+  # --- NOTIFICATION STAGE (disabled) ---
+  # notify:
+  #   name: Utils | Notifications
+  #   needs: [prepare, deploy-web]
+  #   if: always()
+  #   uses: ./.github/workflows/notify.yml
+  #   with:
+  #     build_type: ${{ needs.prepare.outputs.build_type || 'debug' }}
+  #     prepare_result: ${{ needs.prepare.result }}
+  #     web_deploy_result: ${{ needs.deploy-web.result }}
+  #   secrets: inherit
 
