@@ -3,11 +3,13 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MagnifyingGlass, Plus, FileText, UploadSimple, PencilSimple } from '@phosphor-icons/react'
+import { MagnifyingGlass, Plus, FileText, UploadSimple, PencilSimple, FilePdf } from '@phosphor-icons/react'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { PhaseIndicator } from './PhaseIndicator'
 import { ImportAPIDialog } from './ImportAPIDialog'
 import { EditAPIDialog } from './EditAPIDialog'
+import { exportAllPCMFieldsPDF } from '@/lib/pcm-pdf-export'
+import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 import { format } from 'date-fns'
 
@@ -20,7 +22,7 @@ interface APIListProps {
 }
 
 export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI }: APIListProps) {
-  const { t } = useSettings()
+  const { t, language } = useSettings()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
@@ -106,6 +108,15 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
             />
           </div>
           <div className="flex gap-2">
+            {apis.some(a => a.pcmFields.length > 0) && (
+              <Button variant="outline" onClick={() => {
+                exportAllPCMFieldsPDF(apis, language)
+                toast.success(t.pcm.pdfExported)
+              }}>
+                <FilePdf size={20} weight="bold" className="mr-2" />
+                {t.pcm.exportAllPDF}
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
               <UploadSimple size={20} weight="bold" className="mr-2" />
               {t.common.import}
