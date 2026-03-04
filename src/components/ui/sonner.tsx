@@ -1,9 +1,8 @@
-import { useTheme } from "next-themes"
 import { CSSProperties } from "react"
 import { Toaster as Sonner, ToasterProps } from "sonner"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const theme = document.documentElement.classList.contains("dark") ? "dark" : "light"
 
   return (
     <Sonner
