@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from "react-error-boundary";
 
+import './i18n/config'
 import App from './App.tsx'
 import { ErrorFallback } from './ErrorFallback.tsx'
 import { SettingsProvider } from './hooks/use-settings'
