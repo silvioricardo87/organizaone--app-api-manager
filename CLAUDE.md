@@ -27,11 +27,47 @@ CI uses **Bun** for install/build (`bun install && bun run build`). Local develo
 - **shadcn/ui** (New York style) — pre-built components in `src/components/ui/`
 - **Radix UI** primitives underneath shadcn
 - **React Hook Form** + **Zod** for form validation
+- **react-i18next** + **i18next** for internationalization
 - **recharts** for dashboard charts
 - **js-yaml** for OpenAPI spec parsing
+- **date-fns** for date formatting
 - **Sonner** for toast notifications
 
 ## Architecture
+
+### Folder Structure
+
+```
+src/
+├── features/                      # Feature-based modules
+│   ├── api-list/                  # API listing, creation, import
+│   │   ├── components/            # APIList, NewAPIDialog, EditAPIDialog, ImportAPIDialog, BatchImportDialog, YamlUploadSection
+│   │   └── index.ts               # Barrel exports
+│   ├── api-detail/                # Single API detail view
+│   │   ├── components/
+│   │   │   ├── APIDetailView.tsx
+│   │   │   └── tabs/
+│   │   │       ├── specification/  # SpecificationTab + SchemaViewer, EndpointList, etc.
+│   │   │       ├── pcm/            # PCMTab + PCMFieldForm, PCMFieldTable
+│   │   │       ├── OverviewTab.tsx, LifecycleTab.tsx, IssuesTab.tsx, BacklogTab.tsx, TimelineTab.tsx
+│   │   └── index.ts
+│   ├── dashboard/components/       # Dashboard charts
+│   ├── roadmap/components/         # Roadmap timeline
+│   └── settings/components/        # SettingsMenu, data-management/
+├── shared/
+│   ├── components/                 # PhaseIndicator, PCMAutoMapDialog, ValidateReportDialog
+│   ├── hooks/                      # use-persisted-kv, use-settings, use-mobile
+│   └── lib/                        # types, utils, storage, api-utils, date-utils, pcm-*
+├── i18n/
+│   ├── config.ts                   # i18next initialization
+│   └── locales/
+│       ├── en.json                 # English translations
+│       └── pt.json                 # Portuguese translations
+├── components/ui/                  # shadcn/ui primitives (managed by shadcn CLI)
+├── App.tsx                         # Root component with view routing
+├── main.tsx                        # Entry point
+└── ErrorFallback.tsx
+```
 
 ### Routing & Views
 
@@ -39,42 +75,43 @@ No router library — `App.tsx` manages a `currentView` state (`'list' | 'dashbo
 
 ### State & Persistence
 
-All API data lives in a single `APIContract[]` array managed by the **`usePersistedKV`** hook (`src/hooks/use-persisted-kv.ts`). This hook persists data to `localStorage` with a React `useState`-based API.
+All API data lives in a single `APIContract[]` array managed by the **`usePersistedKV`** hook (`src/shared/hooks/use-persisted-kv.ts`). This hook persists data to `localStorage` with a React `useState`-based API.
 
-Storage keys are defined in `src/lib/storage.ts` (`STORAGE_KEYS`). The `storage` utility provides get/set/remove helpers for localStorage.
+Storage keys are defined in `src/shared/lib/storage.ts` (`STORAGE_KEYS`). The `storage` utility provides get/set/remove helpers for localStorage.
 
 ### Internationalization
 
-Bilingual (Portuguese/English). All user-facing strings go through `useSettings().t` which returns the translation object from `src/lib/i18n.ts`. When adding UI text, add keys to **both** `pt` and `en` sections in that file.
+Bilingual (Portuguese/English) via **react-i18next**. Translation strings live in JSON files at `src/i18n/locales/{en,pt}.json`.
 
-### Component Organization
-
-- `src/components/` — page-level components (APIList, APIDetailView, Dashboard, Roadmap, dialogs)
-- `src/components/tabs/` — tab panels for the API detail view (Overview, Specification, Lifecycle, Issues, Backlog, PCM, Timeline)
-- `src/components/ui/` — shadcn/ui primitives (do not manually edit; managed by shadcn CLI)
-- `src/hooks/` — custom hooks (usePersistedKV, useSettings, useMobile)
-- `src/lib/` — types, utilities, i18n translations, storage abstraction
+- Use `const { t } = useSettings()` in components
+- `t` is a **function**: `t('apiList.title')` — NOT property access
+- When adding UI text, add keys to **both** `en.json` and `pt.json`
+- i18next is initialized in `src/i18n/config.ts` (imported as side-effect in `main.tsx`)
+- Date formatting utilities are in `src/shared/lib/date-utils.ts`
 
 ### OpenAPI Spec Handling
 
-`src/lib/api-utils.ts` contains all YAML parsing and OpenAPI extraction logic:
+`src/shared/lib/api-utils.ts` contains all YAML parsing and OpenAPI extraction logic:
 - `parseOpenAPIYAML()` — validates and parses YAML
 - `extractEndpoints()` — lists paths + methods from the spec
 - `getEndpointFields()` — recursively resolves `$ref` references and extracts field paths from request/response schemas
 
 ### Key Data Types
 
-Defined in `src/lib/types.ts`. The central type is `APIContract` which holds: metadata (name, version, group), the raw YAML, parsed spec, lifecycle phases, milestones, known issues, backlog items, and PCM field configurations.
+Defined in `src/shared/lib/types.ts`. The central type is `APIContract` which holds: metadata (name, version, group), the raw YAML, parsed spec, lifecycle phases, milestones, known issues, backlog items, and PCM field configurations.
 
 Lifecycle phases: `implementing → certifying → current → deprecated → retired`
 
 ## Conventions
 
 - **Path alias**: `@/` maps to `src/` (configured in both `tsconfig.json` and `vite.config.ts`)
-- **Styling**: Use Tailwind utility classes; use `cn()` from `src/lib/utils.ts` for conditional class merging
+- **Imports**: Use `@/` absolute paths for all imports. Feature-internal imports use `./` relative paths.
+- **Barrel exports**: Each feature has an `index.ts` that re-exports public components. Import from `@/features/api-list` not from deep paths.
+- **Styling**: Use Tailwind utility classes; use `cn()` from `@/shared/lib/utils` for conditional class merging
 - **Icons**: Phosphor Icons (`@phosphor-icons/react`) as the primary icon library, with Lucide available for shadcn components
 - **IDs**: Generated with `uuid` package
 - **Immutable state updates**: Always use the callback form of `setApis(prev => ...)` for array mutations
+- **Component size**: Keep components under 300 lines. Split into sub-components if needed.
 
 ## CI/CD
 
