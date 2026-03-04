@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Upload } from '@phosphor-icons/react'
-import { parseOpenAPIYAML, extractAPIMetadata, generateId, extractEndpoints } from '@/lib/api-utils'
+import { Upload, Warning } from '@phosphor-icons/react'
+import { parseOpenAPIYAML, extractAPIMetadata, generateId, extractEndpoints, type YAMLValidationError } from '@/lib/api-utils'
 import { generatePCMFields, mergeWithExistingFields } from '@/lib/pcm-field-generator'
 import { BASE_PCM_FIELDS } from '@/lib/pcm-rules'
 import { APIContract, LifecyclePhaseData, PCMField } from '@/lib/types'
@@ -40,6 +40,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
   const [autoMapFamily, setAutoMapFamily] = useState<string | null>(null)
   const [autoMapBaseCount, setAutoMapBaseCount] = useState(0)
   const [autoMapAdditionalCount, setAutoMapAdditionalCount] = useState(0)
+  const [validationErrors, setValidationErrors] = useState<YAMLValidationError[]>([])
   const autoMapConfirmedRef = useRef(false)
 
   useEffect(() => {
@@ -48,29 +49,55 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     }
   }, [open])
 
+  const formatValidationError = (err: YAMLValidationError): string => {
+    const msg = err.message
+    if (msg.startsWith('yaml_syntax_error:')) {
+      const line = msg.split(':')[1]
+      return t.newAPIDialog.yamlSyntaxError.replace('{line}', line)
+    }
+    if (msg.startsWith('missing_field:')) {
+      const field = msg.split(':')[1]
+      if (err.path && err.path.includes('responses')) {
+        return t.newAPIDialog.missingResponses.replace('{path}', err.path)
+      }
+      return t.newAPIDialog.missingField.replace('{field}', field)
+    }
+    if (msg.startsWith('invalid_field:')) {
+      return t.newAPIDialog.invalidField.replace('{path}', err.path || msg.split(':')[1])
+    }
+    if (msg.startsWith('invalid_method:')) {
+      const method = msg.split(':')[1]
+      return t.newAPIDialog.invalidMethod
+        .replace('{method}', method)
+        .replace('{path}', err.path || '')
+    }
+    return msg
+  }
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
+    setValidationErrors([])
     setIsProcessing(true)
     try {
       const content = await file.text()
       const result = parseOpenAPIYAML(content)
-      
+
       if (!result.success) {
-        toast.error(t.newAPIDialog.errorTitle, {
-          description: t.newAPIDialog.errorImporting
-        })
+        setValidationErrors(result.errors || [])
+        setParsedSpec(null)
+        setYamlContent('')
         return
       }
 
       setYamlContent(content)
       setParsedSpec(result.data)
-      
+
       const metadata = extractAPIMetadata(result.data)
       setVersion(metadata.version)
       setSummary(metadata.summary)
-      
+
       if (!name && result.data.info?.title) {
         setName(result.data.info.title)
       }
@@ -189,6 +216,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     setVersion('')
     setSummary('')
     setParsedSpec(null)
+    setValidationErrors([])
     setPendingAPI(null)
     setAutoMapFields([])
   }
@@ -225,6 +253,24 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
               </Button>
             </div>
           </div>
+
+          {validationErrors.length > 0 && (
+            <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Warning size={18} className="text-destructive shrink-0" />
+                <p className="text-sm font-medium text-destructive">
+                  {t.newAPIDialog.validationErrors}
+                </p>
+              </div>
+              <ul className="list-disc list-inside space-y-1 pl-1">
+                {validationErrors.map((err, i) => (
+                  <li key={i} className="text-sm text-destructive/90">
+                    {formatValidationError(err)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="api-name">{t.newAPIDialog.name} *</Label>

@@ -305,7 +305,7 @@ export function exportValidationPDF(api: APIContract, result: ValidationResult, 
       { align: 'center' }
     )
     doc.text(
-      'OrganizaOne API Manager',
+      'API Manager',
       pageWidth - 14,
       doc.internal.pageSize.getHeight() - 5,
       { align: 'right' }

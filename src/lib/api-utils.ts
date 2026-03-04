@@ -1,28 +1,110 @@
-import yaml, { JSON_SCHEMA } from 'js-yaml'
+import yaml, { JSON_SCHEMA, YAMLException } from 'js-yaml'
 
 const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
 
-export function parseOpenAPIYAML(yamlContent: string): { success: boolean; data?: any; error?: string } {
+export type YAMLValidationError = { message: string; path?: string }
+
+const VALID_HTTP_METHODS = new Set(['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'])
+const OPENAPI_PATH_FIELDS = new Set([...VALID_HTTP_METHODS, 'summary', 'description', 'servers', 'parameters', '$ref'])
+
+export function parseOpenAPIYAML(yamlContent: string): {
+  success: boolean
+  data?: any
+  error?: string
+  errors?: YAMLValidationError[]
+} {
+  let parsed: unknown
   try {
-    const parsed = yaml.load(yamlContent, { schema: JSON_SCHEMA })
-    
-    if (!parsed || typeof parsed !== 'object') {
-      return { success: false, error: 'Invalid YAML content' }
-    }
-
-    const spec = parsed as any
-    
-    if (!spec.openapi || !spec.info) {
-      return { success: false, error: 'Not a valid OpenAPI 3.0 specification' }
-    }
-
-    return { success: true, data: spec }
+    parsed = yaml.load(yamlContent, { schema: JSON_SCHEMA })
   } catch (error) {
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to parse YAML' 
+    if (error instanceof YAMLException && error.mark) {
+      const line = error.mark.line + 1
+      return {
+        success: false,
+        error: `YAML syntax error at line ${line}`,
+        errors: [{ message: `yaml_syntax_error:${line}` }],
+      }
+    }
+    const msg = error instanceof Error ? error.message : 'Failed to parse YAML'
+    return { success: false, error: msg, errors: [{ message: msg }] }
+  }
+
+  if (!parsed || typeof parsed !== 'object') {
+    return {
+      success: false,
+      error: 'Invalid YAML content',
+      errors: [{ message: 'Invalid YAML content' }],
     }
   }
+
+  const spec = parsed as Record<string, unknown>
+  const errors: YAMLValidationError[] = []
+
+  // Required top-level: openapi
+  if (!spec.openapi) {
+    errors.push({ message: 'missing_field:openapi', path: 'openapi' })
+  } else if (typeof spec.openapi !== 'string') {
+    errors.push({ message: 'invalid_field:openapi', path: 'openapi' })
+  }
+
+  // Required top-level: info (object)
+  if (!spec.info) {
+    errors.push({ message: 'missing_field:info', path: 'info' })
+  } else if (typeof spec.info !== 'object' || Array.isArray(spec.info)) {
+    errors.push({ message: 'invalid_field:info', path: 'info' })
+  } else {
+    const info = spec.info as Record<string, unknown>
+    if (!info.title) {
+      errors.push({ message: 'missing_field:info.title', path: 'info.title' })
+    }
+    if (!info.version) {
+      errors.push({ message: 'missing_field:info.version', path: 'info.version' })
+    }
+  }
+
+  // Required top-level: paths (object)
+  if (!spec.paths) {
+    errors.push({ message: 'missing_field:paths', path: 'paths' })
+  } else if (typeof spec.paths !== 'object' || Array.isArray(spec.paths)) {
+    errors.push({ message: 'invalid_field:paths', path: 'paths' })
+  } else {
+    const paths = spec.paths as Record<string, unknown>
+    for (const [pathKey, pathValue] of Object.entries(paths)) {
+      if (!pathValue || typeof pathValue !== 'object' || Array.isArray(pathValue)) continue
+      const pathItem = pathValue as Record<string, unknown>
+
+      for (const key of Object.keys(pathItem)) {
+        if (OPENAPI_PATH_FIELDS.has(key) || key.startsWith('x-')) continue
+        errors.push({
+          message: `invalid_method:${key}`,
+          path: `paths.${pathKey}.${key}`,
+        })
+      }
+
+      for (const method of VALID_HTTP_METHODS) {
+        if (!(method in pathItem)) continue
+        const operation = pathItem[method]
+        if (!operation || typeof operation !== 'object') continue
+        const op = operation as Record<string, unknown>
+        if (!op.responses) {
+          errors.push({
+            message: `missing_field:responses`,
+            path: `paths.${pathKey}.${method}.responses`,
+          })
+        }
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    return {
+      success: false,
+      error: errors[0].message,
+      errors,
+    }
+  }
+
+  return { success: true, data: spec }
 }
 
 export function extractAPIMetadata(spec: any): { version: string; summary: string } {

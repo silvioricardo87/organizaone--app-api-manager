@@ -1,7 +1,7 @@
 export const translations = {
   en: {
     header: {
-      title: 'OrganizaOne - API Manager',
+      title: 'API Manager',
       subtitle: 'Manage API contracts, lifecycle, and metrics',
       dashboard: 'Dashboard',
       roadmap: 'Roadmap',
@@ -113,6 +113,12 @@ export const translations = {
       errorImporting: 'Error importing contract',
       successTitle: 'Success',
       successMessage: 'API created successfully',
+      validationErrors: 'Validation errors found',
+      yamlSyntaxError: 'YAML syntax error at line {line}',
+      missingField: 'Missing required field: {field}',
+      invalidField: 'Invalid value at {path}',
+      invalidMethod: 'Invalid HTTP method: {method} at {path}',
+      missingResponses: 'Missing required field: responses at {path}',
     },
     importAPIDialog: {
       title: 'Import API',
@@ -709,7 +715,7 @@ export const translations = {
   },
   pt: {
     header: {
-      title: 'OrganizaOne - Gerenciador de APIs',
+      title: 'Gerenciador de APIs',
       subtitle: 'Gerencie contratos de API, ciclo de vida e métricas',
       dashboard: 'Painel',
       roadmap: 'Roadmap',
@@ -821,6 +827,12 @@ export const translations = {
       errorImporting: 'Erro ao importar contrato',
       successTitle: 'Sucesso',
       successMessage: 'API criada com sucesso',
+      validationErrors: 'Erros de validação encontrados',
+      yamlSyntaxError: 'Erro de sintaxe YAML na linha {line}',
+      missingField: 'Campo obrigatório ausente: {field}',
+      invalidField: 'Valor inválido em {path}',
+      invalidMethod: 'Método HTTP inválido: {method} em {path}',
+      missingResponses: 'Campo obrigatório ausente: responses em {path}',
     },
     importAPIDialog: {
       title: 'Importar API',

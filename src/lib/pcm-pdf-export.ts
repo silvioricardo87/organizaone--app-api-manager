@@ -164,7 +164,7 @@ export function exportPCMFieldsPDF(api: APIContract, language: Language) {
         { align: 'center' }
       )
       doc.text(
-        'OrganizaOne API Manager',
+        'API Manager',
         pageWidth - 6,
         doc.internal.pageSize.getHeight() - 5,
         { align: 'right' }
@@ -324,7 +324,7 @@ export function exportAllPCMFieldsPDF(apis: APIContract[], language: Language) {
       { align: 'center' }
     )
     doc.text(
-      'OrganizaOne API Manager',
+      'API Manager',
       pageWidth - 6,
       pageHeight - 5,
       { align: 'right' }
