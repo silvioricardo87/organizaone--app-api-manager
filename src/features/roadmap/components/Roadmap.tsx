@@ -1,0 +1,267 @@
+import { useMemo, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { APIContract, LifecyclePhase } from '@/shared/lib/types'
+import { useSettings } from '@/shared/hooks/use-settings'
+import { parseISO, differenceInDays, addMonths, min, max } from 'date-fns'
+import { formatDate, monthNames } from '@/shared/lib/date-utils'
+import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
+
+interface RoadmapProps {
+  apis: APIContract[]
+  onBack: () => void
+}
+
+interface TimelineEvent {
+  id: string
+  apiName: string
+  date: Date
+  type: 'milestone' | 'phase'
+  phase?: LifecyclePhase
+  title?: string
+}
+
+const PHASE_COLORS: Record<LifecyclePhase, string> = {
+  implementing: 'bg-[oklch(0.60_0.18_240)]',
+  certifying: 'bg-[oklch(0.75_0.15_70)]',
+  current: 'bg-[oklch(0.65_0.20_140)]',
+  deprecated: 'bg-[oklch(0.70_0.18_200)]',
+  retired: 'bg-[oklch(0.60_0.22_25)]',
+}
+
+export function Roadmap({ apis, onBack }: RoadmapProps) {
+  const { t, language } = useSettings()
+  const [selectedApi, setSelectedApi] = useState<string | null>(null)
+
+  const timelineData = useMemo(() => {
+    const events: TimelineEvent[] = []
+
+    apis.forEach(api => {
+      api.lifecyclePhases.forEach(phaseData => {
+        if (phaseData.startDate) {
+          events.push({
+            id: `${api.id}-${phaseData.phase}-start`,
+            apiName: api.name,
+            date: parseISO(phaseData.startDate),
+            type: 'phase',
+            phase: phaseData.phase,
+          })
+        }
+        if (phaseData.endDate) {
+          events.push({
+            id: `${api.id}-${phaseData.phase}-end`,
+            apiName: api.name,
+            date: parseISO(phaseData.endDate),
+            type: 'phase',
+            phase: phaseData.phase,
+          })
+        }
+      })
+
+      api.milestones.forEach(milestone => {
+        events.push({
+          id: milestone.id,
+          apiName: api.name,
+          date: parseISO(milestone.date),
+          type: 'milestone',
+          title: milestone.title,
+        })
+      })
+    })
+
+    return events.sort((a, b) => a.date.getTime() - b.date.getTime())
+  }, [apis])
+
+  const filteredApis = useMemo(() => {
+    if (!selectedApi) return apis
+    return apis.filter(api => api.id === selectedApi)
+  }, [apis, selectedApi])
+
+  const filteredTimelineData = useMemo(() => {
+    if (!selectedApi) return timelineData
+    const api = apis.find(a => a.id === selectedApi)
+    if (!api) return []
+    return timelineData.filter(event => event.apiName === api.name)
+  }, [timelineData, apis, selectedApi])
+
+  const dateRange = useMemo(() => {
+    const dates = timelineData.map(e => e.date)
+    if (dates.length === 0) {
+      return {
+        start: new Date(),
+        end: addMonths(new Date(), 6),
+      }
+    }
+    const minDate = min(dates)
+    const maxDate = max(dates)
+    return {
+      start: addMonths(minDate, -1),
+      end: addMonths(maxDate, 1),
+    }
+  }, [timelineData])
+
+  const totalDays = differenceInDays(dateRange.end, dateRange.start)
+
+  const getPositionPercent = (date: Date) => {
+    const daysSinceStart = differenceInDays(date, dateRange.start)
+    return (daysSinceStart / totalDays) * 100
+  }
+
+  const apiRows = useMemo(() => {
+    return filteredApis.map(api => {
+      const phases = api.lifecyclePhases
+        .filter(p => p.startDate && p.endDate)
+        .map(p => ({
+          phase: p.phase,
+          start: parseISO(p.startDate!),
+          end: parseISO(p.endDate!),
+        }))
+
+      const events = (selectedApi ? filteredTimelineData : timelineData).filter(e => e.apiName === api.name)
+
+      return {
+        api,
+        events,
+        phases,
+      }
+    })
+  }, [filteredApis, timelineData, filteredTimelineData, selectedApi])
+
+  const monthMarkers = useMemo(() => {
+    let currentDate = new Date(dateRange.start)
+    const markers: { position: number; label: string }[] = []
+    const months = monthNames[language]
+
+    while (currentDate <= dateRange.end) {
+      const monthIndex = currentDate.getMonth()
+      const year = currentDate.getFullYear()
+      markers.push({
+        position: getPositionPercent(currentDate),
+        label: `${months.short[monthIndex]} ${year}`,
+      })
+
+      currentDate = addMonths(currentDate, 1)
+    }
+
+    return markers
+  }, [dateRange, totalDays, language])
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" onClick={onBack}>
+          <ArrowLeft size={20} className="mr-2" />
+          {t('roadmap.back')}
+        </Button>
+        <h2 className="text-2xl font-display font-bold">{t('roadmap.title')}</h2>
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        <Button
+          variant={selectedApi === null ? 'default' : 'outline'}
+          onClick={() => setSelectedApi(null)}
+        >
+          {t('apiList.allPhases')}
+        </Button>
+        {apis.map(api => (
+          <Button
+            key={api.id}
+            variant={selectedApi === api.id ? 'default' : 'outline'}
+            onClick={() => setSelectedApi(api.id)}
+          >
+            {api.name}
+          </Button>
+        ))}
+      </div>
+
+      {timelineData.length === 0 ? (
+        <Card className="p-12 text-center">
+          <CalendarDots size={48} className="mx-auto mb-4 text-muted-foreground" />
+          <p className="text-muted-foreground">
+            {t('roadmap.noTimelineData')}
+          </p>
+        </Card>
+      ) : (
+        <Card className="p-6">
+          <div className="relative min-h-[400px]">
+            <div className="absolute top-0 left-0 right-0 h-12 flex items-center border-b border-border">
+              {monthMarkers.map((marker, idx) => (
+                <div
+                  key={idx}
+                  className="absolute top-0 h-full flex flex-col items-center"
+                  style={{ left: `${marker.position}%` }}
+                >
+                  <div className="w-px h-full bg-border" />
+                  <span className="absolute top-2 text-xs text-muted-foreground whitespace-nowrap">
+                    {marker.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-16 space-y-8">
+              {apiRows.map(({ api, events, phases }) => (
+                <div key={api.id} className="relative">
+                  <div className="mb-2">
+                    <h3 className="font-display font-semibold">{api.name}</h3>
+                    <p className="text-sm text-muted-foreground">{api.version}</p>
+                  </div>
+
+                  <div className="relative h-16 bg-muted/30 rounded-lg">
+                    {phases.map((phaseData, idx) => {
+                      const startPercent = getPositionPercent(phaseData.start)
+                      const endPercent = getPositionPercent(phaseData.end)
+                      const widthPercent = endPercent - startPercent
+
+                      const phaseLabels: Record<LifecyclePhase, string> = {
+                        implementing: t('dashboard.implementing'),
+                        certifying: t('dashboard.certifying'),
+                        current: t('dashboard.current'),
+                        deprecated: t('dashboard.deprecated'),
+                        retired: t('dashboard.retired'),
+                      }
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`absolute top-2 bottom-2 ${PHASE_COLORS[phaseData.phase]} rounded opacity-80`}
+                          style={{
+                            left: `${startPercent}%`,
+                            width: `${widthPercent}%`,
+                          }}
+                        >
+                          <div className="px-2 py-1 text-xs text-white font-medium truncate">
+                            {phaseLabels[phaseData.phase]}
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {events
+                      .filter(e => e.type === 'milestone')
+                      .map(event => {
+                        const position = getPositionPercent(event.date)
+
+                        return (
+                          <div
+                            key={event.id}
+                            className="absolute top-0 bottom-0 flex flex-col items-center"
+                            style={{ left: `${position}%` }}
+                          >
+                            <div className="w-0.5 h-full bg-accent" />
+                            <div className="absolute top-1/2 -translate-y-1/2">
+                              <FlagBanner size={20} weight="fill" className="text-accent" />
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
+    </div>
+  )
+}
