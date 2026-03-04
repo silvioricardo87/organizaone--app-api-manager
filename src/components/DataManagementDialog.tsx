@@ -65,7 +65,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
       const data = await response.json()
 
       if (!Array.isArray(data.apis)) {
-        toast.error(t.toasts.invalidFileFormat)
+        toast.error(t('toasts.invalidFileFormat'))
         setIsProcessing(false)
         return
       }
@@ -107,17 +107,17 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
 
       setProgress(100)
 
-      toast.success(t.settings.sampleDataLoaded.replace('{count}', String(apisWithPCM.length)))
+      toast.success(t('settings.sampleDataLoaded').replace('{count}', String(apisWithPCM.length)))
 
       if (skippedAPIs.length > 0) {
-        toast.warning(`${t.toasts.duplicateAPI}: ${skippedAPIs.slice(0, 3).join(', ')}${skippedAPIs.length > 3 ? '...' : ''}`)
+        toast.warning(`${t('toasts.duplicateAPI')}: ${skippedAPIs.slice(0, 3).join(', ')}${skippedAPIs.length > 3 ? '...' : ''}`)
       }
 
       setIsProcessing(false)
       handleClose()
     } catch (error) {
       console.error('Error loading sample data:', error)
-      toast.error(t.settings.sampleDataError)
+      toast.error(t('settings.sampleDataError'))
       setIsProcessing(false)
     }
   }
@@ -162,10 +162,10 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
       URL.revokeObjectURL(url)
       setDownloaded(true)
 
-      toast.success(t.toasts.allApisExported)
+      toast.success(t('toasts.allApisExported'))
     } catch (error) {
       console.error('Error exporting:', error)
-      toast.error(t.toasts.errorExportingAll)
+      toast.error(t('toasts.errorExportingAll'))
     }
   }
 
@@ -175,7 +175,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
 
   const handleFileSelect = (file: File) => {
     if (file.type !== 'application/json') {
-      toast.error(t.toasts.invalidFileFormat)
+      toast.error(t('toasts.invalidFileFormat'))
       return
     }
     setSelectedFile(file)
@@ -193,7 +193,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
-    
+
     const file = e.dataTransfer.files[0]
     if (file) {
       handleFileSelect(file)
@@ -223,7 +223,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
       setProgress(60)
 
       if (!Array.isArray(data.apis)) {
-        toast.error(t.toasts.invalidFileFormat)
+        toast.error(t('toasts.invalidFileFormat'))
         setIsProcessing(false)
         return
       }
@@ -252,7 +252,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
       setIsProcessing(false)
     } catch (error) {
       console.error('Error analyzing file:', error)
-      toast.error(t.toasts.invalidFileFormat)
+      toast.error(t('toasts.invalidFileFormat'))
       setIsProcessing(false)
     }
   }
@@ -271,10 +271,10 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
     await new Promise(resolve => setTimeout(resolve, 200))
     setProgress(100)
 
-    toast.success(t.toasts.allApisImported.replace('{count}', String(importSummary.toImport.length)))
+    toast.success(t('toasts.allApisImported').replace('{count}', String(importSummary.toImport.length)))
 
     if (importSummary.skipped.length > 0) {
-      toast.warning(`${t.toasts.duplicateAPI}: ${importSummary.skipped.join(', ')}`)
+      toast.warning(`${t('toasts.duplicateAPI')}: ${importSummary.skipped.join(', ')}`)
     }
 
     setIsProcessing(false)
@@ -285,12 +285,12 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{t.settings.dataManagement}</DialogTitle>
+          <DialogTitle>{t('settings.dataManagement')}</DialogTitle>
           <DialogDescription>
-            {viewState === 'menu' && t.settings.dataManagementDescription}
-            {viewState === 'export' && t.settings.exportDescription}
-            {viewState === 'import' && t.settings.importDescription}
-            {viewState === 'sample' && t.settings.loadSampleDataDescription}
+            {viewState === 'menu' && t('settings.dataManagementDescription')}
+            {viewState === 'export' && t('settings.exportDescription')}
+            {viewState === 'import' && t('settings.importDescription')}
+            {viewState === 'sample' && t('settings.loadSampleDataDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -302,11 +302,11 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                   <Download size={32} weight="duotone" className="text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-display font-semibold text-lg mb-1">{t.settings.exportData}</h3>
-                  <p className="text-sm text-muted-foreground">{t.settings.exportDataDescription}</p>
+                  <h3 className="font-display font-semibold text-lg mb-1">{t('settings.exportData')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('settings.exportDataDescription')}</p>
                 </div>
                 <Button variant="outline" className="w-full">
-                  {t.settings.exportData}
+                  {t('settings.exportData')}
                 </Button>
               </div>
             </Card>
@@ -317,11 +317,11 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                   <Upload size={32} weight="duotone" className="text-accent" />
                 </div>
                 <div>
-                  <h3 className="font-display font-semibold text-lg mb-1">{t.settings.importData}</h3>
-                  <p className="text-sm text-muted-foreground">{t.settings.importDataDescription}</p>
+                  <h3 className="font-display font-semibold text-lg mb-1">{t('settings.importData')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('settings.importDataDescription')}</p>
                 </div>
                 <Button variant="outline" className="w-full">
-                  {t.settings.importData}
+                  {t('settings.importData')}
                 </Button>
               </div>
             </Card>
@@ -332,11 +332,11 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                   <Database size={32} weight="duotone" className="text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-display font-semibold text-lg mb-1">{t.settings.loadSampleData}</h3>
-                  <p className="text-sm text-muted-foreground">{t.settings.loadSampleDataDescription}</p>
+                  <h3 className="font-display font-semibold text-lg mb-1">{t('settings.loadSampleData')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('settings.loadSampleDataDescription')}</p>
                 </div>
                 <Button variant="outline" className="w-full">
-                  {t.settings.loadSampleData}
+                  {t('settings.loadSampleData')}
                 </Button>
               </div>
             </Card>
@@ -348,7 +348,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
             {isProcessing && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t.settings.preparingExport}</span>
+                  <span className="text-muted-foreground">{t('settings.preparingExport')}</span>
                   <span className="font-medium">{progress}%</span>
                 </div>
                 <Progress value={progress} />
@@ -361,20 +361,20 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                   <div className="flex items-start gap-3">
                     <CheckCircle size={24} weight="duotone" className="text-success mt-0.5" />
                     <div className="flex-1">
-                      <h4 className="font-semibold mb-2">{t.settings.exportSummary}</h4>
+                      <h4 className="font-semibold mb-2">{t('settings.exportSummary')}</h4>
                       <div className="space-y-1 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t.settings.totalAPIs}:</span>
+                          <span className="text-muted-foreground">{t('settings.totalAPIs')}:</span>
                           <span className="font-medium">{exportData.apis.length}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t.settings.exportDate}:</span>
+                          <span className="text-muted-foreground">{t('settings.exportDate')}:</span>
                           <span className="font-medium font-mono text-xs">
                             {new Date(exportData.exportDate).toLocaleString()}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t.settings.version}:</span>
+                          <span className="text-muted-foreground">{t('settings.version')}:</span>
                           <span className="font-medium font-mono text-xs">{exportData.version}</span>
                         </div>
                       </div>
@@ -387,8 +387,8 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                     <div className="flex items-center gap-3">
                       <FileArrowDown size={24} weight="duotone" className="text-success" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">{t.settings.downloadReady}</p>
-                        <p className="text-xs text-muted-foreground">{t.settings.downloadReadyDescription}</p>
+                        <p className="text-sm font-medium">{t('settings.downloadReady')}</p>
+                        <p className="text-xs text-muted-foreground">{t('settings.downloadReadyDescription')}</p>
                       </div>
                     </div>
                   </Card>
@@ -398,12 +398,12 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={handleClose}>
-                {downloaded ? t.common.close : t.common.cancel}
+                {downloaded ? t('common.close') : t('common.cancel')}
               </Button>
               {!downloaded && !isProcessing && (
                 <Button onClick={handleConfirmExport}>
                   <Download size={16} weight="duotone" className="mr-2" />
-                  {t.settings.downloadFile}
+                  {t('settings.downloadFile')}
                 </Button>
               )}
             </div>
@@ -457,10 +457,10 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                       type="button"
                       variant="outline"
                     >
-                      {t.importAPIDialog.selectFile}
+                      {t('importAPIDialog.selectFile')}
                     </Button>
-                    <p className="text-sm text-muted-foreground">{t.importAPIDialog.dropFile}</p>
-                    <p className="text-xs text-muted-foreground">{t.importAPIDialog.supportedFormats}</p>
+                    <p className="text-sm text-muted-foreground">{t('importAPIDialog.dropFile')}</p>
+                    <p className="text-xs text-muted-foreground">{t('importAPIDialog.supportedFormats')}</p>
                   </div>
                 </>
               )}
@@ -469,7 +469,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
             {isProcessing && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t.settings.analyzingFile}</span>
+                  <span className="text-muted-foreground">{t('settings.analyzingFile')}</span>
                   <span className="font-medium">{progress}%</span>
                 </div>
                 <Progress value={progress} />
@@ -485,28 +485,28 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                     <Warning size={24} weight="duotone" className="text-warning mt-0.5" />
                   )}
                   <div className="flex-1">
-                    <h4 className="font-semibold mb-2">{t.settings.importSummary}</h4>
+                    <h4 className="font-semibold mb-2">{t('settings.importSummary')}</h4>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">{t.settings.apisToImport}:</span>
+                        <span className="text-muted-foreground">{t('settings.apisToImport')}:</span>
                         <span className="font-medium">{importSummary.toImport.length}</span>
                       </div>
                       {importSummary.skipped.length > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-warning">{t.settings.apisSkipped}:</span>
+                          <span className="text-warning">{t('settings.apisSkipped')}:</span>
                           <span className="font-medium text-warning">{importSummary.skipped.length}</span>
                         </div>
                       )}
                     </div>
                     {importSummary.skipped.length > 0 && (
                       <div className="mt-3 p-2 bg-warning/10 rounded text-xs">
-                        <p className="font-medium text-warning mb-1">{t.settings.skippedReason}</p>
+                        <p className="font-medium text-warning mb-1">{t('settings.skippedReason')}</p>
                         <ul className="list-disc list-inside text-muted-foreground space-y-0.5">
                           {importSummary.skipped.slice(0, 5).map((api, index) => (
                             <li key={index}>{api}</li>
                           ))}
                           {importSummary.skipped.length > 5 && (
-                            <li>{t.settings.andMore.replace('{count}', String(importSummary.skipped.length - 5))}</li>
+                            <li>{t('settings.andMore').replace('{count}', String(importSummary.skipped.length - 5))}</li>
                           )}
                         </ul>
                       </div>
@@ -518,20 +518,20 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={handleClose}>
-                {t.common.cancel}
+                {t('common.cancel')}
               </Button>
               {selectedFile && !importSummary && (
                 <Button onClick={handleAnalyzeFile} disabled={isProcessing}>
-                  {t.settings.analyzeFile}
+                  {t('settings.analyzeFile')}
                 </Button>
               )}
               {importSummary && (
-                <Button 
-                  onClick={handleConfirmImport} 
+                <Button
+                  onClick={handleConfirmImport}
                   disabled={importSummary.toImport.length === 0 || isProcessing}
                 >
                   <Upload size={16} weight="duotone" className="mr-2" />
-                  {t.settings.confirmImport}
+                  {t('settings.confirmImport')}
                 </Button>
               )}
             </div>
@@ -543,8 +543,8 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
               <div className="flex items-start gap-3">
                 <Database size={24} weight="duotone" className="text-green-600 mt-0.5" />
                 <div className="flex-1">
-                  <h4 className="font-semibold mb-2">{t.settings.loadSampleData}</h4>
-                  <p className="text-sm text-muted-foreground">{t.settings.loadSampleDataDescription}</p>
+                  <h4 className="font-semibold mb-2">{t('settings.loadSampleData')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('settings.loadSampleDataDescription')}</p>
                   <div className="flex items-center space-x-2 mt-4">
                     <Checkbox
                       id="auto-map-pcm"
@@ -555,7 +555,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
                       htmlFor="auto-map-pcm"
                       className="text-sm font-medium cursor-pointer"
                     >
-                      {t.settings.autoMapPCMOnImport}
+                      {t('settings.autoMapPCMOnImport')}
                     </label>
                   </div>
                 </div>
@@ -565,7 +565,7 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
             {isProcessing && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t.settings.loadingSampleData}</span>
+                  <span className="text-muted-foreground">{t('settings.loadingSampleData')}</span>
                   <span className="font-medium">{progress}%</span>
                 </div>
                 <Progress value={progress} />
@@ -574,11 +574,11 @@ export function DataManagementDialog({ open, onOpenChange, apis, onImport }: Dat
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={handleClose}>
-                {t.common.cancel}
+                {t('common.cancel')}
               </Button>
               <Button onClick={handleLoadSampleData} disabled={isProcessing}>
                 <Database size={16} weight="duotone" className="mr-2" />
-                {t.settings.loadSampleData}
+                {t('settings.loadSampleData')}
               </Button>
             </div>
           </div>

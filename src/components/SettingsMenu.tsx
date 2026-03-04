@@ -34,15 +34,15 @@ export function SettingsMenu({ apis, onOpenDataManagement }: SettingsMenuProps) 
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="flex items-center gap-2">
           <Globe size={16} weight="duotone" />
-          {t.settings.language}
+          {t('settings.language')}
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup value={language} onValueChange={(value) => setLanguage(value as 'en' | 'pt')}>
           <DropdownMenuRadioItem value="en">English</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="pt">Português (Brasil)</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="pt">Portugues (Brasil)</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
-        
+
         <DropdownMenuSeparator />
-        
+
         <DropdownMenuLabel className="flex items-center gap-2">
           {theme === 'dark' ? (
             <Moon size={16} weight="duotone" />
@@ -51,30 +51,30 @@ export function SettingsMenu({ apis, onOpenDataManagement }: SettingsMenuProps) 
           ) : (
             <Desktop size={16} weight="duotone" />
           )}
-          {t.settings.theme}
+          {t('settings.theme')}
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'system')}>
           <DropdownMenuRadioItem value="light">
             <Sun size={16} weight="duotone" className="mr-2" />
-            {t.settings.light}
+            {t('settings.light')}
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="dark">
             <Moon size={16} weight="duotone" className="mr-2" />
-            {t.settings.dark}
+            {t('settings.dark')}
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="system">
             <Desktop size={16} weight="duotone" className="mr-2" />
-            {t.settings.system}
+            {t('settings.system')}
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
 
         {onOpenDataManagement && (
           <>
             <DropdownMenuSeparator />
-            
+
             <DropdownMenuItem onClick={onOpenDataManagement}>
               <Database size={16} weight="duotone" className="mr-2" />
-              {t.settings.dataManagement}
+              {t('settings.dataManagement')}
             </DropdownMenuItem>
           </>
         )}

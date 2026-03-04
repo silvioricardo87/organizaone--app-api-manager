@@ -40,7 +40,7 @@ export function EditAPIDialog({ open, onOpenChange, api, onSave }: EditAPIDialog
 
   const handleSave = () => {
     if (!name.trim()) {
-      toast.error(t.newAPIDialog.errorTitle)
+      toast.error(t('newAPIDialog.errorTitle'))
       return
     }
 
@@ -58,37 +58,37 @@ export function EditAPIDialog({ open, onOpenChange, api, onSave }: EditAPIDialog
 
     onSave(updatedAPI)
     onOpenChange(false)
-    toast.success(t.toasts.apiUpdated)
+    toast.success(t('toasts.apiUpdated'))
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-display">{t.common.edit} API</DialogTitle>
+          <DialogTitle className="text-2xl font-display">{t('common.edit')} API</DialogTitle>
           <DialogDescription>
-            {t.common.edit} {api.name}
+            {t('common.edit')} {api.name}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="edit-api-name">{t.newAPIDialog.name} *</Label>
+            <Label htmlFor="edit-api-name">{t('newAPIDialog.name')} *</Label>
             <Input
               id="edit-api-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={t.newAPIDialog.namePlaceholder}
+              placeholder={t('newAPIDialog.namePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-api-display-name">{t.newAPIDialog.displayName}</Label>
+            <Label htmlFor="edit-api-display-name">{t('newAPIDialog.displayName')}</Label>
             <Input
               id="edit-api-display-name"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder={t.newAPIDialog.displayNamePlaceholder}
+              placeholder={t('newAPIDialog.displayNamePlaceholder')}
             />
             {displayName.trim() && (
               <div className="flex items-center space-x-2 pt-2">
@@ -101,19 +101,19 @@ export function EditAPIDialog({ open, onOpenChange, api, onSave }: EditAPIDialog
                   htmlFor="edit-use-display-name"
                   className="text-sm text-muted-foreground cursor-pointer"
                 >
-                  {t.newAPIDialog.useDisplayNameLabel}
+                  {t('newAPIDialog.useDisplayNameLabel')}
                 </label>
               </div>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-api-group">{t.newAPIDialog.apiGroup}</Label>
+            <Label htmlFor="edit-api-group">{t('newAPIDialog.apiGroup')}</Label>
             <Input
               id="edit-api-group"
               value={apiGroup}
               onChange={(e) => setApiGroup(e.target.value)}
-              placeholder={t.newAPIDialog.apiGroupPlaceholder}
+              placeholder={t('newAPIDialog.apiGroupPlaceholder')}
             />
           </div>
 
@@ -127,29 +127,29 @@ export function EditAPIDialog({ open, onOpenChange, api, onSave }: EditAPIDialog
               htmlFor="edit-is-beta"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
             >
-              {t.newAPIDialog.isBetaLabel}
+              {t('newAPIDialog.isBetaLabel')}
             </label>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-api-version">{t.newAPIDialog.version}</Label>
+              <Label htmlFor="edit-api-version">{t('newAPIDialog.version')}</Label>
               <Input
                 id="edit-api-version"
                 value={version}
                 onChange={(e) => setVersion(e.target.value)}
-                placeholder={t.newAPIDialog.versionPlaceholder}
+                placeholder={t('newAPIDialog.versionPlaceholder')}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-api-summary">{t.newAPIDialog.description}</Label>
+            <Label htmlFor="edit-api-summary">{t('newAPIDialog.description')}</Label>
             <Textarea
               id="edit-api-summary"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              placeholder={t.newAPIDialog.descriptionPlaceholder}
+              placeholder={t('newAPIDialog.descriptionPlaceholder')}
               rows={3}
             />
           </div>
@@ -157,10 +157,10 @@ export function EditAPIDialog({ open, onOpenChange, api, onSave }: EditAPIDialog
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t.common.cancel}
+            {t('common.cancel')}
           </Button>
           <Button onClick={handleSave}>
-            {t.common.save}
+            {t('common.save')}
           </Button>
         </div>
       </DialogContent>

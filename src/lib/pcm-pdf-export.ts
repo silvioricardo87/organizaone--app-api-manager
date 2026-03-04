@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import type { APIContract } from '@/lib/types'
-import type { Language } from '@/lib/i18n'
+import type { Language } from '@/lib/date-utils'
 
 const labels = {
   en: {

@@ -18,10 +18,10 @@ const phaseColorConfig: Record<LifecyclePhase, string> = {
 export function PhaseIndicator({ phase, className }: PhaseIndicatorProps) {
   const { t } = useSettings()
   const color = phaseColorConfig[phase]
-  
+
   return (
     <Badge className={`${color} ${className || ''}`}>
-      {t.apiList[phase]}
+      {t(`apiList.${phase}`)}
     </Badge>
   )
 }

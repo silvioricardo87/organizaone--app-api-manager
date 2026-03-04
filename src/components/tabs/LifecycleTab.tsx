@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarIcon } from '@phosphor-icons/react'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { PhaseIndicator } from '../PhaseIndicator'
-import { formatDate } from '@/lib/i18n'
+import { formatDate } from '@/lib/date-utils'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 
@@ -39,9 +39,9 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
       lifecyclePhases: updatedPhases,
       updatedAt: new Date().toISOString()
     })
-    
+
     setOpenPopovers(prev => ({ ...prev, [`${phase}-${type}`]: false }))
-    toast.success(t.toasts.apiUpdated)
+    toast.success(t('toasts.apiUpdated'))
   }
 
   return (
@@ -58,14 +58,14 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
 
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{t.apiDetail.startDate}</Label>
+                <Label className="text-xs">{t('apiDetail.startDate')}</Label>
                 <Popover open={openPopovers[`${phase}-start`]} onOpenChange={(open) => setOpenPopovers(prev => ({ ...prev, [`${phase}-start`]: open }))}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal h-9 text-sm">
                       <CalendarIcon size={14} className="mr-2" />
                       {phaseData.startDate
                         ? formatDate(new Date(phaseData.startDate), 'long', language)
-                        : t.dates.selectDate}
+                        : t('dates.selectDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -80,14 +80,14 @@ export function LifecycleTab({ api, onUpdate }: LifecycleTabProps) {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs">{t.apiDetail.endDate}</Label>
+                <Label className="text-xs">{t('apiDetail.endDate')}</Label>
                 <Popover open={openPopovers[`${phase}-end`]} onOpenChange={(open) => setOpenPopovers(prev => ({ ...prev, [`${phase}-end`]: open }))}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal h-9 text-sm">
                       <CalendarIcon size={14} className="mr-2" />
                       {phaseData.endDate
                         ? formatDate(new Date(phaseData.endDate), 'long', language)
-                        : t.dates.selectDate}
+                        : t('dates.selectDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">

@@ -37,7 +37,7 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
 
   const handleFileSelect = (file: File) => {
     if (file.type !== 'application/json') {
-      toast.error(t.toasts.invalidFileFormat)
+      toast.error(t('toasts.invalidFileFormat'))
       return
     }
 
@@ -49,7 +49,7 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
 
         const parsed = singleImportSchema.safeParse(rawData)
         if (!parsed.success) {
-          toast.error(t.toasts.invalidFileFormat)
+          toast.error(t('toasts.invalidFileFormat'))
           return
         }
 
@@ -80,7 +80,7 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
         )
 
         if (isDuplicate) {
-          toast.error(t.toasts.duplicateAPI)
+          toast.error(t('toasts.duplicateAPI'))
           return
         }
 
@@ -104,15 +104,15 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
 
         onImport(restoredAPI)
         onOpenChange(false)
-        toast.success(t.toasts.apiImported)
+        toast.success(t('toasts.apiImported'))
       } catch (error) {
         console.error('Error parsing import file:', error)
-        toast.error(t.toasts.errorImportingAPI)
+        toast.error(t('toasts.errorImportingAPI'))
       }
     }
 
     reader.onerror = () => {
-      toast.error(t.toasts.errorImportingAPI)
+      toast.error(t('toasts.errorImportingAPI'))
     }
 
     reader.readAsText(file)
@@ -150,7 +150,7 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
     onImport({ ...pendingAPI, pcmFields: selectedFields })
     setPendingAPI(null)
     onOpenChange(false)
-    toast.success(t.toasts.apiImported)
+    toast.success(t('toasts.apiImported'))
   }
 
   const handleAutoMapSkip = () => {
@@ -159,16 +159,16 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
     setPendingAPI(null)
     setAutoMapDialogOpen(false)
     onOpenChange(false)
-    toast.success(t.toasts.apiImported)
+    toast.success(t('toasts.apiImported'))
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t.importAPIDialog.title}</DialogTitle>
+          <DialogTitle>{t('importAPIDialog.title')}</DialogTitle>
           <DialogDescription>
-            {t.importAPIDialog.description}
+            {t('importAPIDialog.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -187,9 +187,9 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
               <UploadSimple size={32} weight="duotone" className="text-primary" />
             </div>
             <div className="space-y-2">
-              <p className="font-medium">{t.importAPIDialog.selectFile}</p>
-              <p className="text-sm text-muted-foreground">{t.importAPIDialog.dropFile}</p>
-              <p className="text-xs text-muted-foreground">{t.importAPIDialog.supportedFormats}</p>
+              <p className="font-medium">{t('importAPIDialog.selectFile')}</p>
+              <p className="text-sm text-muted-foreground">{t('importAPIDialog.dropFile')}</p>
+              <p className="text-xs text-muted-foreground">{t('importAPIDialog.supportedFormats')}</p>
             </div>
             <Button
               type="button"
@@ -197,7 +197,7 @@ export function ImportAPIDialog({ open, onOpenChange, onImport, existingAPIs }: 
               onClick={() => fileInputRef.current?.click()}
             >
               <UploadSimple size={16} weight="bold" className="mr-2" />
-              {t.importAPIDialog.selectFile}
+              {t('importAPIDialog.selectFile')}
             </Button>
             <input
               ref={fileInputRef}

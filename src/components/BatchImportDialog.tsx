@@ -28,7 +28,7 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
 
   const handleFileSelect = (file: File) => {
     if (file.type !== 'application/json') {
-      toast.error(t.toasts.invalidFileFormat)
+      toast.error(t('toasts.invalidFileFormat'))
       return
     }
     setSelectedFile(file)
@@ -46,7 +46,7 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
-    
+
     const file = e.dataTransfer.files[0]
     if (file) {
       handleFileSelect(file)
@@ -69,7 +69,7 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
 
       const parsed = batchImportSchema.safeParse(rawData)
       if (!parsed.success) {
-        toast.error(t.toasts.invalidFileFormat)
+        toast.error(t('toasts.invalidFileFormat'))
         return
       }
 
@@ -105,20 +105,20 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
 
       if (apisWithPCM.length > 0) {
         onImport(apisWithPCM)
-        const msg = t.toasts.allApisImported.replace('{count}', String(apisWithPCM.length))
+        const msg = t('toasts.allApisImported').replace('{count}', String(apisWithPCM.length))
         toast.success(pcmMappedCount > 0
-          ? `${msg} (${pcmMappedCount} ${t.pcm.autoMapButton.toLowerCase()})`
+          ? `${msg} (${pcmMappedCount} ${t('pcm.autoMapButton').toLowerCase()})`
           : msg)
       }
 
       if (skippedAPIs.length > 0) {
-        toast.warning(`${t.toasts.duplicateAPI}: ${skippedAPIs.join(', ')}`)
+        toast.warning(`${t('toasts.duplicateAPI')}: ${skippedAPIs.join(', ')}`)
       }
 
       handleClose()
     } catch (error) {
       console.error('Error importing batch:', error)
-      toast.error(t.toasts.errorImportingAll)
+      toast.error(t('toasts.errorImportingAll'))
     }
   }
 
@@ -131,9 +131,9 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t.settings.importAll}</DialogTitle>
+          <DialogTitle>{t('settings.importAll')}</DialogTitle>
           <DialogDescription>
-            {t.settings.importAllDescription}
+            {t('settings.importAllDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -182,10 +182,10 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
                     type="button"
                     variant="outline"
                   >
-                    {t.importAPIDialog.selectFile}
+                    {t('importAPIDialog.selectFile')}
                   </Button>
-                  <p className="text-sm text-muted-foreground">{t.importAPIDialog.dropFile}</p>
-                  <p className="text-xs text-muted-foreground">{t.importAPIDialog.supportedFormats}</p>
+                  <p className="text-sm text-muted-foreground">{t('importAPIDialog.dropFile')}</p>
+                  <p className="text-xs text-muted-foreground">{t('importAPIDialog.supportedFormats')}</p>
                 </div>
               </>
             )}
@@ -194,10 +194,10 @@ export function BatchImportDialog({ open, onOpenChange, onImport, existingAPIs }
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={handleClose}>
-            {t.common.cancel}
+            {t('common.cancel')}
           </Button>
           <Button onClick={handleImport} disabled={!selectedFile}>
-            {t.common.import}
+            {t('common.import')}
           </Button>
         </div>
       </DialogContent>

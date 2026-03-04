@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card'
 import { APIContract, LifecyclePhase } from '@/lib/types'
 import { useSettings } from '@/hooks/use-settings'
 import { parseISO, differenceInDays, addMonths, min, max } from 'date-fns'
-import { formatDate, monthNames } from '@/lib/i18n'
+import { formatDate, monthNames } from '@/lib/date-utils'
 import { ArrowLeft, CalendarDots, FlagBanner } from '@phosphor-icons/react'
 
 interface RoadmapProps {
@@ -35,7 +35,7 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
 
   const timelineData = useMemo(() => {
     const events: TimelineEvent[] = []
-    
+
     apis.forEach(api => {
       api.lifecyclePhases.forEach(phaseData => {
         if (phaseData.startDate) {
@@ -151,9 +151,9 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={onBack}>
           <ArrowLeft size={20} className="mr-2" />
-          {t.roadmap.back}
+          {t('roadmap.back')}
         </Button>
-        <h2 className="text-2xl font-display font-bold">{t.roadmap.title}</h2>
+        <h2 className="text-2xl font-display font-bold">{t('roadmap.title')}</h2>
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -161,7 +161,7 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
           variant={selectedApi === null ? 'default' : 'outline'}
           onClick={() => setSelectedApi(null)}
         >
-          {t.apiList.allPhases}
+          {t('apiList.allPhases')}
         </Button>
         {apis.map(api => (
           <Button
@@ -178,7 +178,7 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
         <Card className="p-12 text-center">
           <CalendarDots size={48} className="mx-auto mb-4 text-muted-foreground" />
           <p className="text-muted-foreground">
-            {t.roadmap.noTimelineData}
+            {t('roadmap.noTimelineData')}
           </p>
         </Card>
       ) : (
@@ -212,13 +212,13 @@ export function Roadmap({ apis, onBack }: RoadmapProps) {
                       const startPercent = getPositionPercent(phaseData.start)
                       const endPercent = getPositionPercent(phaseData.end)
                       const widthPercent = endPercent - startPercent
-                      
+
                       const phaseLabels: Record<LifecyclePhase, string> = {
-                        implementing: t.dashboard.implementing,
-                        certifying: t.dashboard.certifying,
-                        current: t.dashboard.current,
-                        deprecated: t.dashboard.deprecated,
-                        retired: t.dashboard.retired,
+                        implementing: t('dashboard.implementing'),
+                        certifying: t('dashboard.certifying'),
+                        current: t('dashboard.current'),
+                        deprecated: t('dashboard.deprecated'),
+                        retired: t('dashboard.retired'),
                       }
 
                       return (

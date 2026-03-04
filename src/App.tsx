@@ -82,8 +82,8 @@ function App() {
                 <FileText size={28} weight="duotone" className="text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-display font-bold">{t.header.title}</h1>
-                <p className="text-sm text-muted-foreground">{t.header.subtitle}</p>
+                <h1 className="text-2xl font-display font-bold">{t('header.title')}</h1>
+                <p className="text-sm text-muted-foreground">{t('header.subtitle')}</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -91,15 +91,15 @@ function App() {
                 <>
                   <Button variant="outline" onClick={() => setCurrentView('dashboard')}>
                     <ChartBar size={20} weight="duotone" className="mr-2" />
-                    {t.header.dashboard}
+                    {t('header.dashboard')}
                   </Button>
                   <Button variant="outline" onClick={() => setCurrentView('roadmap')}>
                     <MapTrifold size={20} weight="duotone" className="mr-2" />
-                    {t.header.roadmap}
+                    {t('header.roadmap')}
                   </Button>
                 </>
               )}
-              <SettingsMenu 
+              <SettingsMenu
                 apis={currentApis}
                 onOpenDataManagement={() => setDataManagementDialogOpen(true)}
               />

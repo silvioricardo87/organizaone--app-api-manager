@@ -53,21 +53,21 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     const msg = err.message
     if (msg.startsWith('yaml_syntax_error:')) {
       const line = msg.split(':')[1]
-      return t.newAPIDialog.yamlSyntaxError.replace('{line}', line)
+      return t('newAPIDialog.yamlSyntaxError').replace('{line}', line)
     }
     if (msg.startsWith('missing_field:')) {
       const field = msg.split(':')[1]
       if (err.path && err.path.includes('responses')) {
-        return t.newAPIDialog.missingResponses.replace('{path}', err.path)
+        return t('newAPIDialog.missingResponses').replace('{path}', err.path)
       }
-      return t.newAPIDialog.missingField.replace('{field}', field)
+      return t('newAPIDialog.missingField').replace('{field}', field)
     }
     if (msg.startsWith('invalid_field:')) {
-      return t.newAPIDialog.invalidField.replace('{path}', err.path || msg.split(':')[1])
+      return t('newAPIDialog.invalidField').replace('{path}', err.path || msg.split(':')[1])
     }
     if (msg.startsWith('invalid_method:')) {
       const method = msg.split(':')[1]
-      return t.newAPIDialog.invalidMethod
+      return t('newAPIDialog.invalidMethod')
         .replace('{method}', method)
         .replace('{path}', err.path || '')
     }
@@ -102,11 +102,11 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
         setName(result.data.info.title)
       }
 
-      toast.success(t.newAPIDialog.successTitle, {
-        description: t.newAPIDialog.successMessage
+      toast.success(t('newAPIDialog.successTitle'), {
+        description: t('newAPIDialog.successMessage')
       })
     } catch (error) {
-      toast.error(t.newAPIDialog.errorTitle)
+      toast.error(t('newAPIDialog.errorTitle'))
     } finally {
       setIsProcessing(false)
     }
@@ -114,7 +114,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
 
   const handleSave = () => {
     if (!name.trim()) {
-      toast.error(t.newAPIDialog.errorTitle)
+      toast.error(t('newAPIDialog.errorTitle'))
       return
     }
 
@@ -126,7 +126,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     )
 
     if (isDuplicate) {
-      toast.error(t.toasts.duplicateAPI)
+      toast.error(t('toasts.duplicateAPI'))
       return
     }
 
@@ -178,8 +178,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
 
     onSave(newAPI)
     onOpenChange(false)
-    toast.success(t.newAPIDialog.successTitle, {
-      description: t.newAPIDialog.successMessage
+    toast.success(t('newAPIDialog.successTitle'), {
+      description: t('newAPIDialog.successMessage')
     })
   }
 
@@ -189,8 +189,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     onSave({ ...pendingAPI, pcmFields: selectedFields })
     setPendingAPI(null)
     onOpenChange(false)
-    toast.success(t.newAPIDialog.successTitle, {
-      description: t.toasts.pcmAutoMapped.replace('{count}', String(selectedFields.length))
+    toast.success(t('newAPIDialog.successTitle'), {
+      description: t('toasts.pcmAutoMapped').replace('{count}', String(selectedFields.length))
     })
   }
 
@@ -200,8 +200,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     setPendingAPI(null)
     setAutoMapDialogOpen(false)
     onOpenChange(false)
-    toast.success(t.newAPIDialog.successTitle, {
-      description: t.newAPIDialog.successMessage
+    toast.success(t('newAPIDialog.successTitle'), {
+      description: t('newAPIDialog.successMessage')
     })
   }
 
@@ -225,15 +225,15 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-display">{t.newAPIDialog.title}</DialogTitle>
+          <DialogTitle className="text-2xl font-display">{t('newAPIDialog.title')}</DialogTitle>
           <DialogDescription>
-            {t.newAPIDialog.importContract}
+            {t('newAPIDialog.importContract')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="yaml-upload">{t.apiDetail.importYAML}</Label>
+            <Label htmlFor="yaml-upload">{t('apiDetail.importYAML')}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="yaml-upload"
@@ -259,7 +259,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
               <div className="flex items-center gap-2">
                 <Warning size={18} className="text-destructive shrink-0" />
                 <p className="text-sm font-medium text-destructive">
-                  {t.newAPIDialog.validationErrors}
+                  {t('newAPIDialog.validationErrors')}
                 </p>
               </div>
               <ul className="list-disc list-inside space-y-1 pl-1">
@@ -273,17 +273,17 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="api-name">{t.newAPIDialog.name} *</Label>
+            <Label htmlFor="api-name">{t('newAPIDialog.name')} *</Label>
             <Input
               id="api-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={t.newAPIDialog.namePlaceholder}
+              placeholder={t('newAPIDialog.namePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="api-display-name">{t.newAPIDialog.displayName}</Label>
+            <Label htmlFor="api-display-name">{t('newAPIDialog.displayName')}</Label>
             <Input
               id="api-display-name"
               value={displayName}
@@ -294,7 +294,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
                   setUseDisplayName(value.trim().length > 0)
                 }
               }}
-              placeholder={t.newAPIDialog.displayNamePlaceholder}
+              placeholder={t('newAPIDialog.displayNamePlaceholder')}
             />
             {displayName.trim() && (
               <div className="flex items-center space-x-2 pt-2">
@@ -310,19 +310,19 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
                   htmlFor="use-display-name"
                   className="text-sm text-muted-foreground cursor-pointer"
                 >
-                  {t.newAPIDialog.useDisplayNameLabel}
+                  {t('newAPIDialog.useDisplayNameLabel')}
                 </label>
               </div>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="api-group">{t.newAPIDialog.apiGroup}</Label>
+            <Label htmlFor="api-group">{t('newAPIDialog.apiGroup')}</Label>
             <Input
               id="api-group"
               value={apiGroup}
               onChange={(e) => setApiGroup(e.target.value)}
-              placeholder={t.newAPIDialog.apiGroupPlaceholder}
+              placeholder={t('newAPIDialog.apiGroupPlaceholder')}
             />
           </div>
 
@@ -336,29 +336,29 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
               htmlFor="is-beta"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
             >
-              {t.newAPIDialog.isBetaLabel}
+              {t('newAPIDialog.isBetaLabel')}
             </label>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="api-version">{t.newAPIDialog.version}</Label>
+              <Label htmlFor="api-version">{t('newAPIDialog.version')}</Label>
               <Input
                 id="api-version"
                 value={version}
                 onChange={(e) => setVersion(e.target.value)}
-                placeholder={t.newAPIDialog.versionPlaceholder}
+                placeholder={t('newAPIDialog.versionPlaceholder')}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="api-summary">{t.newAPIDialog.description}</Label>
+            <Label htmlFor="api-summary">{t('newAPIDialog.description')}</Label>
             <Textarea
               id="api-summary"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              placeholder={t.newAPIDialog.descriptionPlaceholder}
+              placeholder={t('newAPIDialog.descriptionPlaceholder')}
               rows={3}
             />
           </div>
@@ -366,10 +366,10 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
           {parsedSpec && (
             <div className="rounded-lg bg-success/10 border border-success/20 p-4">
               <p className="text-sm text-success-foreground font-medium">
-                ✓ {t.newAPIDialog.successMessage}
+                ✓ {t('newAPIDialog.successMessage')}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {Object.keys(parsedSpec.paths || {}).length} {t.apiDetail.endpoints.toLowerCase()}
+                {Object.keys(parsedSpec.paths || {}).length} {t('apiDetail.endpoints').toLowerCase()}
               </p>
             </div>
           )}
@@ -377,10 +377,10 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t.newAPIDialog.cancel}
+            {t('newAPIDialog.cancel')}
           </Button>
           <Button onClick={handleSave} disabled={!name.trim()}>
-            {t.newAPIDialog.create}
+            {t('newAPIDialog.create')}
           </Button>
         </div>
       </DialogContent>

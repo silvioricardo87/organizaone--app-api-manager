@@ -44,11 +44,11 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
 
     if (!searchQuery.trim()) return result
 
-    const normalize = (str: string) => 
+    const normalize = (str: string) =>
       str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 
     const query = normalize(searchQuery)
-    
+
     return result.filter(api =>
       normalize(api.name).includes(query) ||
       (api.apiGroup && normalize(api.apiGroup).includes(query)) ||
@@ -59,20 +59,20 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
 
   const getCurrentPhase = (api: APIContract): LifecyclePhase | null => {
     const now = new Date()
-    
+
     for (const phaseData of api.lifecyclePhases) {
       const start = phaseData.startDate ? new Date(phaseData.startDate) : null
       const end = phaseData.endDate ? new Date(phaseData.endDate) : null
-      
+
       if (start && start <= now && (!end || end >= now)) {
         return phaseData.phase
       }
     }
-    
+
     const latestPhase = api.lifecyclePhases
       .filter(p => p.startDate)
       .sort((a, b) => new Date(b.startDate!).getTime() - new Date(a.startDate!).getTime())[0]
-    
+
     return latestPhase?.phase || null
   }
 
@@ -82,13 +82,13 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
         <div className="rounded-full bg-muted p-6 mb-4">
           <FileText size={48} className="text-muted-foreground" />
         </div>
-        <h2 className="text-2xl font-display font-semibold mb-2">{t.apiList.noAPIs}</h2>
+        <h2 className="text-2xl font-display font-semibold mb-2">{t('apiList.noAPIs')}</h2>
         <p className="text-muted-foreground mb-6 max-w-md">
-          {t.apiList.noAPIsDescription}
+          {t('apiList.noAPIsDescription')}
         </p>
         <Button onClick={onNewAPI} size="lg">
           <Plus size={20} weight="bold" className="mr-2" />
-          {t.apiList.newAPI}
+          {t('apiList.newAPI')}
         </Button>
       </div>
     )
@@ -101,7 +101,7 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
           <div className="relative flex-1 max-w-md">
             <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
             <Input
-              placeholder={t.apiList.search}
+              placeholder={t('apiList.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -111,19 +111,19 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
             {apis.some(a => a.pcmFields.length > 0) && (
               <Button variant="outline" onClick={() => {
                 exportAllPCMFieldsPDF(apis, language)
-                toast.success(t.pcm.pdfExported)
+                toast.success(t('pcm.pdfExported'))
               }}>
                 <FilePdf size={20} weight="bold" className="mr-2" />
-                {t.pcm.exportAllPDF}
+                {t('pcm.exportAllPDF')}
               </Button>
             )}
             <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
               <UploadSimple size={20} weight="bold" className="mr-2" />
-              {t.common.import}
+              {t('common.import')}
             </Button>
             <Button onClick={onNewAPI}>
               <Plus size={20} weight="bold" className="mr-2" />
-              {t.apiList.newAPI}
+              {t('apiList.newAPI')}
             </Button>
           </div>
         </div>
@@ -135,15 +135,15 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
               className="cursor-pointer px-3 py-1 text-sm transition-all"
               onClick={() => setSelectedGroup(null)}
             >
-              {t.apiList.allGroups}
+              {t('apiList.allGroups')}
             </Badge>
             {apiGroups.map(group => (
               <Badge
                 key={group}
                 variant={selectedGroup === group ? "default" : "outline"}
                 className={`cursor-pointer px-3 py-1 text-sm transition-all ${
-                  selectedGroup === group 
-                    ? "bg-primary text-primary-foreground" 
+                  selectedGroup === group
+                    ? "bg-primary text-primary-foreground"
                     : "hover:bg-primary/10 hover:border-primary/30"
                 }`}
                 onClick={() => setSelectedGroup(selectedGroup === group ? null : group)}
@@ -159,7 +159,7 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
         {filteredAPIs.map(api => {
           const currentPhase = getCurrentPhase(api)
           const displayTitle = api.useDisplayName && api.displayName ? api.displayName : api.name
-          
+
           return (
             <Card
               key={api.id}
@@ -186,14 +186,14 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
                     {currentPhase && <PhaseIndicator phase={currentPhase} />}
                   </div>
                 </div>
-                
+
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {api.summary}
                 </p>
 
                 <div className="flex flex-wrap gap-2 pt-2">
                   <Badge variant="outline" className="text-xs">
-                    {t.apiList.version} {api.version}
+                    {t('apiList.version')} {api.version}
                   </Badge>
                   {api.apiGroup && (
                     <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
@@ -207,18 +207,18 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
                   )}
                   {api.knownIssues.length > 0 && (
                     <Badge variant="outline" className="text-xs">
-                      {api.knownIssues.length} {api.knownIssues.length === 1 ? t.issues.title.slice(0, -1) : t.issues.title}
+                      {api.knownIssues.length} {api.knownIssues.length === 1 ? t('issues.title').slice(0, -1) : t('issues.title')}
                     </Badge>
                   )}
                   {api.backlogItems.length > 0 && (
                     <Badge variant="outline" className="text-xs">
-                      {api.backlogItems.length} {t.improvements.title}
+                      {api.backlogItems.length} {t('improvements.title')}
                     </Badge>
                   )}
                 </div>
 
                 <div className="text-xs text-muted-foreground pt-2 border-t">
-                  {t.dates.lastUpdated} {format(new Date(api.updatedAt), 'MMM d, yyyy')}
+                  {t('dates.lastUpdated')} {format(new Date(api.updatedAt), 'MMM d, yyyy')}
                 </div>
               </div>
             </Card>
@@ -228,7 +228,7 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
 
       {filteredAPIs.length === 0 && searchQuery && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">{t.apiList.noResults} "{searchQuery}"</p>
+          <p className="text-muted-foreground">{t('apiList.noResults')} "{searchQuery}"</p>
         </div>
       )}
 

@@ -125,30 +125,30 @@ export function PCMAutoMapDialog({
         <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Lightning size={20} weight="fill" className="text-primary" />
-            {t.pcm.autoMapTitle}
+            {t('pcm.autoMapTitle')}
           </DialogTitle>
           <DialogDescription>
-            {t.pcm.autoMapDescription}
+            {t('pcm.autoMapDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-3 gap-3 shrink-0">
           <Card className="p-3 text-center">
-            <p className="text-xs text-muted-foreground">{t.pcm.detectedFamily}</p>
+            <p className="text-xs text-muted-foreground">{t('pcm.detectedFamily')}</p>
             <p className="font-semibold text-sm mt-1">
               {detectedFamily ? (
                 <Badge variant="secondary">{detectedFamily}</Badge>
               ) : (
-                <span className="text-muted-foreground text-xs">{t.pcm.noFamilyDetected}</span>
+                <span className="text-muted-foreground text-xs">{t('pcm.noFamilyDetected')}</span>
               )}
             </p>
           </Card>
           <Card className="p-3 text-center">
-            <p className="text-xs text-muted-foreground">{t.pcm.baseFields} / {t.pcm.additionalInfoFields}</p>
+            <p className="text-xs text-muted-foreground">{t('pcm.baseFields')} / {t('pcm.additionalInfoFields')}</p>
             <p className="font-semibold text-sm mt-1">{baseFieldCount} / {additionalFieldCount}</p>
           </Card>
           <Card className="p-3 text-center">
-            <p className="text-xs text-muted-foreground">{t.pcm.totalFields}</p>
+            <p className="text-xs text-muted-foreground">{t('pcm.totalFields')}</p>
             <p className="font-semibold text-sm mt-1">
               {selectedIds.size} / {fields.length}
             </p>
@@ -158,18 +158,18 @@ export function PCMAutoMapDialog({
         <div className="flex items-center gap-2 shrink-0 pt-1">
           <Button variant="outline" size="sm" onClick={handleSelectAll}>
             <CheckSquare size={16} className="mr-1" />
-            {t.common.selectAll}
+            {t('common.selectAll')}
           </Button>
           <Button variant="outline" size="sm" onClick={handleDeselectAll}>
             <Square size={16} className="mr-1" />
-            {t.common.deselectAll}
+            {t('common.deselectAll')}
           </Button>
           <div className="ml-auto flex gap-2">
             <Button variant="ghost" size="sm" onClick={handleExpandAll}>
-              {t.common.expand}
+              {t('common.expand')}
             </Button>
             <Button variant="ghost" size="sm" onClick={handleCollapseAll}>
-              {t.common.collapse}
+              {t('common.collapse')}
             </Button>
           </div>
         </div>
@@ -244,11 +244,11 @@ export function PCMAutoMapDialog({
 
         <div className="flex justify-end gap-2 pt-3 shrink-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t.common.cancel}
+            {t('common.cancel')}
           </Button>
           <Button onClick={handleConfirm} disabled={selectedIds.size === 0}>
             <Lightning size={16} weight="fill" className="mr-1" />
-            {t.common.apply} ({selectedIds.size})
+            {t('common.apply')} ({selectedIds.size})
           </Button>
         </div>
       </DialogContent>

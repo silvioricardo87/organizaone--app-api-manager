@@ -45,7 +45,7 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
   const handleDeleteConfirm = () => {
     storage.removeAPIConfig(api.id)
     onDelete(api.id)
-    toast.success(t.toasts.apiDeleted)
+    toast.success(t('toasts.apiDeleted'))
     setDeleteDialogOpen(false)
   }
 
@@ -86,8 +86,8 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-    
-    toast.success(t.toasts.apiExported)
+
+    toast.success(t('toasts.apiExported'))
   }
 
   return (
@@ -111,36 +111,36 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
               </Badge>
             )}
           </div>
-          <p className="text-muted-foreground">{t.apiDetail.version} {api.version}</p>
+          <p className="text-muted-foreground">{t('apiDetail.version')} {api.version}</p>
         </div>
         {api.pcmFields.length > 0 && (
           <Button variant="outline" onClick={() => {
             exportPCMFieldsPDF(api, language)
-            toast.success(t.pcm.pdfExported)
+            toast.success(t('pcm.pdfExported'))
           }}>
             <FilePdf size={20} weight="bold" className="mr-2" />
-            {t.pcm.exportPDF}
+            {t('pcm.exportPDF')}
           </Button>
         )}
         <Button variant="outline" onClick={handleExport}>
           <DownloadSimple size={20} weight="bold" className="mr-2" />
-          {t.apiDetail.export}
+          {t('apiDetail.export')}
         </Button>
         <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
           <Trash size={20} weight="bold" className="mr-2" />
-          {t.apiDetail.delete}
+          {t('apiDetail.delete')}
         </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="overview">{t.tabs.overview}</TabsTrigger>
-          <TabsTrigger value="specification">{t.tabs.specification}</TabsTrigger>
-          <TabsTrigger value="lifecycle">{t.tabs.lifecycle}</TabsTrigger>
-          <TabsTrigger value="issues">{t.tabs.issues}</TabsTrigger>
-          <TabsTrigger value="backlog">{t.tabs.backlog}</TabsTrigger>
-          <TabsTrigger value="pcm">{t.tabs.pcm}</TabsTrigger>
-          <TabsTrigger value="timeline">{t.tabs.timeline}</TabsTrigger>
+          <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
+          <TabsTrigger value="specification">{t('tabs.specification')}</TabsTrigger>
+          <TabsTrigger value="lifecycle">{t('tabs.lifecycle')}</TabsTrigger>
+          <TabsTrigger value="issues">{t('tabs.issues')}</TabsTrigger>
+          <TabsTrigger value="backlog">{t('tabs.backlog')}</TabsTrigger>
+          <TabsTrigger value="pcm">{t('tabs.pcm')}</TabsTrigger>
+          <TabsTrigger value="timeline">{t('tabs.timeline')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -175,15 +175,15 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t.deleteDialog.title}</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteDialog.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.deleteDialog.description} <strong>{api.name}</strong> (v{api.version})? {t.deleteDialog.warning}
+              {t('deleteDialog.description')} <strong>{api.name}</strong> (v{api.version})? {t('deleteDialog.warning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              {t.common.delete}
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

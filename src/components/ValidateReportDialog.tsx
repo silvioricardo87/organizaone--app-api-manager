@@ -42,7 +42,7 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
 
   const handleFileSelect = (file: File) => {
     if (!file.name.endsWith('.csv')) {
-      toast.error(t.toasts.invalidFileFormat)
+      toast.error(t('toasts.invalidFileFormat'))
       return
     }
     setSelectedFile(file)
@@ -84,7 +84,7 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
       setProgress(70)
 
       if (rows.length === 0) {
-        toast.error(t.pcm.csvParseError)
+        toast.error(t('pcm.csvParseError'))
         setIsProcessing(false)
         return
       }
@@ -97,7 +97,7 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
       setIsProcessing(false)
     } catch (error) {
       console.error('Error validating CSV:', error)
-      toast.error(t.pcm.csvParseError)
+      toast.error(t('pcm.csvParseError'))
       setIsProcessing(false)
     }
   }
@@ -105,7 +105,7 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
   const handleExportPDF = () => {
     if (!result) return
     exportValidationPDF(api, result, language)
-    toast.success(t.pcm.pdfExported)
+    toast.success(t('pcm.pdfExported'))
   }
 
   const severityIcon = (type: string) => {
@@ -118,9 +118,9 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
 
   const severityBadge = (type: string) => {
     switch (type) {
-      case 'error': return <Badge variant="destructive">{t.pcm.error}</Badge>
-      case 'warning': return <Badge className="bg-amber-500/10 text-amber-600 border-amber-200">{t.pcm.warning}</Badge>
-      default: return <Badge variant="secondary">{t.pcm.info}</Badge>
+      case 'error': return <Badge variant="destructive">{t('pcm.error')}</Badge>
+      case 'warning': return <Badge className="bg-amber-500/10 text-amber-600 border-amber-200">{t('pcm.warning')}</Badge>
+      default: return <Badge variant="secondary">{t('pcm.info')}</Badge>
     }
   }
 
@@ -128,8 +128,8 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:!max-w-[90vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t.pcm.validationTitle}</DialogTitle>
-          <DialogDescription>{t.pcm.validationDescription}</DialogDescription>
+          <DialogTitle>{t('pcm.validationTitle')}</DialogTitle>
+          <DialogDescription>{t('pcm.validationDescription')}</DialogDescription>
         </DialogHeader>
 
         {!result && (
@@ -173,9 +173,9 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
                   <UploadSimple size={48} weight="duotone" className="mx-auto mb-4 text-muted-foreground" />
                   <div className="space-y-2">
                     <Button type="button" variant="outline">
-                      {t.pcm.uploadCSV}
+                      {t('pcm.uploadCSV')}
                     </Button>
-                    <p className="text-sm text-muted-foreground">{t.importAPIDialog.dropFile}</p>
+                    <p className="text-sm text-muted-foreground">{t('importAPIDialog.dropFile')}</p>
                     <p className="text-xs text-muted-foreground">CSV</p>
                   </div>
                 </>
@@ -185,7 +185,7 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
             {isProcessing && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t.pcm.processing}</span>
+                  <span className="text-muted-foreground">{t('pcm.processing')}</span>
                   <span className="font-medium">{progress}%</span>
                 </div>
                 <Progress value={progress} />
@@ -194,10 +194,10 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={handleClose}>
-                {t.common.cancel}
+                {t('common.cancel')}
               </Button>
               <Button onClick={handleValidate} disabled={!selectedFile || isProcessing}>
-                {t.pcm.validateReport}
+                {t('pcm.validateReport')}
               </Button>
             </div>
           </>
@@ -208,15 +208,15 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
             {/* Summary Cards */}
             <div className="grid grid-cols-3 gap-3">
               <Card className="p-4 text-center">
-                <p className="text-xs text-muted-foreground">{t.pcm.totalRecords}</p>
+                <p className="text-xs text-muted-foreground">{t('pcm.totalRecords')}</p>
                 <p className="text-2xl font-bold">{result.totalRecords}</p>
               </Card>
               <Card className="p-4 text-center">
-                <p className="text-xs text-muted-foreground">{t.pcm.matchedRecords}</p>
+                <p className="text-xs text-muted-foreground">{t('pcm.matchedRecords')}</p>
                 <p className="text-2xl font-bold text-green-600">{result.matchedRecords}</p>
               </Card>
               <Card className="p-4 text-center">
-                <p className="text-xs text-muted-foreground">{t.pcm.unmatchedRecords}</p>
+                <p className="text-xs text-muted-foreground">{t('pcm.unmatchedRecords')}</p>
                 <p className="text-2xl font-bold text-muted-foreground">{result.unmatchedRecords}</p>
               </Card>
             </div>
@@ -225,7 +225,7 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
             {result.dateRange && (
               <Card className="p-3">
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="font-medium text-muted-foreground">{t.pcm.dateRange}:</span>
+                  <span className="font-medium text-muted-foreground">{t('pcm.dateRange')}:</span>
                   <span className="font-mono text-xs">{result.dateRange.min} — {result.dateRange.max}</span>
                 </div>
               </Card>
@@ -233,18 +233,18 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
 
             {/* Pairing stats */}
             <Card className="p-4">
-              <h4 className="font-semibold text-sm mb-3">{t.pcm.pairingStats}</h4>
+              <h4 className="font-semibold text-sm mb-3">{t('pcm.pairingStats')}</h4>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <p className="text-xs text-muted-foreground">{t.pcm.paired}</p>
+                  <p className="text-xs text-muted-foreground">{t('pcm.paired')}</p>
                   <p className="text-lg font-bold text-green-600">{result.pairedCount}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{t.pcm.unpaired}</p>
+                  <p className="text-xs text-muted-foreground">{t('pcm.unpaired')}</p>
                   <p className="text-lg font-bold text-red-500">{result.unpairedCount}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{t.pcm.pairedInconsistent}</p>
+                  <p className="text-xs text-muted-foreground">{t('pcm.pairedInconsistent')}</p>
                   <p className="text-lg font-bold text-amber-500">{result.pairedInconsistentCount}</p>
                 </div>
               </div>
@@ -253,7 +253,7 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
             {/* Status distribution */}
             {Object.keys(result.statusCodeDistribution).length > 0 && (
               <Card className="p-4">
-                <h4 className="font-semibold text-sm mb-3">{t.pcm.statusDistribution}</h4>
+                <h4 className="font-semibold text-sm mb-3">{t('pcm.statusDistribution')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(result.statusCodeDistribution)
                     .sort(([a], [b]) => a.localeCompare(b))
@@ -273,7 +273,7 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
             {/* Endpoint coverage */}
             {result.endpointCoverage.length > 0 && (
               <Card className="p-4">
-                <h4 className="font-semibold text-sm mb-3">{t.pcm.endpointCoverage}</h4>
+                <h4 className="font-semibold text-sm mb-3">{t('pcm.endpointCoverage')}</h4>
                 <div className="space-y-1 max-h-[200px] overflow-y-auto">
                   {result.endpointCoverage.map((ep) => (
                     <div key={ep.endpoint} className="flex items-center gap-2 text-xs py-1 px-2 rounded hover:bg-muted/50">
@@ -296,11 +296,11 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
 
             {/* Inconsistencies */}
             <Card className="p-4">
-              <h4 className="font-semibold text-sm mb-3">{t.pcm.inconsistencies}</h4>
+              <h4 className="font-semibold text-sm mb-3">{t('pcm.inconsistencies')}</h4>
               {result.inconsistencies.length === 0 ? (
                 <div className="flex items-center gap-2 text-sm text-green-600">
                   <CheckCircle size={16} weight="fill" />
-                  {t.pcm.noInconsistencies}
+                  {t('pcm.noInconsistencies')}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -321,11 +321,11 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={handleClose}>
-                {t.common.close}
+                {t('common.close')}
               </Button>
               <Button onClick={handleExportPDF}>
                 <FilePdf size={16} weight="bold" className="mr-2" />
-                {t.pcm.downloadPDFReport}
+                {t('pcm.downloadPDFReport')}
               </Button>
             </div>
           </div>

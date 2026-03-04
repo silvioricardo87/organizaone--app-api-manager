@@ -12,7 +12,7 @@ import { APIContract, Milestone, LifecyclePhase } from '@/lib/types'
 import { PhaseIndicator } from '../PhaseIndicator'
 import { generateId } from '@/lib/api-utils'
 import { parseISO, differenceInDays } from 'date-fns'
-import { formatDate, monthNames } from '@/lib/i18n'
+import { formatDate, monthNames } from '@/lib/date-utils'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 
@@ -32,12 +32,12 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
   const [date, setDate] = useState<Date>()
 
   const allDates: Date[] = []
-  
+
   api.lifecyclePhases.forEach(phase => {
     if (phase.startDate) allDates.push(parseISO(phase.startDate))
     if (phase.endDate) allDates.push(parseISO(phase.endDate))
   })
-  
+
   api.milestones.forEach(milestone => {
     allDates.push(parseISO(milestone.date))
   })
@@ -63,7 +63,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
 
   const handleSave = () => {
     if (!title.trim() || !date) {
-      toast.error(t.toasts.fieldRequired)
+      toast.error(t('toasts.fieldRequired'))
       return
     }
 
@@ -75,7 +75,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
           ? { ...m, title, description, date: date.toISOString() }
           : m
       )
-      toast.success(t.toasts.milestoneUpdated)
+      toast.success(t('toasts.milestoneUpdated'))
     } else {
       const newMilestone: Milestone = {
         id: generateId(),
@@ -83,10 +83,10 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
         description,
         date: date.toISOString()
       }
-      updatedMilestones = [...api.milestones, newMilestone].sort((a, b) => 
+      updatedMilestones = [...api.milestones, newMilestone].sort((a, b) =>
         new Date(a.date).getTime() - new Date(b.date).getTime()
       )
-      toast.success(t.toasts.milestoneCreated)
+      toast.success(t('toasts.milestoneCreated'))
     }
 
     onUpdate({
@@ -99,7 +99,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
   }
 
   const handleDelete = (milestoneId: string) => {
-    if (!confirm(t.apiDetail.confirmDeleteMessage)) return
+    if (!confirm(t('apiDetail.confirmDeleteMessage'))) return
 
     const updatedMilestones = api.milestones.filter(m => m.id !== milestoneId)
     onUpdate({
@@ -107,7 +107,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
       milestones: updatedMilestones,
       updatedAt: new Date().toISOString()
     })
-    toast.success(t.toasts.milestoneDeleted)
+    toast.success(t('toasts.milestoneDeleted'))
   }
 
   const getPositionPercentage = (date: Date): number => {
@@ -120,16 +120,16 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
       <div className="flex justify-end">
         <Button onClick={() => openDialog()}>
           <Plus size={20} weight="bold" className="mr-2" />
-          {t.timeline.addMilestone}
+          {t('timeline.addMilestone')}
         </Button>
       </div>
 
       <Card className="p-6">
-        <h2 className="text-xl font-display font-semibold mb-6">{t.timeline.visualTimeline}</h2>
-        
+        <h2 className="text-xl font-display font-semibold mb-6">{t('timeline.visualTimeline')}</h2>
+
         <div className="relative pt-16 pb-8">
           <div className="absolute top-16 left-0 right-0 h-2 bg-muted rounded-full"></div>
-          
+
           {api.lifecyclePhases.map((phase, index) => {
             if (!phase.startDate) return null
 
@@ -160,7 +160,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
               <div
                 key={milestone.id}
                 className="absolute transform -translate-x-1/2"
-                style={{ 
+                style={{
                   left: `${position}%`,
                   top: isEven ? '0px' : 'auto',
                   bottom: isEven ? 'auto' : '0px'
@@ -208,7 +208,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">{t.timeline.lifecyclePhases}</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t('timeline.lifecyclePhases')}</h3>
           <div className="space-y-3">
             {phaseOrder.map(phase => {
               const phaseData = api.lifecyclePhases.find(p => p.phase === phase)
@@ -223,7 +223,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
                     <p>{formatDate(parseISO(phaseData.startDate), 'medium', language)}</p>
                     {phaseData.endDate && (
                       <p className="text-muted-foreground">
-                        {t.dates.to} {formatDate(parseISO(phaseData.endDate), 'medium', language)}
+                        {t('dates.to')} {formatDate(parseISO(phaseData.endDate), 'medium', language)}
                       </p>
                     )}
                   </div>
@@ -234,9 +234,9 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">{t.timeline.milestones}</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t('timeline.milestones')}</h3>
           {api.milestones.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t.timeline.noMilestones}</p>
+            <p className="text-sm text-muted-foreground">{t('timeline.noMilestones')}</p>
           ) : (
             <div className="space-y-3">
               {api.milestones.map(milestone => (
@@ -271,41 +271,41 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingMilestone ? t.timeline.editMilestone : t.timeline.newMilestone}</DialogTitle>
+            <DialogTitle>{editingMilestone ? t('timeline.editMilestone') : t('timeline.newMilestone')}</DialogTitle>
             <DialogDescription>
-              {editingMilestone ? t.timeline.updateMilestoneDetails : t.timeline.addNewMilestone}
+              {editingMilestone ? t('timeline.updateMilestoneDetails') : t('timeline.addNewMilestone')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="milestone-title">{t.timeline.title} *</Label>
+              <Label htmlFor="milestone-title">{t('timeline.title')} *</Label>
               <Input
                 id="milestone-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={t.timeline.titlePlaceholder}
+                placeholder={t('timeline.titlePlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="milestone-description">{t.timeline.description}</Label>
+              <Label htmlFor="milestone-description">{t('timeline.description')}</Label>
               <Textarea
                 id="milestone-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder={t.timeline.descriptionPlaceholder}
+                placeholder={t('timeline.descriptionPlaceholder')}
                 rows={2}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>{t.timeline.date} *</Label>
+              <Label>{t('timeline.date')} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon size={16} className="mr-2" />
-                    {date ? formatDate(date, 'long', language) : t.dates.selectDate}
+                    {date ? formatDate(date, 'long', language) : t('dates.selectDate')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -322,10 +322,10 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              {t.timeline.cancel}
+              {t('timeline.cancel')}
             </Button>
             <Button onClick={handleSave} disabled={!title.trim() || !date}>
-              {editingMilestone ? t.timeline.update : t.timeline.create}
+              {editingMilestone ? t('timeline.update') : t('timeline.create')}
             </Button>
           </div>
         </DialogContent>

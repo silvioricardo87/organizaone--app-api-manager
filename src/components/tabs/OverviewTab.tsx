@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card'
 import { APIContract } from '@/lib/types'
 import { PhaseIndicator } from '../PhaseIndicator'
-import { formatDate } from '@/lib/i18n'
+import { formatDate } from '@/lib/date-utils'
 import { useSettings } from '@/hooks/use-settings'
 
 interface OverviewTabProps {
@@ -24,45 +24,45 @@ export function OverviewTab({ api }: OverviewTabProps) {
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-xl font-display font-semibold mb-4">{t.apiDetail.apiInformation}</h2>
+        <h2 className="text-xl font-display font-semibold mb-4">{t('apiDetail.apiInformation')}</h2>
         <dl className="space-y-4">
           <div>
-            <dt className="text-sm font-medium text-muted-foreground mb-1">{t.apiDetail.name}</dt>
+            <dt className="text-sm font-medium text-muted-foreground mb-1">{t('apiDetail.name')}</dt>
             <dd className="text-base">{api.name}</dd>
           </div>
-          
+
           <div>
-            <dt className="text-sm font-medium text-muted-foreground mb-1">{t.apiDetail.version}</dt>
+            <dt className="text-sm font-medium text-muted-foreground mb-1">{t('apiDetail.version')}</dt>
             <dd className="text-base font-mono">{api.version}</dd>
           </div>
-          
+
           <div>
-            <dt className="text-sm font-medium text-muted-foreground mb-1">{t.apiDetail.description}</dt>
+            <dt className="text-sm font-medium text-muted-foreground mb-1">{t('apiDetail.description')}</dt>
             <dd className="text-base">{api.summary}</dd>
           </div>
-          
+
           {currentPhase && (
             <div>
-              <dt className="text-sm font-medium text-muted-foreground mb-1">{t.apiDetail.currentPhase}</dt>
+              <dt className="text-sm font-medium text-muted-foreground mb-1">{t('apiDetail.currentPhase')}</dt>
               <dd className="text-base">
                 <PhaseIndicator phase={currentPhase.phase} />
               </dd>
             </div>
           )}
-          
+
           <div>
-            <dt className="text-sm font-medium text-muted-foreground mb-1">{t.dates.created}</dt>
+            <dt className="text-sm font-medium text-muted-foreground mb-1">{t('dates.created')}</dt>
             <dd className="text-base">{formatDate(new Date(api.createdAt), 'long', language)}</dd>
           </div>
-          
+
           <div>
-            <dt className="text-sm font-medium text-muted-foreground mb-1">{t.dates.lastUpdated}</dt>
+            <dt className="text-sm font-medium text-muted-foreground mb-1">{t('dates.lastUpdated')}</dt>
             <dd className="text-base">{formatDate(new Date(api.updatedAt), 'long', language)}</dd>
           </div>
-          
+
           {endpointCount > 0 && (
             <div>
-              <dt className="text-sm font-medium text-muted-foreground mb-1">{t.cards.totalEndpoints}</dt>
+              <dt className="text-sm font-medium text-muted-foreground mb-1">{t('cards.totalEndpoints')}</dt>
               <dd className="text-base">{endpointCount}</dd>
             </div>
           )}
@@ -71,25 +71,25 @@ export function OverviewTab({ api }: OverviewTabProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-2">{t.cards.knownIssues}</h3>
+          <h3 className="text-lg font-display font-semibold mb-2">{t('cards.knownIssues')}</h3>
           <p className="text-3xl font-bold text-destructive">{api.knownIssues.length}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {api.knownIssues.filter(i => i.status === 'open').length} {t.cards.openIssues}
+            {api.knownIssues.filter(i => i.status === 'open').length} {t('cards.openIssues')}
           </p>
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-2">{t.cards.backlogItems}</h3>
+          <h3 className="text-lg font-display font-semibold mb-2">{t('cards.backlogItems')}</h3>
           <p className="text-3xl font-bold text-accent">{api.backlogItems.length}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {api.backlogItems.filter(i => i.status === 'in_progress').length} {t.cards.inProgress}
+            {api.backlogItems.filter(i => i.status === 'in_progress').length} {t('cards.inProgress')}
           </p>
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-2">{t.cards.pcmFields}</h3>
+          <h3 className="text-lg font-display font-semibold mb-2">{t('cards.pcmFields')}</h3>
           <p className="text-3xl font-bold text-primary">{api.pcmFields.length}</p>
-          <p className="text-sm text-muted-foreground mt-1">{t.cards.configured}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t('cards.configured')}</p>
         </Card>
       </div>
     </div>

@@ -28,23 +28,23 @@ const STATUS_COLORS: Record<IssueStatus, string> = {
 
 export function Dashboard({ apis, onBack }: DashboardProps) {
   const { t } = useSettings()
-  
+
   const getCurrentPhase = (api: APIContract): LifecyclePhase | null => {
     const now = new Date()
-    
+
     for (const phaseData of api.lifecyclePhases) {
       const start = phaseData.startDate ? new Date(phaseData.startDate) : null
       const end = phaseData.endDate ? new Date(phaseData.endDate) : null
-      
+
       if (start && start <= now && (!end || end >= now)) {
         return phaseData.phase
       }
     }
-    
+
     const latestPhase = api.lifecyclePhases
       .filter(p => p.startDate)
       .sort((a, b) => new Date(b.startDate!).getTime() - new Date(a.startDate!).getTime())[0]
-    
+
     return latestPhase?.phase || null
   }
 
@@ -67,7 +67,7 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
     return Object.entries(phaseCounts)
       .filter(([_, count]) => count > 0)
       .map(([phase, count]) => ({
-        name: t.badges[phase as LifecyclePhase],
+        name: t(`badges.${phase}`),
         value: count,
         color: LIFECYCLE_COLORS[phase as LifecyclePhase],
       }))
@@ -90,7 +90,7 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
     return Object.entries(statusCounts)
       .filter(([_, count]) => count > 0)
       .map(([status, count]) => ({
-        name: t.badges[status as IssueStatus],
+        name: t(`badges.${status}`),
         value: count,
         color: STATUS_COLORS[status as IssueStatus],
       }))
@@ -140,29 +140,29 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
           <ArrowLeft size={20} />
         </Button>
         <div>
-          <h2 className="text-2xl font-display font-bold">{t.dashboard.title}</h2>
-          <p className="text-sm text-muted-foreground">{t.dashboard.overview}</p>
+          <h2 className="text-2xl font-display font-bold">{t('dashboard.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('dashboard.overview')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-6">
-          <div className="text-sm text-muted-foreground mb-1">{t.dashboard.totalAPIs}</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('dashboard.totalAPIs')}</div>
           <div className="text-3xl font-display font-bold">{totalAPIs}</div>
         </Card>
         <Card className="p-6">
-          <div className="text-sm text-muted-foreground mb-1">{t.issues.title}</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('issues.title')}</div>
           <div className="text-3xl font-display font-bold">{totalIssues}</div>
         </Card>
         <Card className="p-6">
-          <div className="text-sm text-muted-foreground mb-1">{t.improvements.title}</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('improvements.title')}</div>
           <div className="text-3xl font-display font-bold">{totalBacklog}</div>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">{t.dashboard.byPhase}</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t('dashboard.byPhase')}</h3>
           {lifecycleData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -185,13 +185,13 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              {t.dashboard.noLifecycleData}
+              {t('dashboard.noLifecycleData')}
             </div>
           )}
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">{t.dashboard.issueStatusDistribution}</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t('dashboard.issueStatusDistribution')}</h3>
           {issueStatusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -214,13 +214,13 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              {t.dashboard.noIssuesData}
+              {t('dashboard.noIssuesData')}
             </div>
           )}
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">{t.dashboard.backlogStatus}</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t('dashboard.backlogStatus')}</h3>
           {backlogStatusData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -243,13 +243,13 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              {t.dashboard.noBacklogData}
+              {t('dashboard.noBacklogData')}
             </div>
           )}
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-display font-semibold mb-4">{t.dashboard.issuesByAPI}</h3>
+          <h3 className="text-lg font-display font-semibold mb-4">{t('dashboard.issuesByAPI')}</h3>
           {issuesByAPIData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={issuesByAPIData} layout="vertical">
@@ -263,7 +263,7 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              {t.dashboard.noIssuesToDisplay}
+              {t('dashboard.noIssuesToDisplay')}
             </div>
           )}
         </Card>

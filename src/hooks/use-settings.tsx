@@ -1,30 +1,37 @@
 import { createContext, useContext, ReactNode, useEffect } from 'react'
-import { translations, Language } from '@/lib/i18n'
+import { useTranslation } from 'react-i18next'
 import { usePersistedKV } from '@/hooks/use-persisted-kv'
 import { STORAGE_KEYS } from '@/lib/storage'
 
 type Theme = 'light' | 'dark' | 'system'
+export type Language = 'en' | 'pt'
 
 interface SettingsContextType {
   language: Language
   setLanguage: (lang: Language) => void
   theme: Theme
   setTheme: (theme: Theme) => void
-  t: typeof translations.en
+  t: (key: string) => string
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = usePersistedKV<Language>(STORAGE_KEYS.LANGUAGE, 'pt')
+  const [language, setLanguagePersisted] = usePersistedKV<Language>(STORAGE_KEYS.LANGUAGE, 'pt')
   const [theme, setTheme] = usePersistedKV<Theme>(STORAGE_KEYS.THEME, 'light')
+  const { t, i18n } = useTranslation()
 
   const currentLanguage = (language ?? 'pt') as Language
   const currentTheme = (theme ?? 'light') as Theme
 
+  const handleSetLanguage = (lang: Language) => {
+    setLanguagePersisted(lang)
+    i18n.changeLanguage(lang)
+  }
+
   useEffect(() => {
     const root = document.documentElement
-    
+
     if (currentTheme === 'dark') {
       root.classList.add('dark')
     } else if (currentTheme === 'light') {
@@ -49,19 +56,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           document.documentElement.classList.remove('dark')
         }
       }
-      
+
       mediaQuery.addEventListener('change', handler)
       return () => mediaQuery.removeEventListener('change', handler)
     }
   }, [currentTheme])
 
-  const t = translations[currentLanguage] || translations.pt
-
   return (
     <SettingsContext.Provider
       value={{
         language: currentLanguage,
-        setLanguage: (lang) => setLanguage(lang),
+        setLanguage: handleSetLanguage,
         theme: currentTheme,
         setTheme: (newTheme) => setTheme(newTheme),
         t,
