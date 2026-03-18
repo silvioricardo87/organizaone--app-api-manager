@@ -145,7 +145,7 @@ export function TimelineTab({ api, onUpdate }: TimelineTabProps) {
                 style={{
                   left: `${startPos}%`,
                   width: `${width}%`,
-                  backgroundColor: index % 2 === 0 ? 'oklch(0.45 0.15 250)' : 'oklch(0.70 0.18 200)'
+                  backgroundColor: index % 2 === 0 ? 'oklch(0.58 0.22 345)' : 'oklch(0.83 0.17 85)'
                 }}
               />
             )

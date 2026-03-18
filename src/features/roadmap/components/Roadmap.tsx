@@ -22,10 +22,10 @@ interface TimelineEvent {
 }
 
 const PHASE_COLORS: Record<LifecyclePhase, string> = {
-  implementing: 'bg-[oklch(0.60_0.18_240)]',
-  certifying: 'bg-[oklch(0.75_0.15_70)]',
+  implementing: 'bg-[oklch(0.58_0.22_345)]',
+  certifying: 'bg-[oklch(0.83_0.17_85)]',
   current: 'bg-[oklch(0.65_0.20_140)]',
-  deprecated: 'bg-[oklch(0.70_0.18_200)]',
+  deprecated: 'bg-[oklch(0.68_0.18_345)]',
   retired: 'bg-[oklch(0.60_0.22_25)]',
 }
 

@@ -12,8 +12,8 @@ interface DashboardProps {
 }
 
 const LIFECYCLE_COLORS: Record<LifecyclePhase, string> = {
-  implementing: 'oklch(0.60 0.18 240)',
-  certifying: 'oklch(0.65 0.16 260)',
+  implementing: 'oklch(0.58 0.22 345)',
+  certifying: 'oklch(0.68 0.18 345)',
   current: 'oklch(0.65 0.20 140)',
   deprecated: 'oklch(0.75 0.15 70)',
   retired: 'oklch(0.60 0.22 25)',
@@ -173,7 +173,7 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
                   labelLine={false}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   outerRadius={100}
-                  fill="#8884d8"
+                  fill="#EA3595"
                   dataKey="value"
                 >
                   {lifecycleData.map((entry, index) => (
@@ -202,7 +202,7 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
                   labelLine={false}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   outerRadius={100}
-                  fill="#8884d8"
+                  fill="#EA3595"
                   dataKey="value"
                 >
                   {issueStatusData.map((entry, index) => (
@@ -231,7 +231,7 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
                   labelLine={false}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   outerRadius={100}
-                  fill="#8884d8"
+                  fill="#EA3595"
                   dataKey="value"
                 >
                   {backlogStatusData.map((entry, index) => (
@@ -253,7 +253,7 @@ export function Dashboard({ apis, onBack }: DashboardProps) {
           {issuesByAPIData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={issuesByAPIData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.90 0.005 250)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.91 0.003 345)" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 12 }} />
                 <Tooltip />

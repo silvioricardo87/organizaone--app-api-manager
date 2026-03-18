@@ -112,7 +112,7 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
     switch (type) {
       case 'error': return <Warning size={16} weight="fill" className="text-destructive" />
       case 'warning': return <Warning size={16} weight="fill" className="text-amber-500" />
-      default: return <Info size={16} weight="fill" className="text-blue-500" />
+      default: return <Info size={16} weight="fill" className="text-primary" />
     }
   }
 
