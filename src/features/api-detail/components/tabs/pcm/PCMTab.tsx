@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Lightning, FilePdf, FileMagnifyingGlass } from '@phosphor-icons/react'
+import { Plus, Lightning, FilePdf, FileMagnifyingGlass, ChartBar } from '@phosphor-icons/react'
 import { APIContract, PCMField } from '@/shared/lib/types'
 import { extractEndpoints } from '@/shared/lib/api-utils'
 import { generatePCMFields, mergeWithExistingFields } from '@/shared/lib/pcm-field-generator'
@@ -9,6 +9,7 @@ import { BASE_PCM_FIELDS } from '@/shared/lib/pcm-rules'
 import { exportPCMFieldsPDF } from '@/shared/lib/pcm-pdf-export'
 import { PCMAutoMapDialog } from '@/shared/components/PCMAutoMapDialog'
 import { ValidateReportDialog } from '@/shared/components/ValidateReportDialog'
+import { ReportAnalysisDialog } from '@/shared/components/ReportAnalysisDialog'
 import { toast } from 'sonner'
 import { useSettings } from '@/shared/hooks/use-settings'
 import { PCMFieldForm } from './PCMFieldForm'
@@ -30,6 +31,7 @@ export function PCMTab({ api, apis, onUpdate }: PCMTabProps) {
   const [autoMapBaseCount, setAutoMapBaseCount] = useState(0)
   const [autoMapAdditionalCount, setAutoMapAdditionalCount] = useState(0)
   const [validateDialogOpen, setValidateDialogOpen] = useState(false)
+  const [analyzeDialogOpen, setAnalyzeDialogOpen] = useState(false)
 
   const openDialog = (pcmField?: PCMField) => {
     setEditingField(pcmField || null)
@@ -135,6 +137,10 @@ export function PCMTab({ api, apis, onUpdate }: PCMTabProps) {
               <FileMagnifyingGlass size={20} weight="bold" className="mr-2" />
               {t('pcm.validateReport')}
             </Button>
+            <Button variant="outline" onClick={() => setAnalyzeDialogOpen(true)}>
+              <ChartBar size={20} weight="bold" className="mr-2" />
+              {t('pcm.analyzeReport')}
+            </Button>
           </>
         )}
         <Button onClick={() => openDialog()}>
@@ -162,6 +168,12 @@ export function PCMTab({ api, apis, onUpdate }: PCMTabProps) {
       <ValidateReportDialog
         open={validateDialogOpen}
         onOpenChange={setValidateDialogOpen}
+        api={api}
+      />
+
+      <ReportAnalysisDialog
+        open={analyzeDialogOpen}
+        onOpenChange={setAnalyzeDialogOpen}
         api={api}
       />
 

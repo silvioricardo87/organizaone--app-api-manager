@@ -336,7 +336,12 @@
     "noInconsistencies": "Nenhuma inconsistência encontrada",
     "validationResults": "Resultados da Validação",
     "processing": "Processando...",
-    "csvParseError": "Erro ao processar arquivo CSV"
+    "csvParseError": "Erro ao processar arquivo CSV",
+    "analyzeReport": "Analisar Relatório",
+    "analyzeReportDesc": "Faça upload de um relatório CSV (formato FVP ou PCM) para analisar campos contra esta API e regras PCM.",
+    "uploadCSVFile": "Enviar arquivo CSV",
+    "matched": "Correspondentes",
+    "unmatched": "Sem correspondência"
   },
   "pcmCompliance": {
     "noPCMReference": "Nenhuma API de referência PCM configurada. Adicione uma API PCM primeiro.",

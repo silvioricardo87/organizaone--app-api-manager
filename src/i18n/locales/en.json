@@ -336,7 +336,12 @@
     "noInconsistencies": "No inconsistencies found",
     "validationResults": "Validation Results",
     "processing": "Processing...",
-    "csvParseError": "Error parsing CSV file"
+    "csvParseError": "Error parsing CSV file",
+    "analyzeReport": "Analyze Report",
+    "analyzeReportDesc": "Upload a CSV report (FVP or PCM format) to analyze fields against this API and PCM rules.",
+    "uploadCSVFile": "Upload CSV file",
+    "matched": "Matched",
+    "unmatched": "Unmatched"
   },
   "pcmCompliance": {
     "noPCMReference": "No PCM reference API configured. Add a PCM API first.",
