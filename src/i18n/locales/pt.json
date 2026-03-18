@@ -85,7 +85,8 @@
     "maximum": "Máximo",
     "properties": "Propriedades",
     "items": "Itens",
-    "example": "Exemplo"
+    "example": "Exemplo",
+    "pcmRules": "Regras PCM"
   },
   "newAPIDialog": {
     "title": "Novo Contrato de API",
@@ -335,6 +336,18 @@
     "validationResults": "Resultados da Validação",
     "processing": "Processando...",
     "csvParseError": "Erro ao processar arquivo CSV"
+  },
+  "pcmRules": {
+    "title": "Registro de Regras PCM",
+    "description": "Todas as regras regulatórias para campos de reporte PCM",
+    "searchPlaceholder": "Buscar regras por campo ou descrição...",
+    "mandatory-fields": "Campos Obrigatórios e Opcionais",
+    "discard-rules": "Regras de Descarte",
+    "validation-rules": "Regras de Validação",
+    "additionalinfo-requirements": "Regras de Obrigatoriedade (additionalInfo)",
+    "optimized-journey": "Jornada Otimizada",
+    "endpoints": "Endpoints",
+    "rulesCount": "{count} regras"
   },
   "dashboard": {
     "title": "Painel",

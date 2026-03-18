@@ -13,12 +13,14 @@ import {
 } from '@/components/ui/alert-dialog'
 import { ArrowLeft, Trash, DownloadSimple, Tag, FilePdf } from '@phosphor-icons/react'
 import { APIContract } from '@/shared/lib/types'
+import { cn } from '@/shared/lib/utils'
 import { OverviewTab } from './tabs/OverviewTab'
 import { LifecycleTab } from './tabs/LifecycleTab'
 import { SpecificationTab } from './tabs/specification/SpecificationTab'
 import { IssuesTab } from './tabs/IssuesTab'
 import { BacklogTab } from './tabs/BacklogTab'
 import { PCMTab } from './tabs/pcm/PCMTab'
+import { PCMRulesTab } from './tabs/pcm/PCMRulesTab'
 import { TimelineTab } from './tabs/TimelineTab'
 import { exportPCMFieldsPDF } from '@/shared/lib/pcm-pdf-export'
 import { toast } from 'sonner'
@@ -133,7 +135,7 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
+        <TabsList className={cn("grid w-full lg:w-auto lg:inline-grid", api.isPCMReference ? "grid-cols-8" : "grid-cols-7")}>
           <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
           <TabsTrigger value="specification">{t('tabs.specification')}</TabsTrigger>
           <TabsTrigger value="lifecycle">{t('tabs.lifecycle')}</TabsTrigger>
@@ -141,6 +143,9 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
           <TabsTrigger value="backlog">{t('tabs.backlog')}</TabsTrigger>
           <TabsTrigger value="pcm">{t('tabs.pcm')}</TabsTrigger>
           <TabsTrigger value="timeline">{t('tabs.timeline')}</TabsTrigger>
+          {api.isPCMReference && (
+            <TabsTrigger value="pcm-rules">{t('apiDetail.pcmRules')}</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="overview">
@@ -170,6 +175,12 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
         <TabsContent value="timeline">
           <TimelineTab api={api} onUpdate={onUpdate} />
         </TabsContent>
+
+        {api.isPCMReference && (
+          <TabsContent value="pcm-rules">
+            <PCMRulesTab />
+          </TabsContent>
+        )}
       </Tabs>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
