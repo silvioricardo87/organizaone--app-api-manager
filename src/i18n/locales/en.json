@@ -343,7 +343,10 @@
     "complianceScore": "Compliance Score",
     "matchedFields": "Matched Fields",
     "missingMandatory": "Missing Mandatory",
-    "extraFields": "Extra Fields"
+    "extraFields": "Extra Fields",
+    "compliancePreview": "PCM Compliance Preview",
+    "compliancePreviewDesc": "Review the PCM compliance status for this API before proceeding.",
+    "compliancePreviewHint": "You can configure additional PCM fields later in the API detail view."
   },
   "pcmRules": {
     "title": "PCM Rules Registry",
@@ -470,7 +473,8 @@
     "nullable": "Nullable",
     "deprecated": "Deprecated",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "continue": "Continue"
   },
   "badges": {
     "implementing": "Implementing",

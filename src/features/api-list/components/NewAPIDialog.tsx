@@ -10,6 +10,8 @@ import { generatePCMFields } from '@/shared/lib/pcm-field-generator'
 import { BASE_PCM_FIELDS } from '@/shared/lib/pcm-rules'
 import { APIContract, LifecyclePhaseData, PCMField } from '@/shared/lib/types'
 import { PCMAutoMapDialog } from '@/shared/components/PCMAutoMapDialog'
+import { PCMComplianceDialog } from '@/shared/components/PCMComplianceDialog'
+import { findPCMReferenceAPI } from '@/shared/lib/pcm-reference'
 import { useSettings } from '@/shared/hooks/use-settings'
 import { toast } from 'sonner'
 import { YamlUploadSection } from './YamlUploadSection'
@@ -42,6 +44,8 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
   const [autoMapBaseCount, setAutoMapBaseCount] = useState(0)
   const [autoMapAdditionalCount, setAutoMapAdditionalCount] = useState(0)
   const [validationErrors, setValidationErrors] = useState<YAMLValidationError[]>([])
+  const [complianceDialogOpen, setComplianceDialogOpen] = useState(false)
+  const [savedAPI, setSavedAPI] = useState<APIContract | null>(null)
   const autoMapConfirmedRef = useRef(false)
 
   useEffect(() => {
@@ -158,7 +162,17 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
       }
     }
 
-    onSave(newAPI)
+    finalizeSave(newAPI)
+  }
+
+  const finalizeSave = (apiToSave: APIContract) => {
+    const pcmApi = findPCMReferenceAPI(existingAPIs)
+    if (pcmApi && !apiToSave.isPCMReference && apiToSave.parsedSpec) {
+      setSavedAPI(apiToSave)
+      setComplianceDialogOpen(true)
+      return
+    }
+    onSave(apiToSave)
     onOpenChange(false)
     toast.success(t('newAPIDialog.successTitle'), {
       description: t('newAPIDialog.successMessage')
@@ -168,19 +182,24 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
   const handleAutoMapConfirm = (selectedFields: PCMField[]) => {
     if (!pendingAPI) return
     autoMapConfirmedRef.current = true
-    onSave({ ...pendingAPI, pcmFields: selectedFields })
+    const apiWithFields = { ...pendingAPI, pcmFields: selectedFields }
     setPendingAPI(null)
-    onOpenChange(false)
-    toast.success(t('newAPIDialog.successTitle'), {
-      description: t('toasts.pcmAutoMapped').replace('{count}', String(selectedFields.length))
-    })
+    finalizeSave(apiWithFields)
   }
 
   const handleAutoMapSkip = () => {
     if (!pendingAPI) return
-    onSave(pendingAPI)
+    const api = pendingAPI
     setPendingAPI(null)
     setAutoMapDialogOpen(false)
+    finalizeSave(api)
+  }
+
+  const handleComplianceProceed = () => {
+    if (!savedAPI) return
+    onSave(savedAPI)
+    setSavedAPI(null)
+    setComplianceDialogOpen(false)
     onOpenChange(false)
     toast.success(t('newAPIDialog.successTitle'), {
       description: t('newAPIDialog.successMessage')
@@ -202,6 +221,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     setValidationErrors([])
     setPendingAPI(null)
     setAutoMapFields([])
+    setSavedAPI(null)
   }
 
   return (
@@ -366,6 +386,26 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
         additionalFieldCount={autoMapAdditionalCount}
         onConfirm={handleAutoMapConfirm}
       />
+
+      {savedAPI && (
+        <PCMComplianceDialog
+          open={complianceDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              onSave(savedAPI)
+              setSavedAPI(null)
+              onOpenChange(false)
+              toast.success(t('newAPIDialog.successTitle'), {
+                description: t('newAPIDialog.successMessage')
+              })
+            }
+            setComplianceDialogOpen(open)
+          }}
+          api={savedAPI}
+          pcmApi={findPCMReferenceAPI(existingAPIs)!}
+          onProceed={handleComplianceProceed}
+        />
+      )}
     </Dialog>
   )
 }
