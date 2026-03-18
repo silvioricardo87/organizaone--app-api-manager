@@ -117,7 +117,9 @@
     "missingField": "Campo obrigatório ausente: {field}",
     "invalidField": "Valor inválido em {path}",
     "invalidMethod": "Método HTTP inválido: {method} em {path}",
-    "missingResponses": "Campo obrigatório ausente: responses em {path}"
+    "missingResponses": "Campo obrigatório ausente: responses em {path}",
+    "isPCMReference": "Marcar como API de Referência PCM",
+    "pcmReferenceAlreadyExists": "(já atribuída)"
   },
   "importAPIDialog": {
     "title": "Importar API",
@@ -668,7 +670,8 @@
     "nameRequired": "Nome é obrigatório",
     "fieldRequired": "Este campo é obrigatório",
     "pcmAutoMapped": "{count} campos PCM auto-mapeados com sucesso",
-    "pcmFieldsMerged": "{new} novos campos PCM adicionados ({skipped} duplicatas ignoradas)"
+    "pcmFieldsMerged": "{new} novos campos PCM adicionados ({skipped} duplicatas ignoradas)",
+    "pcmReferenceExists": "Uma API de Referência PCM já está registrada"
   },
   "dates": {
     "today": "Hoje",

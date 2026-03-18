@@ -29,6 +29,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
   const [isUseDisplayNameManuallySet, setIsUseDisplayNameManuallySet] = useState(false)
   const [apiGroup, setApiGroup] = useState('')
   const [isBeta, setIsBeta] = useState(false)
+  const [isPCMReference, setIsPCMReference] = useState(false)
   const [yamlContent, setYamlContent] = useState('')
   const [version, setVersion] = useState('')
   const [summary, setSummary] = useState('')
@@ -96,6 +97,11 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     const normalizedName = name.trim()
     const normalizedVersion = version.trim() || '1.0.0'
 
+    if (isPCMReference && existingAPIs.some(api => api.isPCMReference)) {
+      toast.error(t('toasts.pcmReferenceExists'))
+      return
+    }
+
     const isDuplicate = existingAPIs.some(
       api => api.name === normalizedName && api.version === normalizedVersion
     )
@@ -120,6 +126,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
       useDisplayName: displayName.trim() ? useDisplayName : false,
       apiGroup: apiGroup.trim() || undefined,
       isBeta,
+      isPCMReference,
       version: normalizedVersion,
       summary: summary.trim() || 'No summary provided',
       yamlContent,
@@ -187,6 +194,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
     setIsUseDisplayNameManuallySet(false)
     setApiGroup('')
     setIsBeta(false)
+    setIsPCMReference(false)
     setYamlContent('')
     setVersion('')
     setSummary('')
@@ -279,6 +287,23 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
             >
               {t('newAPIDialog.isBetaLabel')}
             </label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="isPCMReference"
+              checked={isPCMReference}
+              onCheckedChange={(checked) => setIsPCMReference(checked === true)}
+              disabled={!isPCMReference && existingAPIs.some(api => api.isPCMReference)}
+            />
+            <Label htmlFor="isPCMReference" className="text-sm font-medium">
+              {t('newAPIDialog.isPCMReference')}
+            </Label>
+            {!isPCMReference && existingAPIs.some(api => api.isPCMReference) && (
+              <span className="text-xs text-muted-foreground">
+                {t('newAPIDialog.pcmReferenceAlreadyExists')}
+              </span>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
