@@ -245,6 +245,7 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
           onOpenChange={(open) => !open && setEditingAPI(null)}
           api={editingAPI}
           onSave={onUpdateAPI}
+          existingAPIs={apis}
         />
       )}
     </div>

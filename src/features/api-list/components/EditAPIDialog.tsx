@@ -14,15 +14,17 @@ interface EditAPIDialogProps {
   onOpenChange: (open: boolean) => void
   api: APIContract
   onSave: (api: APIContract) => void
+  existingAPIs: APIContract[]
 }
 
-export function EditAPIDialog({ open, onOpenChange, api, onSave }: EditAPIDialogProps) {
+export function EditAPIDialog({ open, onOpenChange, api, onSave, existingAPIs }: EditAPIDialogProps) {
   const { t } = useSettings()
   const [name, setName] = useState(api.name)
   const [displayName, setDisplayName] = useState(api.displayName || '')
   const [useDisplayName, setUseDisplayName] = useState(api.useDisplayName || false)
   const [apiGroup, setApiGroup] = useState(api.apiGroup || '')
   const [isBeta, setIsBeta] = useState(api.isBeta || false)
+  const [isPCMReference, setIsPCMReference] = useState(api.isPCMReference || false)
   const [version, setVersion] = useState(api.version)
   const [summary, setSummary] = useState(api.summary)
 
@@ -33,6 +35,7 @@ export function EditAPIDialog({ open, onOpenChange, api, onSave }: EditAPIDialog
       setUseDisplayName(api.useDisplayName || false)
       setApiGroup(api.apiGroup || '')
       setIsBeta(api.isBeta || false)
+      setIsPCMReference(api.isPCMReference || false)
       setVersion(api.version)
       setSummary(api.summary)
     }
@@ -44,6 +47,11 @@ export function EditAPIDialog({ open, onOpenChange, api, onSave }: EditAPIDialog
       return
     }
 
+    if (isPCMReference && existingAPIs.some(a => a.isPCMReference && a.id !== api.id)) {
+      toast.error(t('toasts.pcmReferenceExists'))
+      return
+    }
+
     const updatedAPI: APIContract = {
       ...api,
       name: name.trim(),
@@ -51,6 +59,7 @@ export function EditAPIDialog({ open, onOpenChange, api, onSave }: EditAPIDialog
       useDisplayName: displayName.trim() ? useDisplayName : false,
       apiGroup: apiGroup.trim() || undefined,
       isBeta,
+      isPCMReference,
       version: version.trim() || '1.0.0',
       summary: summary.trim(),
       updatedAt: new Date().toISOString(),
@@ -129,6 +138,23 @@ export function EditAPIDialog({ open, onOpenChange, api, onSave }: EditAPIDialog
             >
               {t('newAPIDialog.isBetaLabel')}
             </label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="edit-is-pcm-reference"
+              checked={isPCMReference}
+              onCheckedChange={(checked) => setIsPCMReference(checked === true)}
+              disabled={!isPCMReference && existingAPIs.some(a => a.isPCMReference && a.id !== api.id)}
+            />
+            <label htmlFor="edit-is-pcm-reference" className="text-sm font-medium leading-none cursor-pointer">
+              {t('newAPIDialog.isPCMReference')}
+            </label>
+            {!isPCMReference && existingAPIs.some(a => a.isPCMReference && a.id !== api.id) && (
+              <span className="text-xs text-muted-foreground">
+                {t('newAPIDialog.pcmReferenceAlreadyExists')}
+              </span>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
