@@ -341,7 +341,9 @@
     "analyzeReportDesc": "Faça upload de um relatório CSV (formato FVP ou PCM) para analisar campos contra esta API e regras PCM.",
     "uploadCSVFile": "Enviar arquivo CSV",
     "matched": "Correspondentes",
-    "unmatched": "Sem correspondência"
+    "unmatched": "Sem correspondência",
+    "exportDomains": "Exportar Domínios",
+    "domainsExported": "Domínios PCM exportados com sucesso"
   },
   "pcmCompliance": {
     "noPCMReference": "Nenhuma API de referência PCM configurada. Adicione uma API PCM primeiro.",

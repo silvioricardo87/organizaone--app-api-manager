@@ -341,7 +341,9 @@
     "analyzeReportDesc": "Upload a CSV report (FVP or PCM format) to analyze fields against this API and PCM rules.",
     "uploadCSVFile": "Upload CSV file",
     "matched": "Matched",
-    "unmatched": "Unmatched"
+    "unmatched": "Unmatched",
+    "exportDomains": "Export Domains",
+    "domainsExported": "PCM domains exported successfully"
   },
   "pcmCompliance": {
     "noPCMReference": "No PCM reference API configured. Add a PCM API first.",
