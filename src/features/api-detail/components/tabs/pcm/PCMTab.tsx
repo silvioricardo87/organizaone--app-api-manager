@@ -166,10 +166,12 @@ export function PCMTab({ api, apis, onUpdate }: PCMTabProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end gap-2 flex-wrap">
-        <Button variant="outline" onClick={handleAutoMap}>
-          <Lightning size={20} weight="bold" className="mr-2" />
-          {t('pcm.autoMapButton')}
-        </Button>
+        {!api.isPCMReference && (
+          <Button variant="outline" onClick={handleAutoMap}>
+            <Lightning size={20} weight="bold" className="mr-2" />
+            {t('pcm.autoMapButton')}
+          </Button>
+        )}
         {api.pcmFields.length > 0 && (
           <>
             <Button variant="outline" onClick={handleExportPDF}>

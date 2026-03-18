@@ -144,7 +144,7 @@ export function NewAPIDialog({ open, onOpenChange, onSave, existingAPIs }: NewAP
       updatedAt: new Date().toISOString()
     }
 
-    if (parsedSpec) {
+    if (parsedSpec && !isPCMReference) {
       const { fields, detectedFamily } = generatePCMFields(normalizedName, parsedSpec, normalizedVersion)
       if (fields.length > 0) {
         const endpoints = extractEndpoints(parsedSpec)
