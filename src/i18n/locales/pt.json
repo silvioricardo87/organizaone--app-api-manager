@@ -86,7 +86,8 @@
     "properties": "Propriedades",
     "items": "Itens",
     "example": "Exemplo",
-    "pcmRules": "Regras PCM"
+    "pcmRules": "Regras PCM",
+    "pcmCompliance": "Conformidade PCM"
   },
   "newAPIDialog": {
     "title": "Novo Contrato de API",
@@ -336,6 +337,13 @@
     "validationResults": "Resultados da Validação",
     "processing": "Processando...",
     "csvParseError": "Erro ao processar arquivo CSV"
+  },
+  "pcmCompliance": {
+    "noPCMReference": "Nenhuma API de referência PCM configurada. Adicione uma API PCM primeiro.",
+    "complianceScore": "Score de Conformidade",
+    "matchedFields": "Campos Correspondentes",
+    "missingMandatory": "Obrigatórios Ausentes",
+    "extraFields": "Campos Extras"
   },
   "pcmRules": {
     "title": "Registro de Regras PCM",

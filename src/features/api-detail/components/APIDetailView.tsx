@@ -21,6 +21,7 @@ import { IssuesTab } from './tabs/IssuesTab'
 import { BacklogTab } from './tabs/BacklogTab'
 import { PCMTab } from './tabs/pcm/PCMTab'
 import { PCMRulesTab } from './tabs/pcm/PCMRulesTab'
+import { PCMComplianceTab } from './tabs/pcm/PCMComplianceTab'
 import { TimelineTab } from './tabs/TimelineTab'
 import { exportPCMFieldsPDF } from '@/shared/lib/pcm-pdf-export'
 import { toast } from 'sonner'
@@ -39,6 +40,7 @@ interface APIDetailViewProps {
 export function APIDetailView({ api, apis, onBack, onUpdate, onDelete }: APIDetailViewProps) {
   const { t, language } = useSettings()
   const [activeTab, setActiveTab] = useState('overview')
+  const hasPCMRef = apis.some(a => a.isPCMReference && a.id !== api.id)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   useEffect(() => {
@@ -136,7 +138,7 @@ export function APIDetailView({ api, apis, onBack, onUpdate, onDelete }: APIDeta
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className={cn("grid w-full lg:w-auto lg:inline-grid", api.isPCMReference ? "grid-cols-8" : "grid-cols-7")}>
+        <TabsList className={cn("grid w-full lg:w-auto lg:inline-grid", (api.isPCMReference || (hasPCMRef && !api.isPCMReference)) ? "grid-cols-8" : "grid-cols-7")}>
           <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
           <TabsTrigger value="specification">{t('tabs.specification')}</TabsTrigger>
           <TabsTrigger value="lifecycle">{t('tabs.lifecycle')}</TabsTrigger>
@@ -146,6 +148,9 @@ export function APIDetailView({ api, apis, onBack, onUpdate, onDelete }: APIDeta
           <TabsTrigger value="timeline">{t('tabs.timeline')}</TabsTrigger>
           {api.isPCMReference && (
             <TabsTrigger value="pcm-rules">{t('apiDetail.pcmRules')}</TabsTrigger>
+          )}
+          {hasPCMRef && !api.isPCMReference && (
+            <TabsTrigger value="pcm-compliance">{t('apiDetail.pcmCompliance')}</TabsTrigger>
           )}
         </TabsList>
 
@@ -180,6 +185,12 @@ export function APIDetailView({ api, apis, onBack, onUpdate, onDelete }: APIDeta
         {api.isPCMReference && (
           <TabsContent value="pcm-rules">
             <PCMRulesTab />
+          </TabsContent>
+        )}
+
+        {hasPCMRef && !api.isPCMReference && (
+          <TabsContent value="pcm-compliance">
+            <PCMComplianceTab api={api} apis={apis} />
           </TabsContent>
         )}
       </Tabs>

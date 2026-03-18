@@ -86,7 +86,8 @@
     "properties": "Properties",
     "items": "Items",
     "example": "Example",
-    "pcmRules": "PCM Rules"
+    "pcmRules": "PCM Rules",
+    "pcmCompliance": "PCM Compliance"
   },
   "newAPIDialog": {
     "title": "New API Contract",
@@ -336,6 +337,13 @@
     "validationResults": "Validation Results",
     "processing": "Processing...",
     "csvParseError": "Error parsing CSV file"
+  },
+  "pcmCompliance": {
+    "noPCMReference": "No PCM reference API configured. Add a PCM API first.",
+    "complianceScore": "Compliance Score",
+    "matchedFields": "Matched Fields",
+    "missingMandatory": "Missing Mandatory",
+    "extraFields": "Extra Fields"
   },
   "pcmRules": {
     "title": "PCM Rules Registry",
