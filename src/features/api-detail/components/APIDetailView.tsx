@@ -118,7 +118,7 @@ export function APIDetailView({ api, apis, onBack, onUpdate, onDelete }: APIDeta
           </div>
           <p className="text-muted-foreground">{t('apiDetail.version')} {api.version}</p>
         </div>
-        {api.pcmFields.length > 0 && (
+        {api.pcmFields.length > 0 && !api.isPCMReference && (
           <Button variant="outline" onClick={() => {
             exportPCMFieldsPDF(api, language)
             toast.success(t('pcm.pdfExported'))
@@ -138,13 +138,15 @@ export function APIDetailView({ api, apis, onBack, onUpdate, onDelete }: APIDeta
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className={cn("grid w-full lg:w-auto lg:inline-grid", (api.isPCMReference || (hasPCMRef && !api.isPCMReference)) ? "grid-cols-8" : "grid-cols-7")}>
+        <TabsList className={cn("grid w-full lg:w-auto lg:inline-grid", (hasPCMRef && !api.isPCMReference) ? "grid-cols-8" : "grid-cols-7")}>
           <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
           <TabsTrigger value="specification">{t('tabs.specification')}</TabsTrigger>
           <TabsTrigger value="lifecycle">{t('tabs.lifecycle')}</TabsTrigger>
           <TabsTrigger value="issues">{t('tabs.issues')}</TabsTrigger>
           <TabsTrigger value="backlog">{t('tabs.backlog')}</TabsTrigger>
-          <TabsTrigger value="pcm">{t('tabs.pcm')}</TabsTrigger>
+          {!api.isPCMReference && (
+            <TabsTrigger value="pcm">{t('tabs.pcm')}</TabsTrigger>
+          )}
           <TabsTrigger value="timeline">{t('tabs.timeline')}</TabsTrigger>
           {api.isPCMReference && (
             <TabsTrigger value="pcm-rules">{t('apiDetail.pcmRules')}</TabsTrigger>
@@ -174,9 +176,11 @@ export function APIDetailView({ api, apis, onBack, onUpdate, onDelete }: APIDeta
           <BacklogTab api={api} onUpdate={onUpdate} />
         </TabsContent>
 
-        <TabsContent value="pcm">
-          <PCMTab api={api} apis={apis} onUpdate={onUpdate} />
-        </TabsContent>
+        {!api.isPCMReference && (
+          <TabsContent value="pcm">
+            <PCMTab api={api} apis={apis} onUpdate={onUpdate} />
+          </TabsContent>
+        )}
 
         <TabsContent value="timeline">
           <TimelineTab api={api} onUpdate={onUpdate} />
