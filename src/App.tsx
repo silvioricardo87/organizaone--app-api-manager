@@ -114,6 +114,7 @@ function App() {
         ) : currentView === 'detail' && selectedAPI ? (
           <APIDetailView
             api={selectedAPI}
+            apis={currentApis}
             onBack={handleBack}
             onUpdate={handleUpdateAPI}
             onDelete={handleDeleteAPI}

@@ -16,10 +16,11 @@ import { PCMFieldTable } from './PCMFieldTable'
 
 interface PCMTabProps {
   api: APIContract
+  apis: APIContract[]
   onUpdate: (api: APIContract) => void
 }
 
-export function PCMTab({ api, onUpdate }: PCMTabProps) {
+export function PCMTab({ api, apis, onUpdate }: PCMTabProps) {
   const { t, language } = useSettings()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingField, setEditingField] = useState<PCMField | null>(null)

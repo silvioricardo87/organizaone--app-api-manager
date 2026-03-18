@@ -30,12 +30,13 @@ import { Badge } from '@/components/ui/badge'
 
 interface APIDetailViewProps {
   api: APIContract
+  apis: APIContract[]
   onBack: () => void
   onUpdate: (api: APIContract) => void
   onDelete: (apiId: string) => void
 }
 
-export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailViewProps) {
+export function APIDetailView({ api, apis, onBack, onUpdate, onDelete }: APIDetailViewProps) {
   const { t, language } = useSettings()
   const [activeTab, setActiveTab] = useState('overview')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -169,7 +170,7 @@ export function APIDetailView({ api, onBack, onUpdate, onDelete }: APIDetailView
         </TabsContent>
 
         <TabsContent value="pcm">
-          <PCMTab api={api} onUpdate={onUpdate} />
+          <PCMTab api={api} apis={apis} onUpdate={onUpdate} />
         </TabsContent>
 
         <TabsContent value="timeline">
