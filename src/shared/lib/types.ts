@@ -61,6 +61,49 @@ export interface PCMField {
   mandatory: PCMMandatoryType
 }
 
+export type PCMRuleCategory =
+  | 'mandatory-fields'
+  | 'discard-rules'
+  | 'validation-rules'
+  | 'additionalinfo-requirements'
+  | 'optimized-journey'
+
+export interface PCMRule {
+  id: string
+  category: PCMRuleCategory
+  field: string
+  description: string
+  rule: string
+  roles: string[]
+  httpCodes: string[]
+  endpoints: string[]
+  apiFamily?: string
+  versions?: string[]
+  domain?: string
+  severity: 'error' | 'warning' | 'info'
+}
+
+export interface PCMComplianceResult {
+  apiId: string
+  apiName: string
+  totalPCMFields: number
+  matchedFields: number
+  missingMandatoryFields: PCMComplianceItem[]
+  extraFields: PCMComplianceItem[]
+  matchedFieldsList: PCMComplianceItem[]
+  rulesApplied: PCMRule[]
+  overallScore: number
+}
+
+export interface PCMComplianceItem {
+  field: string
+  endpoint: string
+  method: string
+  status: 'matched' | 'missing' | 'extra' | 'inconsistent'
+  rule?: PCMRule
+  detail?: string
+}
+
 export interface APIContract {
   id: string
   name: string
@@ -68,6 +111,7 @@ export interface APIContract {
   useDisplayName?: boolean
   apiGroup?: string
   isBeta?: boolean
+  isPCMReference?: boolean
   version: string
   summary: string
   yamlContent: string
@@ -92,6 +136,7 @@ const apiContractImportSchema = z.object({
   useDisplayName: z.boolean().optional().default(false),
   apiGroup: z.string().optional(),
   isBeta: z.boolean().optional().default(false),
+  isPCMReference: z.boolean().optional().default(false),
   yamlContent: z.string().optional().default(''),
   parsedSpec: z.any().optional(),
   lifecyclePhases: z.array(z.object({
@@ -115,6 +160,7 @@ export const singleImportSchema = z.object({
     useDisplayName: z.boolean().optional(),
     apiGroup: z.string().optional(),
     isBeta: z.boolean().optional(),
+    isPCMReference: z.boolean().optional(),
     version: z.string().optional(),
     createdAt: z.string().optional(),
   }),
