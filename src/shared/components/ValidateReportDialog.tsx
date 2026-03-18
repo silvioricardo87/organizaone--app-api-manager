@@ -12,8 +12,11 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { UploadSimple, FilePdf, CheckCircle, Warning, X, Info } from '@phosphor-icons/react'
 import { APIContract } from '@/shared/lib/types'
-import { parseCSV, validateReport, type ValidationResult } from '@/shared/lib/pcm-csv-validator'
+import { parseCSV, validateReport, validateReportAgainstPCMRules, type ValidationResult } from '@/shared/lib/pcm-csv-validator'
 import { exportValidationPDF } from '@/shared/lib/pcm-validation-pdf'
+import { ALL_PCM_RULES } from '@/shared/lib/pcm-rules-data'
+import { detectAPIFamily } from '@/shared/lib/pcm-field-generator'
+import { extractEndpoints } from '@/shared/lib/api-utils'
 import { toast } from 'sonner'
 import { useSettings } from '@/shared/hooks/use-settings'
 
@@ -30,11 +33,13 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
   const [isProcessing, setIsProcessing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [result, setResult] = useState<ValidationResult | null>(null)
+  const [pcmValidation, setPcmValidation] = useState<ReturnType<typeof validateReportAgainstPCMRules> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleClose = () => {
     setSelectedFile(null)
     setResult(null)
+    setPcmValidation(null)
     setProgress(0)
     setIsProcessing(false)
     onOpenChange(false)
@@ -91,6 +96,13 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
 
       const validationResult = validateReport(rows, api)
       setProgress(100)
+
+      // PCM cross-validation
+      const endpoints = api.parsedSpec ? extractEndpoints(api.parsedSpec) : []
+      const family = detectAPIFamily(api.name, endpoints)
+      const applicableRules = ALL_PCM_RULES.filter(rule => !rule.apiFamily || rule.apiFamily === family?.family)
+      const pcmResult = validateReportAgainstPCMRules(validationResult.matchedRows, applicableRules)
+      setPcmValidation(pcmResult)
 
       await new Promise(resolve => setTimeout(resolve, 200))
       setResult(validationResult)
@@ -318,6 +330,45 @@ export function ValidateReportDialog({ open, onOpenChange, api }: ValidateReport
                 </div>
               )}
             </Card>
+
+            {pcmValidation && (
+              <Card className="p-4 space-y-3">
+                <h4 className="font-medium">{t('pcmCompliance.pcmCrossValidation')}</h4>
+
+                {pcmValidation.mandatoryMissing.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-red-600 dark:text-red-400 mb-1">{t('pcmCompliance.mandatoryMissing')} ({pcmValidation.mandatoryMissing.length})</p>
+                    <div className="flex flex-wrap gap-1">
+                      {pcmValidation.mandatoryMissing.map(item => (
+                        <Badge key={item.field} variant="destructive" className="text-xs">{item.field}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {pcmValidation.fieldsInReportAndPCM.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">{t('pcmCompliance.fieldsInReportAndPCM')} ({pcmValidation.fieldsInReportAndPCM.length})</p>
+                    <div className="flex flex-wrap gap-1">
+                      {pcmValidation.fieldsInReportAndPCM.map(field => (
+                        <Badge key={field} variant="secondary" className="text-xs bg-green-100 dark:bg-green-900/20">{field}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {pcmValidation.fieldsInReportNotPCM.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-amber-600 dark:text-amber-400 mb-1">{t('pcmCompliance.fieldsInReportNotPCM')} ({pcmValidation.fieldsInReportNotPCM.length})</p>
+                    <div className="flex flex-wrap gap-1">
+                      {pcmValidation.fieldsInReportNotPCM.map(field => (
+                        <Badge key={field} variant="outline" className="text-xs">{field}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Card>
+            )}
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={handleClose}>

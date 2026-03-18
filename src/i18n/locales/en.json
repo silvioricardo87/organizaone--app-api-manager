@@ -346,7 +346,12 @@
     "extraFields": "Extra Fields",
     "compliancePreview": "PCM Compliance Preview",
     "compliancePreviewDesc": "Review the PCM compliance status for this API before proceeding.",
-    "compliancePreviewHint": "You can configure additional PCM fields later in the API detail view."
+    "compliancePreviewHint": "You can configure additional PCM fields later in the API detail view.",
+    "pcmCrossValidation": "PCM Cross-Validation",
+    "fieldsInReportAndPCM": "Fields in Report & PCM",
+    "fieldsInReportNotPCM": "In Report, Not in PCM",
+    "fieldsInPCMNotReport": "In PCM, Not in Report",
+    "mandatoryMissing": "Missing Mandatory Fields"
   },
   "pcmRules": {
     "title": "PCM Rules Registry",

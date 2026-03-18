@@ -346,7 +346,12 @@
     "extraFields": "Campos Extras",
     "compliancePreview": "Prévia de Conformidade PCM",
     "compliancePreviewDesc": "Revise o status de conformidade PCM desta API antes de prosseguir.",
-    "compliancePreviewHint": "Você pode configurar campos PCM adicionais posteriormente na visualização de detalhes da API."
+    "compliancePreviewHint": "Você pode configurar campos PCM adicionais posteriormente na visualização de detalhes da API.",
+    "pcmCrossValidation": "Validação Cruzada PCM",
+    "fieldsInReportAndPCM": "Campos no Relatório e PCM",
+    "fieldsInReportNotPCM": "No Relatório, Não na PCM",
+    "fieldsInPCMNotReport": "Na PCM, Não no Relatório",
+    "mandatoryMissing": "Campos Obrigatórios Ausentes"
   },
   "pcmRules": {
     "title": "Registro de Regras PCM",

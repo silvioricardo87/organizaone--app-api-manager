@@ -1,4 +1,4 @@
-import type { APIContract } from '@/shared/lib/types'
+import type { APIContract, PCMRule } from '@/shared/lib/types'
 import { extractEndpoints } from '@/shared/lib/api-utils'
 import { API_FAMILY_RULES } from '@/shared/lib/pcm-rules'
 
@@ -286,4 +286,55 @@ export function validateReport(rows: CSVRow[], api: APIContract): ValidationResu
     inconsistencies,
     matchedRows: matched,
   }
+}
+
+export interface PCMReportValidation {
+  fieldsInReportAndPCM: string[]
+  fieldsInReportNotPCM: string[]
+  fieldsInPCMNotReport: string[]
+  mandatoryMissing: { field: string; description?: string }[]
+}
+
+export function validateReportAgainstPCMRules(
+  rows: CSVRow[],
+  applicableRules: PCMRule[]
+): PCMReportValidation {
+  if (rows.length === 0) {
+    return { fieldsInReportAndPCM: [], fieldsInReportNotPCM: [], fieldsInPCMNotReport: [], mandatoryMissing: [] }
+  }
+
+  // Get all column headers from the first row
+  const headers = Object.keys(rows[0])
+
+  // Map CSV columns to normalized field names
+  const csvFields = new Set<string>()
+  for (const header of headers) {
+    const lower = header.toLowerCase()
+    if (lower.startsWith('additionalinfo_')) {
+      csvFields.add(lower.replace('additionalinfo_', ''))
+    } else {
+      csvFields.add(lower)
+    }
+  }
+
+  // Get mandatory PCM field names
+  const mandatoryPCMFields = new Set(
+    applicableRules.filter(r => r.severity === 'error').map(r => r.field.toLowerCase())
+  )
+  const allPCMFields = new Set(
+    applicableRules.map(r => r.field.toLowerCase())
+  )
+
+  const fieldsInReportAndPCM = [...csvFields].filter(f => allPCMFields.has(f))
+  const fieldsInReportNotPCM = [...csvFields].filter(f => !allPCMFields.has(f))
+  const fieldsInPCMNotReport = [...allPCMFields].filter(f => !csvFields.has(f))
+
+  const mandatoryMissing = [...mandatoryPCMFields]
+    .filter(f => !csvFields.has(f))
+    .map(field => {
+      const rule = applicableRules.find(r => r.field.toLowerCase() === field && r.severity === 'error')
+      return { field, description: rule?.description }
+    })
+
+  return { fieldsInReportAndPCM, fieldsInReportNotPCM, fieldsInPCMNotReport, mandatoryMissing }
 }
