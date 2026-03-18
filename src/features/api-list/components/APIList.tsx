@@ -205,6 +205,11 @@ export function APIList({ apis, onSelectAPI, onUpdateAPI, onNewAPI, onImportAPI 
                       Beta
                     </Badge>
                   )}
+                  {api.isPCMReference && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                      PCM
+                    </span>
+                  )}
                   {api.knownIssues.length > 0 && (
                     <Badge variant="outline" className="text-xs">
                       {api.knownIssues.length} {api.knownIssues.length === 1 ? t('issues.title').slice(0, -1) : t('issues.title')}
