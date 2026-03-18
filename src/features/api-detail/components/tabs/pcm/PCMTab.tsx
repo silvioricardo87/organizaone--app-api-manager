@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Lightning, FilePdf, FileMagnifyingGlass, ChartBar } from '@phosphor-icons/react'
+import { Plus, Lightning, FilePdf, FileMagnifyingGlass, ChartBar, DownloadSimple } from '@phosphor-icons/react'
 import { APIContract, PCMField } from '@/shared/lib/types'
 import { extractEndpoints } from '@/shared/lib/api-utils'
-import { generatePCMFields, mergeWithExistingFields } from '@/shared/lib/pcm-field-generator'
+import { generatePCMFields, mergeWithExistingFields, detectAPIFamily } from '@/shared/lib/pcm-field-generator'
 import { BASE_PCM_FIELDS } from '@/shared/lib/pcm-rules'
 import { exportPCMFieldsPDF } from '@/shared/lib/pcm-pdf-export'
 import { PCMAutoMapDialog } from '@/shared/components/PCMAutoMapDialog'
@@ -110,6 +110,49 @@ export function PCMTab({ api, apis, onUpdate }: PCMTabProps) {
     toast.success(t('pcm.pdfExported'))
   }
 
+  const handleExportDomains = () => {
+    const endpoints = api.parsedSpec ? extractEndpoints(api.parsedSpec) : []
+    const family = detectAPIFamily(api.name, endpoints)
+
+    const exportData = {
+      apiName: api.name,
+      apiVersion: api.version,
+      isPCMReference: api.isPCMReference || false,
+      detectedFamily: family?.family || null,
+      exportedAt: new Date().toISOString(),
+      endpoints: endpoints.map(ep => ({
+        path: ep.path,
+        methods: ep.methods,
+      })),
+      pcmFields: api.pcmFields.map(f => ({
+        field: f.field,
+        endpoint: f.endpoint,
+        method: f.method,
+        mandatory: f.mandatory,
+        definition: f.definition,
+        domain: f.domain,
+        roles: f.roles,
+      })),
+      fieldSummary: Object.entries(
+        api.pcmFields.reduce((acc, f) => {
+          acc[f.field] = (acc[f.field] || 0) + 1
+          return acc
+        }, {} as Record<string, number>)
+      ).map(([field, count]) => ({ field, endpointCount: count })),
+    }
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `pcm-domains-${api.name}-v${api.version}-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success(t('pcm.domainsExported'))
+  }
+
   if (!api.parsedSpec) {
     return (
       <Card className="p-12 text-center">
@@ -132,6 +175,10 @@ export function PCMTab({ api, apis, onUpdate }: PCMTabProps) {
             <Button variant="outline" onClick={handleExportPDF}>
               <FilePdf size={20} weight="bold" className="mr-2" />
               {t('pcm.exportPDF')}
+            </Button>
+            <Button variant="outline" onClick={handleExportDomains}>
+              <DownloadSimple size={20} weight="bold" className="mr-2" />
+              {t('pcm.exportDomains')}
             </Button>
             <Button variant="outline" onClick={() => setValidateDialogOpen(true)}>
               <FileMagnifyingGlass size={20} weight="bold" className="mr-2" />
